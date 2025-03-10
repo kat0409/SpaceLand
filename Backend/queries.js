@@ -1,9 +1,13 @@
 //Make any query you can think of an store it here
 
 const getRides = 'SELECT * FROM rides';
+
 const getEmployees = 'SELECT * FROM employee';
+
 const addEmployee = 'INSERT INTO employee (EmployeeID, FirstName, LastName, JobRole, Email, Address, SupervisorID, username, password) VALUES (?,?,?,?,?,?,?,?,?)';
 
 const getRidesNeedingMaintenance = 'SELECT * FROM rides WHERE MaintenanceNeed = 1';
 
 const addMaintenance = 'INSERT INTO maintenance (MaintenanceID, RideID, MaintenanceStartDate, MaintenanceEndDate, MaintenanceEmployeeID, eventID) VALUES (?,?,?,?,?,?,)';
+
+const getMerchandiseTransactions = 'SELECT * FROM merchandiseTransactions';
