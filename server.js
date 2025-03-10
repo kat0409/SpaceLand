@@ -1,5 +1,6 @@
 const http = require('http');
 const mysql = require('mysql2');
+const url = require('url')
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -14,17 +15,18 @@ connection.connect((err) => {
         return;
     }
     console.log('Connected to MySQL database!');
-})
+});
 
 /*const server = http.createServer((request, response) => {
-    /*response.statusCode = 200
+    const parsedURL = url.parse(request.url, true);
+    const queryParameters = parse
+
+    response.statusCode = 200
     response.setHeader('Content-Type', 'text/html') //header is where we put the content type, authorization tokens, etc.; second parameter is the content type
     response.write('<h1> Hello World </h1>') //what we send back to the client through the server
     response.end()
     
 })*/
-
-
 
 const PORT  = process.env.PORT || 3000 //check if there is an environment variable
 
