@@ -11,3 +11,5 @@ const getRidesNeedingMaintenance = 'SELECT * FROM rides WHERE MaintenanceNeed = 
 const addMaintenance = 'INSERT INTO maintenance (MaintenanceID, RideID, MaintenanceStartDate, MaintenanceEndDate, MaintenanceEmployeeID, eventID) VALUES (?,?,?,?,?,?,)';
 
 const getMerchandiseTransactions = 'SELECT * FROM merchandiseTransactions';
+
+const addMerchandiseTransaction = 'INSERT INTO merchandiseTransactions (merchandiseID, VisitorID, transactionDate, quantity, totalAmount) VALUES (?,?,?,?,?)';
