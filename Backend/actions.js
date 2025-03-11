@@ -39,27 +39,42 @@ const addEmployee = (request, response) => {
     });
 
     request.on("end", () => {
-        const {EmployeeID, FirstName, LastName, JobRole, Email, Address, SUpervisorID, username, password} = JSON.parse(body);
+        const parsedBody = JSON.parse(body);
+        const {FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth} = JSON.parse(body);
 
-        if(!EmployeeID || !FirstName || !LastName || !JobRole || !Email || !Address || !SUpervisorID || !username || !password) {
+        if(!FirstName || !LastName || !Email || !Address || !SupervisorID || !username || !password || !Department || !employmentStatus || !dateOfBirth) {
             response.writeHead(400, {"Content-Type": "application/json"});
             response.end(JSON.stringify({error: "All fields are required"}));
             return;
         }
 
-        //Remember you might need to modify this
-        //const SupervisorID = 
-
-        pool.query(queries.addEmployee,[EmployeeID, FirstName, LastName, JobRole, Email, Address, SUpervisorID, username, password], (error, results) => {
+        pool.query(queries.getSupervisorIDbyDept, [Department], (error, results) => {
             if(error){
-                console.error("Error adding employee:", error);
+                console.error("Error retrieving supervisor ID:", error);
                 response.writeHead(500, {"Content-Type": "application/json"});
                 response.end(JSON.stringify({error: "Internal server error"}));
                 return;
             }
-            response.writeHead(201, {"Content-Type": "application/json"});
-            response.end(JSON.stringify({message: "Employee added successfully"}));
+            if(results.length === 0){
+                response.writeHead(400, {"Content-Type": "application/json"});
+                response.end(JSON.stringify({error: "Supervisor was not found in the department."}));
+                return;
+            }
+
+            const supervisorID = results[0].SupervisorID;
+
+            pool.query(queries.addEmployee, [FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth], (error, results) => {
+                if (error) {
+                    console.error("Error adding employee:", error);
+                    response.writeHead(500, {"Content-Type": "application/json"});
+                    response.end(JSON.stringify({error: "Internal Server Error"}));
+                    return;
+                }
+                response.writeHead(201, {"Content-Type": "application/json"});
+                response.end(JSON.stringify({message: "Employee added successfully"}));
+            });
         });
+
     });
 };
 
