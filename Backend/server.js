@@ -1,14 +1,6 @@
 const http = require('http');
 const {getRides, getEmployees, addEmployee, getRidesNeedingMaintenance, addMaintenance } = require('./functions.js');
 
-connection.connect((err) => {
-    if(err){
-        console.error('Error connecting to MySQL:', err);
-        return;
-    }
-    console.log('Connected to MySQL database!');
-});
-
 /*const server = http.createServer((request, response) => {
     const parsedURL = url.parse(request.url, true);
     const queryParameters = parse
