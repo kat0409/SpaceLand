@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+/* Scroll behavior */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
+}
+
+/* Suppress ALL system cursors */
+html,
+body,
+button,
+a,
+input,
+textarea,
+select,
+label {
+  cursor: none !important;
+}
+
+/* Also override common Tailwind cursor utility classes just in case */
+.cursor-pointer,
+.cursor-default,
+.cursor-text,
+.cursor-wait,
+.cursor-crosshair,
+.cursor-move {
+  cursor: none !important;
+}
+
+/* Base Body Styling */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, sans-serif;
+  background-color: black;
+  color: white;
+}
