@@ -38,6 +38,13 @@ const addVisitor = 'INSERT INTO visitors (VisitorID,FirstName,LastName,Phone,Ema
 
 const getVisitorInfo = 'SELECT * FROM visitors WHERE VisitorID = ?';
 
+const getUnsentNotifications = `
+    SELECT ln.notificationID, ln.merchandiseID, m.itemName
+    FROM low_stock_notifications ln
+    JOIN merchandise m ON ln.merchandiseID = m.merchandiseID
+    WHERE ln.sent = 0;
+`;
+
 //checkMerchQuantity
 //getSupervisorEmailByDepartment
 //updateMerchQuantity
