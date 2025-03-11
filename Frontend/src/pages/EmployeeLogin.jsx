@@ -13,23 +13,44 @@ export default function EmployeeLogin() {
   });
 
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
 
-    // TODO: Replace with real authentication logic when backend is ready
-    if (formData.username && formData.password) {
-      console.log('Logging in employee:', formData);
-      navigate('/employee-portal'); // placeholder for now
-    } else {
-      setError('Please fill in both fields.');
+    try {
+      const response = await fetch('http://localhost:3000/login-employee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // ✅ Store EmployeeID in localStorage
+        localStorage.setItem('employeeID', data.EmployeeID);
+        // ✅ Redirect
+        navigate('/employee-portal');
+      } else {
+        // ❌ Backend returned error message
+        setError(data.error || 'Invalid credentials');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Server error. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -43,9 +64,7 @@ export default function EmployeeLogin() {
         className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white px-6 py-20 flex items-center justify-center"
       >
         <div className="w-full max-w-md bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-2xl shadow-lg">
-          <h2 className="text-3xl font-bold mb-4 text-center">
-            👩‍🚀 Employee Login
-          </h2>
+          <h2 className="text-3xl font-bold mb-4 text-center">👩‍🚀 Employee Login</h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -57,6 +76,7 @@ export default function EmployeeLogin() {
                 placeholder="Enter your username"
                 value={formData.username}
                 onChange={handleChange}
+                required
               />
             </div>
 
@@ -69,16 +89,18 @@ export default function EmployeeLogin() {
                 placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
+                required
               />
             </div>
 
-            {error && <p className="text-red-400 text-sm">{error}</p>}
+            {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 text-white font-semibold py-2 rounded-lg transition"
+              disabled={loading}
+              className={`w-full py-3 font-semibold rounded-lg transition bg-gradient-to-r from-purple-600 to-indigo-500 text-white hover:from-purple-700 hover:to-indigo-600 ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
-              Login
+              {loading ? 'Logging in...' : 'Login'}
             </button>
           </form>
         </div>
