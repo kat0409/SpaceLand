@@ -34,15 +34,16 @@ const updateEmployeeInfo = 'UPDATE employee SET FirstName = ?, LastName = ?, Ema
 
 const getEmployeeInfo = 'SELECT * FROM employee WHERE EmployeeID = ?';
 
+const addVisitor = 'INSERT INTO visitors (VisitorID,FirstName,LastName,Phone,Email,Address,DateOfBirth,AccessibilityNeeds,Gender,Username,Password,Height,Age,MilitaryStatus) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+
+const getVisitorInfo = 'SELECT * FROM visitors WHERE VisitorID = ?';
 
 //getRestaurantTransactions
 //getTickets
 //addTickets
 //getTicketTransactions
 //getVisitors
-//addVisitor
 //getAllVisitors
-//getOneVisitor
 //getDisabledVisitors
 //getWeather
 //getInclementWeather
