@@ -103,3 +103,11 @@ const addMaintenance = (request, response) => {
         });
     });
 };
+
+module.exports = {
+    getRides,
+    getEmployees,
+    getRidesNeedingMaintenance,
+    addEmployee,
+    addMaintenance
+};
