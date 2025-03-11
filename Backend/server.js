@@ -1,6 +1,9 @@
 const http = require('http');
 const {getRides, getEmployees, addEmployee, getRidesNeedingMaintenance, addMaintenance } = require('./functions.js');
 
+//If you are calling a getter function, use GET
+//If you are calling an add function, use POST
+
 const server = http.createServer((request, response) => {
     const parsedURL = new URL(request.url, `http://${request.headers.host}`);
 
