@@ -5,10 +5,21 @@ const pool = mysql.createPool({
     host: 'space-land.mysql.database.azure.com',
     user: 'space_land2025',
     password: '$paceland25',
-    database: 'space_land_25',
-    waitForConnections: true,
+    database: 'spacelanddb25',
     connectionLimit: 10,
-    queueLimit: 0
+    ssl: {
+        rejectUnauthorized: true
+    }
+});
+
+pool.getConnection((err, connection) => {
+    if(err){
+        console.error("Error connecting to the database:", err);
+    }
+    else{
+        console.log("Database connection successful");
+        connection.release();
+    }
 });
 
 module.exports = pool;
