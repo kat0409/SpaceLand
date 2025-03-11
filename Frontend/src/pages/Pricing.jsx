@@ -1,8 +1,14 @@
 // src/pages/Pricing.jsx
+import Header from '../components/Header';
+import PricingSection from '../components/PricingSection';
+import Footer from '../components/Footer';
+
 export default function Pricing() {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-2xl">
-        Pricing Page Coming Soon...
-      </div>
-    );
-  }
+  return (
+    <>
+      <Header />
+      <PricingSection />
+      <Footer />
+    </>
+  );
+}
