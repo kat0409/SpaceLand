@@ -6,30 +6,27 @@ import Footer from '../components/Footer';
 export default function EmployeeDashboard() {
   const [employeeData, setEmployeeData] = useState(null);
   const [supervisorName, setSupervisorName] = useState('');
+  const employeeID = localStorage.getItem('employeeID'); // or from context
 
-  // Temporary mock data – replace with API call later
   useEffect(() => {
-    const mockEmployee = {
-      employeeID: 42,
-      firstName: 'Alex',
-      lastName: 'Johnson',
-      email: 'alex.j@spaceland.com',
-      address: '123 Cosmic Blvd',
-      employmentStatus: 'Active',
-      department: 'Ride Operations',
-      supervisorID: 3,
+    const fetchEmployee = async () => {
+      try {
+        const res = await fetch(`http://localhost:3000/getEmployeeInfo?id=${employeeID}`);
+        const data = await res.json();
+        setEmployeeData(data[0]); // assuming array response
+
+        // Fetch Supervisor Info
+        const supRes = await fetch(`http://localhost:3000/getSupervisorInfo?id=${data[0].SupervisorID}`);
+        const supData = await supRes.json();
+        const supervisor = supData[0];
+        setSupervisorName(`${supervisor.firstName} ${supervisor.lastName}`);
+      } catch (err) {
+        console.error('Error fetching employee data', err);
+      }
     };
 
-    const mockSupervisors = {
-      3: { firstName: 'Sarah', lastName: 'Lee' },
-    };
-
-    setEmployeeData(mockEmployee);
-    if (mockSupervisors[mockEmployee.supervisorID]) {
-      const { firstName, lastName } = mockSupervisors[mockEmployee.supervisorID];
-      setSupervisorName(`${firstName} ${lastName}`);
-    }
-  }, []);
+    if (employeeID) fetchEmployee();
+  }, [employeeID]);
 
   return (
     <>
@@ -42,11 +39,11 @@ export default function EmployeeDashboard() {
             <p>Loading employee details...</p>
           ) : (
             <div className="space-y-4 text-lg">
-              <p><span className="font-semibold text-purple-400">Employee ID:</span> {employeeData.employeeID}</p>
-              <p><span className="font-semibold text-purple-400">Name:</span> {employeeData.firstName} {employeeData.lastName}</p>
-              <p><span className="font-semibold text-purple-400">Email:</span> {employeeData.email}</p>
-              <p><span className="font-semibold text-purple-400">Address:</span> {employeeData.address}</p>
-              <p><span className="font-semibold text-purple-400">Department:</span> {employeeData.department}</p>
+              <p><span className="font-semibold text-purple-400">Employee ID:</span> {employeeData.EmployeeID}</p>
+              <p><span className="font-semibold text-purple-400">Name:</span> {employeeData.FirstName} {employeeData.LastName}</p>
+              <p><span className="font-semibold text-purple-400">Email:</span> {employeeData.Email}</p>
+              <p><span className="font-semibold text-purple-400">Address:</span> {employeeData.Address}</p>
+              <p><span className="font-semibold text-purple-400">Department:</span> {employeeData.Department}</p>
               <p><span className="font-semibold text-purple-400">Employment Status:</span> {employeeData.employmentStatus}</p>
               <p><span className="font-semibold text-purple-400">Supervisor:</span> {supervisorName}</p>
             </div>
