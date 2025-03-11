@@ -39,42 +39,57 @@ const addEmployee = (request, response) => {
     });
 
     request.on("end", () => {
-        const parsedBody = JSON.parse(body);
-        const {FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth} = JSON.parse(body);
-
-        if(!FirstName || !LastName || !Email || !Address || !SupervisorID || !username || !password || !Department || !employmentStatus || !dateOfBirth) {
-            response.writeHead(400, {"Content-Type": "application/json"});
-            response.end(JSON.stringify({error: "All fields are required"}));
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (error) {
+            response.writeHead(400, { "Content-Type": "application/json" });
+            response.end(JSON.stringify({ error: "Invalid JSON format" }));
             return;
         }
 
+        const { FirstName, LastName, Email, Address, username, password, Department, employmentStatus, dateOfBirth } = parsedBody;
+
+        // Validate required fields
+        if (!FirstName || !LastName || !Email || !Address || !username || !password || !Department || !employmentStatus || !dateOfBirth) {
+            response.writeHead(400, { "Content-Type": "application/json" });
+            response.end(JSON.stringify({ error: "All fields are required" }));
+            return;
+        }
+
+        // Retrieve SupervisorID based on the department to check if the supervisorID exists in the supervisor table
         pool.query(queries.getSupervisorIDbyDept, [Department], (error, results) => {
-            if(error){
+            if (error) {
                 console.error("Error retrieving supervisor ID:", error);
-                response.writeHead(500, {"Content-Type": "application/json"});
-                response.end(JSON.stringify({error: "Internal server error"}));
+                response.writeHead(500, { "Content-Type": "application/json" });
+                response.end(JSON.stringify({ error: "Internal server error" }));
                 return;
             }
-            if(results.length === 0){
-                response.writeHead(400, {"Content-Type": "application/json"});
-                response.end(JSON.stringify({error: "Supervisor was not found in the department."}));
+            if (results.length === 0) {
+                response.writeHead(400, { "Content-Type": "application/json" });
+                response.end(JSON.stringify({ error: "Supervisor was not found in the department." }));
                 return;
             }
 
+            // Use the retrieved SupervisorID
             const supervisorID = results[0].SupervisorID;
 
-            pool.query(queries.addEmployee, [FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth], (error, results) => {
-                if (error) {
-                    console.error("Error adding employee:", error);
-                    response.writeHead(500, {"Content-Type": "application/json"});
-                    response.end(JSON.stringify({error: "Internal Server Error"}));
-                    return;
+            // Add the employee to the database
+            pool.query(
+                queries.addEmployee,
+                [FirstName, LastName, Email, Address, supervisorID, username, password, Department, employmentStatus, dateOfBirth],
+                (error, results) => {
+                    if (error) {
+                        console.error("Error adding employee:", error);
+                        response.writeHead(500, { "Content-Type": "application/json" });
+                        response.end(JSON.stringify({ error: "Internal Server Error" }));
+                        return;
+                    }
+                    response.writeHead(201, { "Content-Type": "application/json" });
+                    response.end(JSON.stringify({ message: "Employee added successfully" }));
                 }
-                response.writeHead(201, {"Content-Type": "application/json"});
-                response.end(JSON.stringify({message: "Employee added successfully"}));
-            });
+            );
         });
-
     });
 };
 
@@ -122,6 +137,19 @@ const addMaintenance = (request, response) => {
     });
 };
 
+const getMerchandiseTransactions = (request, response) =>{
+    pool.query(queries.getMerchandiseTransactions, (error, results) => {
+        if(error) {
+            console.error("Error fetching transactions made in the gift shop:", error);
+            response.writeHead(500, {"Content-Type": "application/json"});
+            response.end(JSON.stringify({error: "Internal server error"}));
+            return;
+        }
+        response.writeHead(200, {"Content-Type": "application/json"});
+        response.end(JSON.stringify(results));
+    });
+}
+
 
 
 module.exports = {
@@ -129,5 +157,6 @@ module.exports = {
     getEmployees,
     getRidesNeedingMaintenance,
     addEmployee,
-    addMaintenance
+    addMaintenance,
+    getMerchandiseTransactions
 };
