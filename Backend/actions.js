@@ -11,6 +11,8 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+const sendNotification = async
+
 //Fetch all rides
 const getRides = (request, response) => {
     pool.query(queries.getRides, (error, results) => {
