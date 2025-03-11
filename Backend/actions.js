@@ -47,6 +47,9 @@ const addEmployee = (request, response) => {
             return;
         }
 
+        //Remember you might need to modify this
+        //const SupervisorID = 
+
         pool.query(queries.addEmployee,[EmployeeID, FirstName, LastName, JobRole, Email, Address, SUpervisorID, username, password], (error, results) => {
             if(error){
                 console.error("Error adding employee:", error);
@@ -103,6 +106,8 @@ const addMaintenance = (request, response) => {
         });
     });
 };
+
+
 
 module.exports = {
     getRides,
