@@ -30,4 +30,33 @@ const getEmployees = (request, response) => {
     });
 };
 
-//
+//add employees
+//Add an employee to the database
+const addEmployee = (request, response) => {
+    let body = "";
+
+    request.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    request.on("end", () => {
+        const {EmployeeID, FirstName, LastName, JobRole, Email, Address, SUpervisorID, username, password} = JSON.parse(body);
+
+        if(!EmployeeID || !FirstName || !LastName || !JobRole || !Email || !Address || !SUpervisorID || !username || !password) {
+            response.writeHead(400, {"Content-Type": "application/json"});
+            response.end(JSON.stringify({error: "All fields are required"}));
+            return;
+        }
+
+        pool.query(queries.addEmployee,[EmployeeID, FirstName, LastName, JobRole, Email, Address, SUpervisorID, username, password], (error, results) => {
+            if(error){
+                console.error("Error adding employee:", error);
+                response.writeHead(500, {"Content-Type": "application/json"});
+                response.end(JSON.stringify({error: "Internal server error"}));
+                return;
+            }
+            response.writeHead(201, {"Content-Type": "application/json"});
+            response.end(JSON.stringify({message: "Employee added successfully"}));
+        });
+    });
+};
