@@ -1,22 +1,18 @@
 // src/App.jsx
-import Header from './components/Header';
-import Hero from './components/Hero';
-import RidesPreview from './components/RidesPreview';
-import EventsPreview from './components/EventsPreview';
-import Footer from './components/Footer';
-import PricingSection from './components/PricingSection';
-import DiningSection from './components/DiningSection';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+// Add later: import Auth from './pages/Auth'; 
+// Add later: import Dashboard from './pages/Dashboard';
 
 export default function App() {
   return (
-    <div>
-      <Header />
-      <Hero />
-      <RidesPreview />
-      <EventsPreview />
-      <DiningSection />
-      <PricingSection />
-      <Footer />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        {/* Future Routes */}
+        {/* <Route path="/auth" element={<Auth />} /> */}
+        {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+      </Routes>
+    </Router>
   );
 }
