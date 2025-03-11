@@ -4,7 +4,7 @@ const getRides = 'SELECT * FROM rides';
 
 const getEmployees = 'SELECT * FROM employee';
 
-const addEmployee = 'INSERT INTO employee (FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus) VALUES (?,?,?,?,?,?,?,?,?)';
+const addEmployee = 'INSERT INTO employee (FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth) VALUES (?,?,?,?,?,?,?,?,?,?)';
 
 const getRidesNeedingMaintenance = 'SELECT * FROM rides WHERE MaintenanceNeed = 1';
 
@@ -30,6 +30,10 @@ const updateEmployeeForDeletion = 'UPDATE employee SET employmentStatus = 0 WHER
 
 const updateEmployeeForRehire = 'UPDATE employee SET employmentStatus = 1 WHERE EmployeeID = ?';
 
+const updateEmployeeInfo = 'UPDATE employee SET FirstName = ?, LastName = ?, Email = ?, Address = ?, SupervisorID = ?, username = ?, password = ?, Department = ?, employmentStatus = ?, dateOfBirth = ?';
+
+const getEmployeeInfo = 'SELECT * FROM employee WHERE EmployeeID = ?';
+
 
 //getRestaurantTransactions
 //getTickets
@@ -44,12 +48,9 @@ const updateEmployeeForRehire = 'UPDATE employee SET employmentStatus = 1 WHERE 
 //getInclementWeather
 //getDaysClosedForWeather
 //addDayClosedForWeather
-//setEmployeeToRehire
-//setEmployeeToDelete
-//updateEmployeeInfo
+
 //authenticateUser
 //getSupervisorInfo
-//getEmployeeInfo
 //decodeToken
 //updateVisitorInfo
 //updateSupervisorInfo
