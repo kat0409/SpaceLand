@@ -1,6 +1,15 @@
 const { stringify } = require('qs');
 const pool = require('./db.js');
 const queries = require('./queries.js');
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'your-email@gmail.com',//Do i need to make a fake supervisor email?
+        pass: 'your-email-password', //Do i need to make a fake supervisor email password?
+    },
+});
 
 //Fetch all rides
 const getRides = (request, response) => {
@@ -149,8 +158,6 @@ const getMerchandiseTransactions = (request, response) =>{
         response.end(JSON.stringify(results));
     });
 }
-
-
 
 module.exports = {
     getRides,
