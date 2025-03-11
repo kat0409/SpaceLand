@@ -45,6 +45,41 @@ const getUnsentNotifications = `
     WHERE ln.sent = 0;
 `;
 
+const getSupervisorEmailByDepartment = `
+    SELECT email FROM supervisors WHERE departmentName = ?;
+`;
+
+const markNotificationAsSent = `
+    UPDATE low_stock_notifications
+    SET sent = 1
+    WHERE notificationID = ?;
+`;
+
+module.exports = {
+    getRides,
+    getEmployees,
+    addEmployee,
+    getRidesNeedingMaintenance,
+    addMaintenance,
+    getMerchandiseTransactions,
+    addMerchandiseTransaction,
+    addRestaurant,
+    getMealPlans,
+    getRestaurantTransactions,
+    addRestaurantTransaction,
+    getSupervisors,
+    getSupervisorIDbyDept,
+    updateEmployeeForDeletion,
+    updateEmployeeForRehire,
+    updateEmployeeInfo,
+    getEmployeeInfo,
+    addVisitor,
+    getVisitorInfo,
+    getUnsentNotifications,
+    getSupervisorEmailByDepartment,
+    markNotificationAsSent
+};
+
 //checkMerchQuantity
 //getSupervisorEmailByDepartment
 //updateMerchQuantity
