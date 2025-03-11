@@ -38,12 +38,14 @@ const addVisitor = 'INSERT INTO visitors (VisitorID,FirstName,LastName,Phone,Ema
 
 const getVisitorInfo = 'SELECT * FROM visitors WHERE VisitorID = ?';
 
-//getRestaurantTransactions
+//checkMerchQuantity
+//getSupervisorEmailByDepartment
+//updateMerchQuantity
 //getTickets
 //addTickets
 //getTicketTransactions
-//getVisitors
 //getAllVisitors
+//addVisitors
 //getDisabledVisitors
 //getWeather
 //getInclementWeather
@@ -66,5 +68,9 @@ const getVisitorInfo = 'SELECT * FROM visitors WHERE VisitorID = ?';
 //getEmployeeDepartment
 //getSupervisorDepartment
 //orderMoreMerch ????
+//getEventList
+//addEventToList
+//markEventForCancellation
+//updateEvent
 
 //Reports?
