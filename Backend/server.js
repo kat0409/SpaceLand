@@ -12,10 +12,29 @@ const corsMiddleWare = cors();
 //POST: add data to the database
 //PUT: update data in the database
 
-const routes = {
-    'GET' : [
-
-    ]
+// Define route handlers in a map for efficiency
+const routeMap = {
+    'GET': [
+        '/rides', 
+        '/employees', 
+        '/merchandise', 
+        '/maintenance', 
+        '/merchandise-transactions', 
+    ],
+    'POST': [
+        '/add-employee', 
+        '/add-maintenance',
+        '/add-merchandise-transaction', 
+    ],
+    'PUT': [
+        '/update-employee', 
+        '/update-merchandise-quantity', 
+        '/update-maintenance', 
+    ],
+    'DELETE': [
+        '/delete-employee',
+        '/delete-maintenance', 
+    ],
 };
 
 const server = http.createServer((request, response) => {
