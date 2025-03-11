@@ -30,7 +30,6 @@ const getEmployees = (request, response) => {
     });
 };
 
-//add employees
 //Add an employee to the database
 const addEmployee = (request, response) => {
     let body = "";
@@ -58,5 +57,19 @@ const addEmployee = (request, response) => {
             response.writeHead(201, {"Content-Type": "application/json"});
             response.end(JSON.stringify({message: "Employee added successfully"}));
         });
+    });
+};
+
+//Fetch the rides that need maintenance
+const getRidesNeedingMaintenance = (request, response) => {
+    pool.query(queries.getRidesNeedingMaintenance, (error, results) => {
+        if(error) {
+            console.error("Error fetching rides needing maintenance:", error);
+            response.writeHead(500, {"Content-Type": "application/json"});
+            response.end(JSON.stringify({error: "Internal server error"}));
+            return;
+        }
+        response.writeHead(200, {"Content-Type": "application/json"});
+        response.end(JSON.stringify(results));
     });
 };
