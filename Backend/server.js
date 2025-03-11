@@ -37,8 +37,29 @@ const routeMap = {
     ],
 };
 
-const server = http.createServer((request, response) => {
+const server = http.createServer((req, res) => {
+    corsMiddleWare(req, res, () => {
+        const parsedUrl = url.parse(req.url, true);
+        const {pathname} = parsedUrl;
+        const method = req.method;
 
+        if(pathname === '/'){
+            res.writeHead(200, {"Content-Type":"application/json"});
+            res.end(JSON.stringify("From backend side"));
+            return;
+        }
+
+        const isMatch  = (routeMap[method] || []).some(route =>
+            pathname.startsWith(route)
+        );
+
+        if(isMatch){
+            return eRoutes(req,res);
+        }
+
+        res.writeHead(404, {"Content-Type": "application/json"});
+        res.end(JSON.stringify({error: "Route not found"}));
+    });
 });
 
 const PORT  = process.env.PORT || 3000 //check if there is an environment variable
