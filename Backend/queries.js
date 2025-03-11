@@ -16,10 +16,22 @@ const addMerchandiseTransaction = 'INSERT INTO merchandiseTransactions (VisitorI
 
 const addRestaurant = 'INSERT INTO restaurant (restaurantName, mealPlanTier) VALUES (?,?)';
 
-//getRestaurant
+const getMealPlans = 'SELECT * FROM restaurant';
+
+const getRestaurantTransactions = 'SELECT * FROM restaurantTransactions';
+
+const addRestaurantTransaction = 'INSERT INTO restaurantTransactions (restaurantID, VisitorID, transactionDate, Amount) VALUES (?, ?, ?, ?)';
+
 //getRestaurantTransactions
 //getTickets
 //addTickets
 //getTicketTransactions
+//getVisitors
+//addVisitor
+//getDisabledVisitors
+//getWeather
+//getInclementWeather
+//getDaysClosedForWeather
+//addDayClosedForWeather
 
 //Reports?
