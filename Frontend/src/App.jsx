@@ -7,6 +7,7 @@ import Events from "./pages/Events";
 import Auth from "./pages/Auth";
 import UserPortal from "./pages/UserPortal";
 import EmployeeLogin from "./pages/EmployeeLogin";
+import EmployeeDashboard from "./pages/EmployeeDashboard";
 import Dining from "./pages/Dining";
 import Pricing from "./pages/Pricing";
 import CursorOverlay from "./components/ui/CursorOverlay";
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/employee-login" element={<EmployeeLogin />} />
+          <Route path="/employee-portal" element={<EmployeeDashboard />} />
           <Route path="/rides" element={<Rides />} />
           <Route path="/events" element={<Events />} />
           <Route path="/auth" element={<Auth />} />
