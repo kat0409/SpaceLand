@@ -11,7 +11,24 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-const sendNotification = async
+// Function to send email notification
+const sendNotification = async (supervisorEmail, itemName) => {
+    const mailOptions = {
+        from: 'your-email@gmail.com',//modify this later
+        to: supervisorEmail,
+        subject: 'Low Stock Alert',
+        text: `The item "${itemName}" has reached 0 quantity. Please order more.`,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log('Notification sent successfully.');
+        return true;
+    } catch (error) {
+        console.error('Error sending notification:', error);
+        return false;
+    }
+};
 
 //Fetch all rides
 const getRides = (request, response) => {
@@ -161,3 +178,12 @@ const getMerchandiseTransactions = (request, response) =>{
     });
 }
 
+//Check to see if you need to make a module.exports function here as well
+module.exports = {
+    getRides,
+    getEmployees,
+    addEmployee,
+    getRidesNeedingMaintenance,
+    addMaintenance,
+    getMerchandiseTransactions,
+};
