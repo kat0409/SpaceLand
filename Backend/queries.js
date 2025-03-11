@@ -49,7 +49,7 @@ const getVisitorInfo = 'SELECT * FROM visitors WHERE VisitorID = ?';
 //getInclementWeather
 //getDaysClosedForWeather
 //addDayClosedForWeather
-
+//addRides
 //authenticateUser
 //getSupervisorInfo
 //decodeToken
@@ -59,6 +59,12 @@ const getVisitorInfo = 'SELECT * FROM visitors WHERE VisitorID = ?';
 //addMerchItem
 //getMerchItem
 //updateMerchItem
-//
+//markItemForDeletion
+//sendMaintenanceMessage
+//updateMerchItemQuantity
+//getMerchItemQuantity
+//getEmployeeDepartment
+//getSupervisorDepartment
+//orderMoreMerch ????
 
 //Reports?
