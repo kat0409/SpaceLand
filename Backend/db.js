@@ -1,4 +1,4 @@
-const mysql = require('mysql2');
+const mysql = require('mysql');
 
 //create a connection pool to connect db to the backend of the web app
 const pool = mysql.createPool({
@@ -8,7 +8,7 @@ const pool = mysql.createPool({
     database: 'spacelanddb25',
     connectionLimit: 10,
     ssl: {
-        rejectUnauthorized: true
+        rejectUnauthorized: true,
     }
 });
 
