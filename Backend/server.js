@@ -1,13 +1,5 @@
 const http = require('http');
-const mysql = require('mysql2');
-const url = require('url')
-
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'space_land2025',
-    password: '$paceland25',
-    database: 'space_land_25'
-});
+const {getRides, getEmployees, addEmployee, getRidesNeedingMaintenance, addMaintenance } = require('./functions.js');
 
 connection.connect((err) => {
     if(err){
@@ -30,4 +22,6 @@ connection.connect((err) => {
 
 const PORT  = process.env.PORT || 3000 //check if there is an environment variable
 
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
