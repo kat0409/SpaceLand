@@ -30,6 +30,33 @@ const sendNotification = async (supervisorEmail, itemName) => {
     }
 };
 
+// Function to check for unsent notifications and send emails
+const checkAndSendNotifications = async () => {
+    try {
+        // Fetch unsent notifications
+        const [notifications] = await pool.query(queries.getUnsentNotifications);
+
+        // Fetch supervisor email
+        const [supervisor] = await pool.query(queries.getSupervisorEmailByDepartment);
+        const supervisorEmail = supervisor[0].email;
+
+        // Process each notification
+        for (const notification of notifications) {
+            const { notificationID, merchandiseID, itemName } = notification;
+
+            // Send notification
+            const emailSent = await sendNotification(supervisorEmail, itemName);
+
+            // Mark notification as sent
+            if (emailSent) {
+                await pool.query(queries.markNotificationAsSent, [notificationID]);
+            }
+        }
+    } catch (error) {
+        console.error('Error processing notifications:', error);
+    }
+};
+
 //Fetch all rides
 const getRides = (request, response) => {
     pool.query(queries.getRides, (error, results) => {
@@ -186,4 +213,6 @@ module.exports = {
     getRidesNeedingMaintenance,
     addMaintenance,
     getMerchandiseTransactions,
+    checkAndSendNotifications,
+    
 };
