@@ -73,3 +73,33 @@ const getRidesNeedingMaintenance = (request, response) => {
         response.end(JSON.stringify(results));
     });
 };
+
+//add a maintenance job to the database
+const addMaintenance = (request, response) => {
+    let body = "";
+
+    request.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    request.on("end", () => {
+        const {MaintenanceID, RideID, MaintenanceStartDate, MaintenanceEndDate, MaintenanceEmployeeID, eventID} = JSON.parse(body);
+
+        if(!MaintenanceID || !RideID || !MaintenanceStartDate || !MaintenanceEndDate || !MaintenanceEmployeeID){
+            response.writeHead(400, {"Content-Type": "application/json"});
+            response.end(JSON.stringify({error: "MaintenanceID, RideID, MaintenanceStartDate, MaintenanceStartDate, MaintenanceEndDate, and MaintenanceEmployeeID are all required"}));
+            return;
+        }
+
+        pool.query(queries.addMaintenance, [MaintenanceID, RideID, MaintenanceStartDate, MaintenanceStartDate, MaintenanceEndDate, MaintenanceEmployeeID], (error, results) => {
+            if (error){
+                console.error("Error adding maintenance record:", error);
+                response.writeHead(500, {"Content-Type": "application/json"});
+                response.end(JSON.stringify({error: "Internal server error"}));
+                return;
+            }
+            response.writeHead(201, {"Content-Type": "application.json"});
+            response.end(JSON.stringify({message: "Maintenance record added successfully"}));
+        });
+    });
+};
