@@ -1,25 +1,37 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { motion } from "framer-motion";
 import Home from "./pages/Home";
-import Dining from "./pages/Dining";
-import Events from "./pages/Events";
-import Pricing from "./pages/Pricing";
 import Rides from "./pages/Rides";
-import EmployeeLogin from "./pages/EmployeeLogin";
+import Events from "./pages/Events";
+import Auth from "./pages/Auth";
 import UserPortal from "./pages/UserPortal";
+import EmployeeLogin from "./pages/EmployeeLogin";
+import Dining from "./pages/Dining";
+import Pricing from "./pages/Pricing";
+import CursorOverlay from "./components/ui/CursorOverlay";
 
 export default function App() {
   return (
+    
     <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/dining" element={<Dining />} />
-        <Route path="/events" element={<Events />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/rides" element={<Rides />} />
-        <Route path="/employee-login" element={<EmployeeLogin />} />
-        <Route path="/portal" element={<UserPortal />} />
-      </Routes>
+      <CursorOverlay />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/employee-login" element={<EmployeeLogin />} />
+          <Route path="/rides" element={<Rides />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/portal" element={<UserPortal />} />
+          <Route path="/dining" element={<Dining />} />
+        </Routes>
+      </motion.div>
     </Router>
   );
 }
