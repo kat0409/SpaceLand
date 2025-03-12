@@ -69,6 +69,35 @@ const checkVisitorExists = `
 
 const purchasePass = 'INSERT INTO tickets (ticketType, price, VisitorID, purchaseDate) VALUES (?,?,?,NOW())';
 
+const getEmployeesByDepartment = `
+    SELECT * FROM employee WHERE Department = ?
+`;
+
+const getMaintenanceRequests = `
+    SELECT * FROM maintenance WHERE MaintenanceStatus = 0
+`;
+
+const updateMaintenanceStatus = `
+    UPDATE maintenance SET MaintenanceStatus = ? WHERE MaintenanceID = ?
+`;
+
+const getLowStockMerchandise = `
+    SELECT * FROM merchandise WHERE quantity < 10
+`;
+
+const getSalesReport = `
+    SELECT * FROM merchandiseTransactions
+`;
+
+const getTicketSales = `
+    SELECT * FROM tickets
+`;
+
+const getVisitorRecords = `
+    SELECT * FROM visitors
+`;
+
+
 module.exports = {
     getRides,
     getEmployees,
@@ -94,7 +123,14 @@ module.exports = {
     markNotificationAsSent,
     authenticateVisitor,
     checkVisitorExists,
-    purchasePass
+    purchasePass,
+    getEmployeesByDepartment,
+    getMaintenanceRequests,
+    updateMaintenanceStatus,
+    getLowStockMerchandise,
+    getSalesReport,
+    getTicketSales,
+    getVisitorRecords
 };
 
 //checkMerchQuantity
