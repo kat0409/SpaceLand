@@ -103,36 +103,38 @@ const addEmployee = (request, response) => {
             return;
         }
 
-        const { FirstName, LastName, Email, Address, username, password, Department, employmentStatus, dateOfBirth } = parsedBody;
+        // Get employee details from request body
+        const { FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth } = parsedBody;
 
         // Validate required fields
-        if (!FirstName || !LastName || !Email || !Address || !username || !password || !Department || !employmentStatus || !dateOfBirth) {
+        if (!FirstName || !LastName || !Email || !Address || !SupervisorID || !username || !password || !Department || !employmentStatus || !dateOfBirth) {
             response.writeHead(400, { "Content-Type": "application/json" });
             response.end(JSON.stringify({ error: "All fields are required" }));
             return;
         }
 
-        // Retrieve SupervisorID based on the department to check if the supervisorID exists in the supervisor table
-        pool.query(queries.getSupervisorIDbyDept, [Department], (error, results) => {
+        console.log("Checking if SupervisorID exists:", SupervisorID);
+
+        // Check if the provided SupervisorID exists in `supervisors`
+        pool.query('SELECT * FROM supervisors WHERE SupervisorID = ?', [SupervisorID], (error, results) => {
             if (error) {
-                console.error("Error retrieving supervisor ID:", error);
+                console.error("Error verifying SupervisorID:", error);
                 response.writeHead(500, { "Content-Type": "application/json" });
                 response.end(JSON.stringify({ error: "Internal server error" }));
                 return;
             }
+
             if (results.length === 0) {
+                console.log("SupervisorID not found:", SupervisorID);
                 response.writeHead(400, { "Content-Type": "application/json" });
-                response.end(JSON.stringify({ error: "Supervisor was not found in the department." }));
+                response.end(JSON.stringify({ error: `Supervisor with ID ${SupervisorID} does not exist` }));
                 return;
             }
 
-            // Use the retrieved SupervisorID
-            const supervisorID = results[0].SupervisorID;
-
-            // Add the employee to the database
+            // Insert the new employee into the database
             pool.query(
-                queries.addEmployee,
-                [FirstName, LastName, Email, Address, supervisorID, username, password, Department, employmentStatus, dateOfBirth],
+                'INSERT INTO employee (FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth) VALUES (?,?,?,?,?,?,?,?,?,?)',
+                [FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth],
                 (error, results) => {
                     if (error) {
                         console.error("Error adding employee:", error);
@@ -140,8 +142,9 @@ const addEmployee = (request, response) => {
                         response.end(JSON.stringify({ error: "Internal Server Error" }));
                         return;
                     }
+
                     response.writeHead(201, { "Content-Type": "application/json" });
-                    response.end(JSON.stringify({ message: "Employee added successfully" }));
+                    response.end(JSON.stringify({ message: "Employee added successfully", EmployeeID: results.insertId }));
                 }
             );
         });
