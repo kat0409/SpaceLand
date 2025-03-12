@@ -41,7 +41,10 @@ function routes(req, res) {
     if ( url.startsWith('/add-visitor') && method === 'POST') {
         return actions.addVisitor(req, res);
     }
-        
+    
+    if (url.startsWith('/check-visitor') && method === 'POST') {
+        return actions.checkVisitorExists(req, res);
+    }
 
     // Add more routes as needed...
 
