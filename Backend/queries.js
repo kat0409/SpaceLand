@@ -54,6 +54,9 @@ const markNotificationAsSent = `
     SET sent = 1
     WHERE notificationID = ?;
 `;
+const getEmployeesByDepartment = 
+'SELECT * FROM employee WHERE Department = ?';
+
 
 module.exports = {
     getRides,
