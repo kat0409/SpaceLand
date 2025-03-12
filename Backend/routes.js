@@ -38,7 +38,7 @@ function routes(req, res) {
         return;
     }*/
 
-    if (pathname === '/add-visitor' && method === 'POST') {
+    if ( url.startsWith('/add-visitor') && method === 'POST') {
         return actions.addVisitor(req, res);
     }
         
