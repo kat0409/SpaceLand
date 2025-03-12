@@ -1,4 +1,3 @@
-// src/components/Header.jsx
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -6,26 +5,27 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
-    { name: 'Home', href: '/' },            // Page Route
-    { name: 'Rides', href: '/rides' },      // Page Route
-    { name: 'Events', href: '/events' },    // Page Route
-    { name: 'Dining', href: '/dining' },    // Scroll Anchor
-    { name: 'Pricing', href: '/pricing' },  // Scroll Anchor
-    { name: 'Contact', href: '#footer' },   // Scroll Anchor
+    { name: 'Home', href: '/' },
+    { name: 'Rides', href: '/rides' },
+    { name: 'Events', href: '/events' },
+    { name: 'Dining', href: '/dining' },
+    { name: 'Pricing', href: '/pricing' },
+    { name: 'Contact', href: '#footer' },
   ];
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-black/60 backdrop-blur-md border-b border-white/10">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Logo */}
-        <Link
-          to="/"
-          className="text-white text-2xl font-bold tracking-tight hover:text-purple-400 transition"
-        >
-          Spaceland 🚀
+        {/* ✅ LOGO LINK TO HOMEPAGE */}
+        <Link to="/" className="flex items-center gap-2">
+          <img
+            src="/assets/SpaceLand.svg"
+            alt="SpaceLand Logo"
+            className="h-16 w-auto ml-0"
+          />
         </Link>
 
-        {/* Desktop Nav */}
+        {/* ✅ DESKTOP NAV */}
         <nav className="hidden md:flex gap-6 items-center">
           {navLinks.map((link) =>
             link.href.startsWith('#') ? (
@@ -56,7 +56,7 @@ export default function Header() {
           </Link>
         </nav>
 
-        {/* Mobile Hamburger */}
+        {/* MOBILE HAMBURGER ICON */}
         <button
           className="md:hidden text-white text-xl"
           onClick={() => setIsOpen(!isOpen)}
@@ -65,7 +65,7 @@ export default function Header() {
         </button>
       </div>
 
-      {/* Mobile Dropdown Nav */}
+      {/* ✅ MOBILE DROPDOWN NAV */}
       {isOpen && (
         <div className="md:hidden bg-black/90 px-6 pb-4">
           {navLinks.map((link) =>
@@ -90,7 +90,7 @@ export default function Header() {
             )
           )}
 
-          {/* Mobile Login Button */}
+          {/* MOBILE LOGIN BUTTON */}
           <Link
             to="/auth"
             className="block text-center mt-4 bg-gradient-to-r from-purple-600 to-indigo-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:from-purple-700 hover:to-indigo-600 transition"

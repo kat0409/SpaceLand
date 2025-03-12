@@ -1,46 +1,47 @@
-// src/components/Hero.jsx
-import { motion } from 'framer-motion';
+import { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 
 export default function Hero() {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = 0.25; // ⬅️ slower: try 0.25, 0.5, 0.75 etc
+    }
+  }, []);
+
   return (
-    <section id="home"className="relative h-screen w-full overflow-hidden bg-black text-white">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="/assets/space-bg.jpg"
-          alt="Galaxy Background"
-          className="w-full h-full object-cover brightness-75"
-        />
-      </div>
+    <section className="relative w-full h-screen overflow-hidden">
+      {/* Galaxy Video Background */}
+      <video
+        ref={videoRef}
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute top-0 left-0 w-full h-full object-cover z-[-1]"
+      >
+        <source src="/assets/galaxy.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
 
-      {/* Overlay Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
-        <motion.h1
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1 }}
-          className="text-5xl md:text-7xl font-bold tracking-tight drop-shadow-lg"
-        >
+      {/* Gradient Overlay for Fade Effect */}
+      <div className="absolute bottom-0 w-full h-64 bg-gradient-to-b from-transparent to-black z-0 pointer-events-none" />
+
+      {/* Hero Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
+        <h1 className="text-5xl md:text-6xl font-bold mb-4">
           Welcome to <span className="text-purple-400">Spaceland</span>
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.3, delay: 0.2 }}
-          className="mt-4 text-lg md:text-xl text-gray-200 max-w-xl"
-        >
+        </h1>
+        <p className="text-lg md:text-xl text-gray-200 max-w-2xl">
           Houston’s ultimate space-themed rollercoaster adventure awaits.
-        </motion.p>
-
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ duration: 0.3 }}
-          className="mt-8 px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:from-indigo-600 hover:to-purple-700 transition-all"
+        </p>
+        <Link
+          to="/rides"
+          className="mt-8 bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition"
         >
           Explore Rides
-        </motion.button>
+        </Link>
       </div>
     </section>
   );
