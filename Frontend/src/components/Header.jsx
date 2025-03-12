@@ -1,3 +1,4 @@
+// src/components/Header.jsx
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -16,16 +17,19 @@ export default function Header() {
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-black/60 backdrop-blur-md border-b border-white/10">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* ✅ LOGO LINK TO HOMEPAGE */}
-        <Link to="/" className="flex items-center gap-2">
-          <img
-            src="/assets/SpaceLand.svg"
-            alt="SpaceLand Logo"
-            className="h-16 w-auto ml-0"
-          />
+        
+        {/* Logo section */}
+        <Link to="/" className="relative flex items-center">
+          <div className="h-8 md:h-10 w-auto scale-[6.0] transform origin-left -ml-20">
+            <img
+              src="/assets/SpaceLand.svg"
+              alt="Spaceland Logo"
+              className="h-full w-auto object-contain"
+            />
+          </div>
         </Link>
 
-        {/* ✅ DESKTOP NAV */}
+        {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-6 items-center">
           {navLinks.map((link) =>
             link.href.startsWith('#') ? (
@@ -47,16 +51,15 @@ export default function Header() {
             )
           )}
 
-          {/* LOGIN BUTTON */}
           <Link
             to="/auth"
-            className="bg-gradient-to-r from-purple-600 to-indigo-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:from-purple-700 hover:to-indigo-600 transition-all"
+            className="bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 text-white font-semibold px-4 py-2 rounded-lg shadow transition"
           >
             Login
           </Link>
         </nav>
 
-        {/* MOBILE HAMBURGER ICON */}
+        {/* Mobile Hamburger */}
         <button
           className="md:hidden text-white text-xl"
           onClick={() => setIsOpen(!isOpen)}
@@ -65,7 +68,7 @@ export default function Header() {
         </button>
       </div>
 
-      {/* ✅ MOBILE DROPDOWN NAV */}
+      {/* Mobile Dropdown Nav */}
       {isOpen && (
         <div className="md:hidden bg-black/90 px-6 pb-4">
           {navLinks.map((link) =>
@@ -90,7 +93,6 @@ export default function Header() {
             )
           )}
 
-          {/* MOBILE LOGIN BUTTON */}
           <Link
             to="/auth"
             className="block text-center mt-4 bg-gradient-to-r from-purple-600 to-indigo-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:from-purple-700 hover:to-indigo-600 transition"
