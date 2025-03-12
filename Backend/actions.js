@@ -389,15 +389,15 @@ const purchasePass = ((req,res) => {
             return;
         }
 
-        const { VisitorID, PassType, Price } = parsedBody;
+        const { VisitorID, ticketType, price } = parsedBody;
 
-        if (!VisitorID || !PassType || !Price) {
+        if (!VisitorID || !ticketType || !price) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'VisitorID, PassType, and Price are required.' }));
             return;
         }
 
-        pool.query(queries.purchasePass, [VisitorID, PassType, Price], (err, results) => {
+        pool.query(queries.purchasePass, [ticketType, price, VisitorID], (err, results) => {
             if (err) {
                 console.error('Error purchasing pass:', err);
                 res.writeHead(500, { 'Content-Type': 'application/json' });
