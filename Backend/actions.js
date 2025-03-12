@@ -161,3 +161,55 @@ const getMerchandiseTransactions = (request, response) =>{
     });
 }
 
+const handleEmployeeLogin = (request, response) => {
+    let body = "";
+  
+    request.on("data", (chunk) => {
+      body += chunk.toString();
+    });
+  
+    request.on("end", () => {
+      const { username, password } = JSON.parse(body);
+  
+      if (!username || !password) {
+        response.writeHead(400, { "Content-Type": "application/json" });
+        response.end(JSON.stringify({ error: "Username and password required" }));
+        return;
+      }
+  
+      const query = 'SELECT * FROM employee WHERE username = ? AND password = ?';
+      pool.query(query, [username, password], (err, results) => {
+        if (err) {
+          console.error("Login error:", err);
+          response.writeHead(500, { "Content-Type": "application/json" });
+          response.end(JSON.stringify({ error: "Internal server error" }));
+          return;
+        }
+  
+        if (results.length === 0) {
+          response.writeHead(401, { "Content-Type": "application/json" });
+          response.end(JSON.stringify({ error: "Invalid credentials" }));
+          return;
+        }
+  
+        const employee = results[0];
+        const isSupervisor = employee.SupervisorID === employee.EmployeeID;
+  
+        response.writeHead(200, { "Content-Type": "application/json" });
+        response.end(JSON.stringify({
+          message: "Login successful",
+          isSupervisor: isSupervisor,
+          ...employee
+        }));
+      });
+    });
+  };
+  module.exports = {
+    getRides,
+    getEmployees,
+    addEmployee,
+    getRidesNeedingMaintenance,
+    addMaintenance,
+    getMerchandiseTransactions,
+    handleEmployeeLogin
+  };
