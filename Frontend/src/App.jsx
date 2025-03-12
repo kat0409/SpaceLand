@@ -11,6 +11,7 @@ import EmployeeDashboard from "./pages/EmployeeDashboard";
 import Dining from "./pages/Dining";
 import Pricing from "./pages/Pricing";
 import CursorOverlay from "./components/ui/CursorOverlay";
+import SupervisorPortal from "./pages/SupervisorPortal";
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <Routes>
+          <Route path="/supervisor-portal" element={<SupervisorPortal />} />
           <Route path="/" element={<Home />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/employee-login" element={<EmployeeLogin />} />
