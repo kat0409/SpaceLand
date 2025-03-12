@@ -205,6 +205,53 @@ const getMerchandiseTransactions = (request, response) =>{
     });
 };
 
+const loginVisitor = (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (err) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const { username, password } = parsedBody;
+
+        if (!username || !password) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Username and password are required" }));
+            return;
+        }
+
+        pool.query(queries.authenticateVisitor, [username, password], (err, results) => {
+            if (err) {
+                console.error("Error querying loginVisitor:", err);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+
+            if (results.length === 0) {
+                res.writeHead(401, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Invalid credentials" }));
+            } else {
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({
+                    message: "Login successful",
+                    visitorID: results[0].VisitorID
+                }));
+            }
+        });
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -214,5 +261,5 @@ module.exports = {
     addMaintenance,
     getMerchandiseTransactions,
     checkAndSendNotifications,
-    
+    loginVisitor
 };
