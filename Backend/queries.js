@@ -67,6 +67,8 @@ const checkVisitorExists = `
     SELECT * FROM visitors WHERE Username = ?
 `;
 
+const purchasePass = 'INSERT INTO tickets (ticketType, price, VisitorID, purchaseDate) VALUES (?,?,?,NOW())';
+
 module.exports = {
     getRides,
     getEmployees,
@@ -91,7 +93,8 @@ module.exports = {
     getSupervisorEmailByDepartment,
     markNotificationAsSent,
     authenticateVisitor,
-    checkVisitorExists
+    checkVisitorExists,
+    purchasePass
 };
 
 //checkMerchQuantity
