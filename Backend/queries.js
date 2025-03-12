@@ -34,7 +34,7 @@ const updateEmployeeInfo = 'UPDATE employee SET FirstName = ?, LastName = ?, Ema
 
 const getEmployeeInfo = 'SELECT * FROM employee WHERE EmployeeID = ?';
 
-const addVisitor = 'INSERT INTO visitors (VisitorID,FirstName,LastName,Phone,Email,Address,DateOfBirth,AccessibilityNeeds,Gender,Username,Password,Height,Age,MilitaryStatus) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+//const addVisitor = 'INSERT INTO visitors (VisitorID,FirstName,LastName,Phone,Email,Address,DateOfBirth,AccessibilityNeeds,Gender,Username,Password,Height,Age,MilitaryStatus) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
 
 const getVisitorInfo = 'SELECT * FROM visitors WHERE VisitorID = ?';
 
@@ -56,6 +56,16 @@ const markNotificationAsSent = `
 `;
 
 const authenticateVisitor = 'SELECT * FROM visitors WHERE username = ? AND password = ?';
+
+const addVisitor = `
+    INSERT INTO visitors (FirstName, LastName, Phone, Email, Address, DateOfBirth, 
+        AccessibilityNeeds, Gender, Username, Password, Height, Age, MilitaryStatus)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`;
+
+const checkVisitorExists = `
+    SELECT * FROM visitors WHERE Username = ?
+`;
 
 module.exports = {
     getRides,
@@ -80,7 +90,8 @@ module.exports = {
     getUnsentNotifications,
     getSupervisorEmailByDepartment,
     markNotificationAsSent,
-    authenticateVisitor
+    authenticateVisitor,
+    checkVisitorExists
 };
 
 //checkMerchQuantity

@@ -25,7 +25,8 @@ const routeMap = {
         '/add-employee', 
         '/add-maintenance',
         '/add-merchandise-transaction',
-        '/login'
+        '/login',
+        '/add-visitor'
     ],
     'PUT': [
         '/update-employee', 

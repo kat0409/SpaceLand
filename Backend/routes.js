@@ -32,11 +32,17 @@ function routes(req, res) {
         return actions.loginVisitor(req, res);
     }
 
-    if (url.startsWith('/add-employee') && method === 'GET') {
+    /*if (url.startsWith('/add-employee') && method === 'GET') {
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ message: "This route requires POST method." }));
         return;
+    }*/
+
+    if (pathname === '/add-visitor' && method === 'POST') {
+        return actions.addVisitor(req, res);
     }
+        
+
     // Add more routes as needed...
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
