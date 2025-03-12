@@ -103,36 +103,38 @@ const addEmployee = (request, response) => {
             return;
         }
 
-        const { FirstName, LastName, Email, Address, username, password, Department, employmentStatus, dateOfBirth } = parsedBody;
+        // Get employee details from request body
+        const { FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth } = parsedBody;
 
         // Validate required fields
-        if (!FirstName || !LastName || !Email || !Address || !username || !password || !Department || !employmentStatus || !dateOfBirth) {
+        if (!FirstName || !LastName || !Email || !Address || !SupervisorID || !username || !password || !Department || !employmentStatus || !dateOfBirth) {
             response.writeHead(400, { "Content-Type": "application/json" });
             response.end(JSON.stringify({ error: "All fields are required" }));
             return;
         }
 
-        // Retrieve SupervisorID based on the department to check if the supervisorID exists in the supervisor table
-        pool.query(queries.getSupervisorIDbyDept, [Department], (error, results) => {
+        console.log("Checking if SupervisorID exists:", SupervisorID);
+
+        // Check if the provided SupervisorID exists in `supervisors`
+        pool.query('SELECT * FROM supervisors WHERE SupervisorID = ?', [SupervisorID], (error, results) => {
             if (error) {
-                console.error("Error retrieving supervisor ID:", error);
+                console.error("Error verifying SupervisorID:", error);
                 response.writeHead(500, { "Content-Type": "application/json" });
                 response.end(JSON.stringify({ error: "Internal server error" }));
                 return;
             }
+
             if (results.length === 0) {
+                console.log("SupervisorID not found:", SupervisorID);
                 response.writeHead(400, { "Content-Type": "application/json" });
-                response.end(JSON.stringify({ error: "Supervisor was not found in the department." }));
+                response.end(JSON.stringify({ error: `Supervisor with ID ${SupervisorID} does not exist` }));
                 return;
             }
 
-            // Use the retrieved SupervisorID
-            const supervisorID = results[0].SupervisorID;
-
-            // Add the employee to the database
+            // Insert the new employee into the database
             pool.query(
-                queries.addEmployee,
-                [FirstName, LastName, Email, Address, supervisorID, username, password, Department, employmentStatus, dateOfBirth],
+                'INSERT INTO employee (FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth) VALUES (?,?,?,?,?,?,?,?,?,?)',
+                [FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth],
                 (error, results) => {
                     if (error) {
                         console.error("Error adding employee:", error);
@@ -140,8 +142,9 @@ const addEmployee = (request, response) => {
                         response.end(JSON.stringify({ error: "Internal Server Error" }));
                         return;
                     }
+
                     response.writeHead(201, { "Content-Type": "application/json" });
-                    response.end(JSON.stringify({ message: "Employee added successfully" }));
+                    response.end(JSON.stringify({ message: "Employee added successfully", EmployeeID: results.insertId }));
                 }
             );
         });
@@ -203,7 +206,210 @@ const getMerchandiseTransactions = (request, response) =>{
         response.writeHead(200, {"Content-Type": "application/json"});
         response.end(JSON.stringify(results));
     });
-}
+};
+
+const loginVisitor = (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (err) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const { username, password } = parsedBody;
+
+        if (!username || !password) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Username and password are required" }));
+            return;
+        }
+
+        pool.query(queries.authenticateVisitor, [username, password], (err, results) => {
+            if (err) {
+                console.error("Error querying loginVisitor:", err);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+
+            if (results.length === 0) {
+                res.writeHead(401, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Invalid credentials" }));
+            } else {
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({
+                    message: "Login successful",
+                    visitorID: results[0].VisitorID
+                }));
+            }
+        });
+    });
+};
+
+//Add a visitor
+const addVisitor = (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (error) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const {
+            FirstName, LastName, Phone, Email, Address, DateOfBirth, 
+            AccessibilityNeeds, Gender, Username, Password, Height, Age, MilitaryStatus
+        } = parsedBody;
+
+        if (!FirstName || !LastName || !Email || !Username || !Password || !DateOfBirth) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "First name, last name, email, username, password, and date of birth are required." }));
+            return;
+        }
+
+        // Ensure optional fields have defaults
+        const phone = Phone || null;
+        const address = Address || null;
+        const gender = Gender || null;
+        const height = Height || null;
+        const age = Age || null;
+
+        // Set checkboxes as 1 (true) if checked, else 0 (false)
+        const accessibilityNeeds = AccessibilityNeeds ? 1 : 0;
+        const militaryStatus = MilitaryStatus ? 1 : 0;
+
+        pool.query(queries.checkVisitorExists, [Username], (error, results) => {
+            if (error) {
+                console.error("Error checking existing visitor:", error);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+
+            if (results.length > 0) {
+                res.writeHead(400, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Username already exists" }));
+                return;
+            }
+
+            pool.query(
+                queries.addVisitor,
+                [FirstName, LastName, phone, Email, address, DateOfBirth, accessibilityNeeds, gender, Username, Password, height, age, militaryStatus],
+                (error, results) => {
+                    if (error) {
+                        console.error("Error adding visitor:", error);
+                        res.writeHead(500, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ error: "Internal server error" }));
+                        return;
+                    }
+
+                    res.writeHead(201, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ message: "Visitor account created successfully", VisitorID: results.insertId }));
+                }
+            );
+        });
+    });
+};
+
+const checkVisitorExists = (req, res) => {
+    let body = '';
+
+    req.on('data', (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (err) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Invalid JSON' }));
+            return;
+        }
+
+        const { username } = parsedBody;
+
+        if (!username) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Username required' }));
+            return;
+        }
+
+        pool.query(queries.checkVisitorExists, [username], (err, results) => {
+            if (err) {
+                console.error('Error querying checkVisitorExists:', err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Internal server error' }));
+                return;
+            }
+
+            if (results.length > 0) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ exists: true }));
+            } else {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ exists: false }));
+            }
+        });
+    });
+};
+
+const purchasePass = ((req,res) => {
+    let body = '';
+
+    req.on('data', (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (err) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Invalid JSON format' }));
+            return;
+        }
+
+        const { VisitorID, ticketType, price } = parsedBody;
+
+        if (!VisitorID || !ticketType || !price) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'VisitorID, PassType, and Price are required.' }));
+            return;
+        }
+
+        pool.query(queries.purchasePass, [ticketType, price, VisitorID], (err, results) => {
+            if (err) {
+                console.error('Error purchasing pass:', err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Internal server error' }));
+                return;
+            }
+
+            res.writeHead(201, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Pass purchased successfully', TicketID: results.insertId }));
+        });
+    });
+});
 
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
@@ -214,5 +420,8 @@ module.exports = {
     addMaintenance,
     getMerchandiseTransactions,
     checkAndSendNotifications,
-    
+    loginVisitor,
+    addVisitor,
+    checkVisitorExists,
+    purchasePass
 };
