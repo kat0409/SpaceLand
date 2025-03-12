@@ -41,11 +41,14 @@ function routes(req, res) {
     if ( url.startsWith('/add-visitor') && method === 'POST') {
         return actions.addVisitor(req, res);
     }
-    
+
     if (url.startsWith('/check-visitor') && method === 'POST') {
         return actions.checkVisitorExists(req, res);
     }
 
+    if(url.startsWith('/purchase-pass') && method === 'POST'){
+        return actions.purchasePass(req,res);
+    }
     // Add more routes as needed...
 
     res.writeHead(404, { 'Content-Type': 'application/json' });

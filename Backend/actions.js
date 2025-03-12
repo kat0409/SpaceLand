@@ -278,7 +278,6 @@ const addVisitor = (req, res) => {
             AccessibilityNeeds, Gender, Username, Password, Height, Age, MilitaryStatus
         } = parsedBody;
 
-        // Validate required fields
         if (!FirstName || !LastName || !Email || !Username || !Password || !DateOfBirth) {
             res.writeHead(400, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ error: "First name, last name, email, username, password, and date of birth are required." }));
@@ -296,7 +295,6 @@ const addVisitor = (req, res) => {
         const accessibilityNeeds = AccessibilityNeeds ? 1 : 0;
         const militaryStatus = MilitaryStatus ? 1 : 0;
 
-        // Check if the username already exists
         pool.query(queries.checkVisitorExists, [Username], (error, results) => {
             if (error) {
                 console.error("Error checking existing visitor:", error);
@@ -311,7 +309,6 @@ const addVisitor = (req, res) => {
                 return;
             }
 
-            // Insert the new visitor into the database
             pool.query(
                 queries.addVisitor,
                 [FirstName, LastName, phone, Email, address, DateOfBirth, accessibilityNeeds, gender, Username, Password, height, age, militaryStatus],
@@ -375,7 +372,44 @@ const checkVisitorExists = (req, res) => {
     });
 };
 
+const purchasePass = ((req,res) => {
+    let body = '';
 
+    req.on('data', (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (err) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Invalid JSON format' }));
+            return;
+        }
+
+        const { VisitorID, PassType, Price } = parsedBody;
+
+        if (!VisitorID || !PassType || !Price) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'VisitorID, PassType, and Price are required.' }));
+            return;
+        }
+
+        pool.query(queries.purchasePass, [VisitorID, PassType, Price], (err, results) => {
+            if (err) {
+                console.error('Error purchasing pass:', err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Internal server error' }));
+                return;
+            }
+
+            res.writeHead(201, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Pass purchased successfully', TicketID: results.insertId }));
+        });
+    });
+});
 
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
@@ -388,5 +422,6 @@ module.exports = {
     checkAndSendNotifications,
     loginVisitor,
     addVisitor,
-    checkVisitorExists
+    checkVisitorExists,
+    purchasePass
 };

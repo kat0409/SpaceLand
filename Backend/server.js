@@ -27,7 +27,8 @@ const routeMap = {
         '/add-merchandise-transaction',
         '/login',
         '/add-visitor',
-        '/check-visitor'
+        '/check-visitor',
+        '/purchase-pass'
     ],
     'PUT': [
         '/update-employee', 
