@@ -1,21 +1,3 @@
-/*const actions = require('./actions'); 
-const {URL} = require('url');
-
-function routes(req, res) {
-    const url =  req.url;
-    const method = res.method;
-
-    if(url === '/rides' && method === 'GET'){
-        actions.getRides(req,res);
-    }
-    else if(url === '/employees' && method === 'GET'){
-        actions.getEmployees(req,res);
-    }
-};
-
-module.exports = routes;*/
-
-// routes.js
 const actions = require('./actions');
 
 function routes(req, res) {
@@ -45,7 +27,6 @@ function routes(req, res) {
     if (url.startsWith('/merchandise-transactions') && method === 'GET') {
         return actions.getMerchandiseTransactions(req, res);
     }
-
     // Add more routes as needed...
 
     res.writeHead(404, { 'Content-Type': 'application/json' });

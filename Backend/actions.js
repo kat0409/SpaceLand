@@ -203,7 +203,7 @@ const getMerchandiseTransactions = (request, response) =>{
         response.writeHead(200, {"Content-Type": "application/json"});
         response.end(JSON.stringify(results));
     });
-}
+};
 
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
