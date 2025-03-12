@@ -255,6 +255,82 @@ const loginVisitor = (req, res) => {
     });
 };
 
+//Add a visitor
+const addVisitor = (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (error) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const {
+            FirstName, LastName, Phone, Email, Address, DateOfBirth, 
+            AccessibilityNeeds, Gender, Username, Password, Height, Age, MilitaryStatus
+        } = parsedBody;
+
+        // Validate required fields
+        if (!FirstName || !LastName || !Email || !Username || !Password || !DateOfBirth) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "First name, last name, email, username, password, and date of birth are required." }));
+            return;
+        }
+
+        // Ensure optional fields have defaults
+        const phone = Phone || null;
+        const address = Address || null;
+        const gender = Gender || null;
+        const height = Height || null;
+        const age = Age || null;
+
+        // Set checkboxes as 1 (true) if checked, else 0 (false)
+        const accessibilityNeeds = AccessibilityNeeds ? 1 : 0;
+        const militaryStatus = MilitaryStatus ? 1 : 0;
+
+        // Check if the username already exists
+        pool.query(queries.checkVisitorExists, [Username], (error, results) => {
+            if (error) {
+                console.error("Error checking existing visitor:", error);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+
+            if (results.length > 0) {
+                res.writeHead(400, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Username already exists" }));
+                return;
+            }
+
+            // Insert the new visitor into the database
+            pool.query(
+                queries.addVisitor,
+                [FirstName, LastName, phone, Email, address, DateOfBirth, accessibilityNeeds, gender, Username, Password, height, age, militaryStatus],
+                (error, results) => {
+                    if (error) {
+                        console.error("Error adding visitor:", error);
+                        res.writeHead(500, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ error: "Internal server error" }));
+                        return;
+                    }
+
+                    res.writeHead(201, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ message: "Visitor account created successfully", VisitorID: results.insertId }));
+                }
+            );
+        });
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -264,5 +340,6 @@ module.exports = {
     addMaintenance,
     getMerchandiseTransactions,
     checkAndSendNotifications,
-    loginVisitor
+    loginVisitor,
+    addVisitor
 };
