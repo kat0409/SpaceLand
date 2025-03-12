@@ -24,7 +24,8 @@ const routeMap = {
     'POST': [
         '/add-employee', 
         '/add-maintenance',
-        '/add-merchandise-transaction', 
+        '/add-merchandise-transaction',
+        '/login'
     ],
     'PUT': [
         '/update-employee', 
