@@ -27,6 +27,11 @@ function routes(req, res) {
     if (url.startsWith('/merchandise-transactions') && method === 'GET') {
         return actions.getMerchandiseTransactions(req, res);
     }
+
+    if (url.startsWith('/login') && method === 'POST') {
+        return actions.loginVisitor(req, res);
+    }
+    
     // Add more routes as needed...
 
     res.writeHead(404, { 'Content-Type': 'application/json' });

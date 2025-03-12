@@ -55,7 +55,7 @@ const markNotificationAsSent = `
     WHERE notificationID = ?;
 `;
 
-const loginVisitor = 'SELECT * FROM visitors WHERE username = ? AND password = ?';
+const authenticateVisitor = 'SELECT * FROM visitors WHERE username = ? AND password = ?';
 
 module.exports = {
     getRides,
@@ -80,7 +80,7 @@ module.exports = {
     getUnsentNotifications,
     getSupervisorEmailByDepartment,
     markNotificationAsSent,
-    loginVisitor
+    authenticateVisitor
 };
 
 //checkMerchQuantity
