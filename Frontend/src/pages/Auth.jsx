@@ -165,3 +165,24 @@ export default function Auth() {
     </>
   );
 }
+
+const registerVisitor = async (visitorData) => {
+  try {
+    const response = await fetch('http://localhost:3000/add-visitor', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(visitorData)
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      console.log('Registration Successful:', data);
+    } else {
+      console.error('Error:', data.error);
+    }
+  } catch (error) {
+    console.error('Request failed:', error);
+  }
+};
