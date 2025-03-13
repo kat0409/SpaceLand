@@ -54,9 +54,6 @@ const markNotificationAsSent = `
     SET sent = 1
     WHERE notificationID = ?;
 `;
-const getEmployeesByDepartment = 
-'SELECT * FROM employee WHERE Department = ?';
-
 
 const authenticateVisitor = 'SELECT * FROM visitors WHERE username = ? AND password = ?';
 
