@@ -57,7 +57,10 @@ function routes(req, res) {
     if (url.startsWith('/supervisor/maintenance-requests') && method === 'GET') {
         return actions.getMaintenanceRequests(req, res);
     }
-    
+
+    if (url.startsWith('/supervisor/update-maintenance-status') && method === 'POST') {
+        return actions.updateMaintenanceStatus(req, res);
+    }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
