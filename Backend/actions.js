@@ -411,6 +411,7 @@ const purchasePass = ((req,res) => {
     });
 });
 
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
