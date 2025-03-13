@@ -34,7 +34,7 @@ const updateEmployeeInfo = 'UPDATE employee SET FirstName = ?, LastName = ?, Ema
 
 const getEmployeeInfo = 'SELECT * FROM employee WHERE EmployeeID = ?';
 
-const addVisitor = 'INSERT INTO visitors (VisitorID,FirstName,LastName,Phone,Email,Address,DateOfBirth,AccessibilityNeeds,Gender,Username,Password,Height,Age,MilitaryStatus) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+//const addVisitor = 'INSERT INTO visitors (VisitorID,FirstName,LastName,Phone,Email,Address,DateOfBirth,AccessibilityNeeds,Gender,Username,Password,Height,Age,MilitaryStatus) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
 
 const getVisitorInfo = 'SELECT * FROM visitors WHERE VisitorID = ?';
 
@@ -56,6 +56,49 @@ const markNotificationAsSent = `
 `;
 const getEmployeesByDepartment = 
 'SELECT * FROM employee WHERE Department = ?';
+
+
+const authenticateVisitor = 'SELECT * FROM visitors WHERE username = ? AND password = ?';
+
+const addVisitor = `
+    INSERT INTO visitors (FirstName, LastName, Phone, Email, Address, DateOfBirth, 
+        AccessibilityNeeds, Gender, Username, Password, Height, Age, MilitaryStatus)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`;
+
+const checkVisitorExists = `
+    SELECT * FROM visitors WHERE Username = ?
+`;
+
+const purchasePass = 'INSERT INTO tickets (ticketType, price, VisitorID, purchaseDate) VALUES (?,?,?,NOW())';
+
+const getEmployeesByDepartment = `
+    SELECT * FROM employee WHERE Department = ?
+`;
+
+const getMaintenanceRequests = `
+    SELECT * FROM maintenance WHERE MaintenanceStatus = 0
+`;
+
+const updateMaintenanceStatus = `
+    UPDATE maintenance SET MaintenanceStatus = ? WHERE MaintenanceID = ?
+`;
+
+const getLowStockMerchandise = `
+    SELECT * FROM merchandise WHERE quantity < 10
+`;
+
+const getSalesReport = `
+    SELECT * FROM merchandiseTransactions
+`;
+
+const getTicketSales = `
+    SELECT * FROM tickets
+`;
+
+const getVisitorRecords = `
+    SELECT * FROM visitors
+`;
 
 
 module.exports = {
@@ -80,7 +123,17 @@ module.exports = {
     getVisitorInfo,
     getUnsentNotifications,
     getSupervisorEmailByDepartment,
-    markNotificationAsSent
+    markNotificationAsSent,
+    authenticateVisitor,
+    checkVisitorExists,
+    purchasePass,
+    getEmployeesByDepartment,
+    getMaintenanceRequests,
+    updateMaintenanceStatus,
+    getLowStockMerchandise,
+    getSalesReport,
+    getTicketSales,
+    getVisitorRecords
 };
 
 //checkMerchQuantity
