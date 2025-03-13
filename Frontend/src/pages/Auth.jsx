@@ -186,3 +186,25 @@ const registerVisitor = async (visitorData) => {
     console.error('Request failed:', error);
   }
 };
+
+const loginVisitor = async (username, password) => {
+  try {
+    const response = await fetch('http://localhost:3000/login-visitor', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      console.log('Login Successful:', data);
+      localStorage.setItem('visitorID', data.visitorID); // Save session
+    } else {
+      console.error('Error:', data.error);
+    }
+  } catch (error) {
+    console.error('Request failed:', error);
+  }
+};
