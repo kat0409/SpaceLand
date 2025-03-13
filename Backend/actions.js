@@ -465,6 +465,18 @@ const updateMaintenanceStatus = (req, res) => {
         });
     });
 };
+const getLowStockMerchandise = (req, res) => {
+    pool.query(queries.getLowStockMerchandise, (error, results) => {
+        if (error) {
+            console.error("Error fetching low stock merchandise:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
 
 
 //Check to see if you need to make a module.exports function here as well
