@@ -26,17 +26,26 @@ export default function Hero() {
             backdropFilter: 'blur(1.5px)',
           }}
         />
+        {/* 🌠 Bottom fade overlay */}
+<div className="absolute bottom-0 w-full h-40 bg-gradient-to-b from-transparent to-black z-10 pointer-events-none" />
+        
+
+        {/* ✨ Optional: Particle animation overlay behind text */}
+        <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
+          <div className="w-full h-full bg-[url('/assets/particles.png')] bg-repeat bg-cover opacity-10 animate-galaxy-particles" />
+        </div>
       </div>
 
       {/* 🌌 Hero Content */}
       <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 items-center h-full px-6 md:px-12">
         <div className="text-white text-left space-y-6">
           <h1
-            className="text-[70px] md:text-[90px] font-extrabold tracking-widest drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]"
+            className="typewriter font-extrabold tracking-widest text-[70px] md:text-[90px] drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]"
             style={{ fontFamily: 'Orbitron, sans-serif' }}
           >
-            Welcome
+            Welcome<span className="typewriter-cursor">|</span>
           </h1>
+
           <p
             className="text-lg md:text-xl max-w-xl text-gray-200"
             style={{
@@ -46,9 +55,10 @@ export default function Hero() {
           >
             Houston’s ultimate space-themed rollercoaster adventure awaits.
           </p>
+
           <Link
             to="/rides"
-            className="inline-block bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition"
+            className="inline-block bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition animate-pulse-glow"
           >
             Explore Rides
           </Link>
