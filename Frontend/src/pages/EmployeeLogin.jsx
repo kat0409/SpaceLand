@@ -13,6 +13,7 @@ export default function EmployeeLogin() {
   });
 
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -21,15 +22,48 @@ export default function EmployeeLogin() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // TODO: Replace with real authentication logic when backend is ready
-    if (formData.username && formData.password) {
-      console.log('Logging in employee:', formData);
-      navigate('/employee-portal'); // placeholder for now
-    } else {
+    if (!formData.username || !formData.password) {
       setError('Please fill in both fields.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('https://spaceland.onrender.com/employee-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        // Store full employee data in localStorage
+        localStorage.setItem('employee', JSON.stringify(result));
+
+        // Redirect based on department role
+        const department = result.Department?.toLowerCase();
+        if (department === 'supervisor') {
+          localStorage.setItem('supervisorID', result.EmployeeID);
+          navigate('/supervisor-portal');
+        } else {
+          navigate('/employee-portal');
+        }
+      } else {
+        setError(result.error || 'Login failed.');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('An error occurred while logging in.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,9 +110,12 @@ export default function EmployeeLogin() {
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 text-white font-semibold py-2 rounded-lg transition"
+              disabled={loading}
+              className={`w-full bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 text-white font-semibold py-2 rounded-lg transition ${
+                loading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
-              Login
+              {loading ? 'Logging in...' : 'Login'}
             </button>
           </form>
         </div>
