@@ -78,7 +78,13 @@ const getMaintenanceRequests = `
 `;
 
 const updateMaintenanceStatus = `
-    UPDATE maintenance SET MaintenanceStatus = ? WHERE MaintenanceID = ?
+    UPDATE rides 
+    SET MaintenanceStatus = ? 
+    WHERE RideID = (SELECT RideID FROM maintenance WHERE MaintenanceID = ?);
+
+    UPDATE maintenance 
+    SET MaintenanceStartDate = ?, MaintenanceEndDate = ? 
+    WHERE MaintenanceID = ?;
 `;
 
 const getLowStockMerchandise = `
