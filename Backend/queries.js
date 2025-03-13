@@ -134,13 +134,12 @@ module.exports = {
     purchasePass,
     getEmployeesByDepartment,
     getMaintenanceRequests,
-    updateMaintenanceStatus,
     getLowStockMerchandise,
     getSalesReport,
     getTicketSales,
     getVisitorRecords,
     updateMaintenanceDates,
-    updateMaintenanceStatus
+    updateRideMaintenanceStatus
 };
 
 //checkMerchQuantity
