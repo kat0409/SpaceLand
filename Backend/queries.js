@@ -77,14 +77,16 @@ const getMaintenanceRequests = `
     SELECT * FROM rides WHERE MaintenanceNeed = 1
 `;
 
-const updateMaintenanceStatus = `
+const updateRideMaintenanceStatus = `
     UPDATE rides 
     SET MaintenanceStatus = ? 
-    WHERE RideID = (SELECT RideID FROM maintenance WHERE MaintenanceID = ?);
+    WHERE RideID = (SELECT RideID FROM maintenance WHERE MaintenanceID = ?)
+`;
 
+const updateMaintenanceDates = `
     UPDATE maintenance 
     SET MaintenanceStartDate = ?, MaintenanceEndDate = ? 
-    WHERE MaintenanceID = ?;
+    WHERE MaintenanceID = ?
 `;
 
 const getLowStockMerchandise = `
@@ -136,7 +138,9 @@ module.exports = {
     getLowStockMerchandise,
     getSalesReport,
     getTicketSales,
-    getVisitorRecords
+    getVisitorRecords,
+    updateMaintenanceDates,
+    updateRideMaintenanceStatus
 };
 
 //checkMerchQuantity
