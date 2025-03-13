@@ -38,8 +38,11 @@ export default function Rides() {
   return (
     <>
       <Header />
-      <section className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black px-6 py-20 text-white">
-        <div className="max-w-7xl mx-auto text-center">
+      <section id="rides" className="relative min-h-screen bg-gradient-to-b from-black via-gray-900 to-black px-6 pt-32 pb-24 text-white">
+        {/* Smooth fade transition from Hero video */}
+        <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-black via-transparent to-transparent z-0 pointer-events-none" />
+
+        <div className="relative z-10 max-w-7xl mx-auto text-center">
           <h2 className="text-5xl font-bold mb-6">🎢 Spaceland Rides</h2>
           <p className="text-gray-400 max-w-2xl mx-auto mb-12">
             Explore our universe of exhilarating rides designed for thrill-seekers, families, and everyone in between.
