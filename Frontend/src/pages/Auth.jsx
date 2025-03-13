@@ -17,7 +17,10 @@ export default function Auth() {
   const [successMessage, setSuccessMessage] = useState('');
 
   // Optional: use .env for backend URL
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://spaceland.onrender.com";
+  //const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://spaceland.onrender.com";
+  const BACKEND_URL = "http://localhost:3000"; // Change this if backend is deployed
+
+  console.log(BACKEND_URL);
 
   const handleSignupChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -51,7 +54,7 @@ export default function Auth() {
     };
 
     try {
-      const res = await fetch(`${BACKEND_URL}/add-visitor`, {
+      const res = await fetch(`http://localhost:3000/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -208,3 +211,4 @@ const loginVisitor = async (username, password) => {
     console.error('Request failed:', error);
   }
 };
+
