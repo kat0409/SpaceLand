@@ -62,6 +62,10 @@ function routes(req, res) {
         return actions.updateMaintenanceStatus(req, res);
     }
 
+    if (url.startsWith('/supervisor/low-stock') && method === 'GET') {
+        return actions.getLowStockMerchandise(req, res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
