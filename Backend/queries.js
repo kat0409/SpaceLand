@@ -74,11 +74,19 @@ const getEmployeesByDepartment = `
 `;
 
 const getMaintenanceRequests = `
-    SELECT * FROM maintenance WHERE MaintenanceStatus = 0
+    SELECT * FROM rides WHERE MaintenanceNeed = 1
 `;
 
-const updateMaintenanceStatus = `
-    UPDATE maintenance SET MaintenanceStatus = ? WHERE MaintenanceID = ?
+const updateRideMaintenanceStatus = `
+    UPDATE rides 
+    SET MaintenanceStatus = ? 
+    WHERE RideID = (SELECT RideID FROM maintenance WHERE MaintenanceID = ?)
+`;
+
+const updateMaintenanceDates = `
+    UPDATE maintenance 
+    SET MaintenanceStartDate = ?, MaintenanceEndDate = ? 
+    WHERE MaintenanceID = ?
 `;
 
 const getLowStockMerchandise = `
@@ -126,11 +134,12 @@ module.exports = {
     purchasePass,
     getEmployeesByDepartment,
     getMaintenanceRequests,
-    updateMaintenanceStatus,
     getLowStockMerchandise,
     getSalesReport,
     getTicketSales,
-    getVisitorRecords
+    getVisitorRecords,
+    updateMaintenanceDates,
+    updateRideMaintenanceStatus
 };
 
 //checkMerchQuantity

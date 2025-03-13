@@ -48,7 +48,7 @@ const routeMap = {
     ],
 };
 
-const server = http.createServer((req, res) => {
+/*const server = http.createServer((req, res) => {
     corsMiddleWare(req, res, () => {
         const parsedUrl = url.parse(req.url, true);
         const {pathname} = parsedUrl;
@@ -71,7 +71,44 @@ const server = http.createServer((req, res) => {
         res.writeHead(404, {"Content-Type": "application/json"});
         res.end(JSON.stringify({error: "Route not found"}));
     });
-});
+});*/
+
+const server = http.createServer((req, res) => {
+    // ✅ Allow CORS manually
+    res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173"); // OR better: "http://localhost:5173"
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  
+    // ✅ Handle OPTIONS preflight requests
+    if (req.method === "OPTIONS") {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+  
+    corsMiddleWare(req, res, () => {
+      const parsedUrl = url.parse(req.url, true);
+      const { pathname } = parsedUrl;
+      const method = req.method;
+  
+      if (pathname === "/") {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify("From backend side"));
+        return;
+      }
+  
+      const isMatch = (routeMap[method] || []).some(route =>
+        pathname.startsWith(route)
+      );
+  
+      if (isMatch) {
+        return eRoutes(req, res);
+      }
+  
+      res.writeHead(404, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Route not found" }));
+    });
+  });
 
 const PORT  = process.env.PORT || 3000 //check if there is an environment variable
 
