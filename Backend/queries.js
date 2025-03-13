@@ -140,7 +140,7 @@ module.exports = {
     getTicketSales,
     getVisitorRecords,
     updateMaintenanceDates,
-    updateRideMaintenanceStatus
+    updateMaintenanceStatus
 };
 
 //checkMerchQuantity
