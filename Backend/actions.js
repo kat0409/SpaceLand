@@ -463,23 +463,38 @@ const updateMaintenanceStatus = (req, res) => {
             return;
         }
 
-        pool.query(
-            queries.updateMaintenanceStatus,
-            [status, maintenanceID, startDate || null, endDate || null, maintenanceID],
-            (error, results) => {
-                if (error) {
-                    console.error("Error updating maintenance status:", error);
-                    res.writeHead(500, { "Content-Type": "application/json" });
-                    res.end(JSON.stringify({ error: "Internal server error" }));
-                    return;
-                }
+        // Update Ride MaintenanceStatus first
+        pool.query(queries.updateRideMaintenanceStatus, [status, maintenanceID], (error, results) => {
+            if (error) {
+                console.error("Error updating ride maintenance status:", error);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
 
+            console.log("Ride MaintenanceStatus updated successfully");
+
+            // If startDate and endDate are provided, update maintenance table
+            if (startDate && endDate) {
+                pool.query(queries.updateMaintenanceDates, [startDate, endDate, maintenanceID], (error, results) => {
+                    if (error) {
+                        console.error("Error updating maintenance dates:", error);
+                        res.writeHead(500, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ error: "Internal server error" }));
+                        return;
+                    }
+
+                    res.writeHead(200, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ message: "Maintenance status and dates updated successfully" }));
+                });
+            } else {
                 res.writeHead(200, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({ message: "Maintenance status updated successfully" }));
             }
-        );
+        });
     });
 };
+
 
 const getLowStockMerchandise = (req, res) => {
     pool.query(queries.getLowStockMerchandise, (error, results) => {
