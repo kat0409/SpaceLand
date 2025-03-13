@@ -410,6 +410,7 @@ const purchasePass = ((req,res) => {
         });
     });
 });
+
 const getEmployeesByDept = (req, res) => {
     const { department } = req.query;
     pool.query(queries.getEmployeesByDepartment, [department], (error, results) => {
@@ -423,6 +424,7 @@ const getEmployeesByDept = (req, res) => {
         res.end(JSON.stringify(results));
     });
 };
+
 const getMaintenanceRequests = (req, res) => {
     pool.query(queries.getMaintenanceRequests, (error, results) => {
         if (error) {
@@ -527,5 +529,12 @@ module.exports = {
     loginVisitor,
     addVisitor,
     checkVisitorExists,
-    purchasePass
+    purchasePass,
+    getEmployeesByDept,
+    getMaintenanceRequests,
+    updateMaintenanceStatus,
+    getLowStockMerchandise,
+    getSalesReport,
+    getTicketSales,
+    getVisitorRecords
 };

@@ -74,7 +74,7 @@ const getEmployeesByDepartment = `
 `;
 
 const getMaintenanceRequests = `
-    SELECT * FROM maintenance WHERE MaintenanceStatus = 0
+    SELECT * FROM rides WHERE MaintenanceNeed = 1
 `;
 
 const updateMaintenanceStatus = `
