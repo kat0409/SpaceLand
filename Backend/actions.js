@@ -410,6 +410,7 @@ const purchasePass = ((req,res) => {
         });
     });
 });
+
 const getEmployeesByDept = (req, res) => {
     const { department } = req.query;
     pool.query(queries.getEmployeesByDepartment, [department], (error, results) => {
@@ -423,6 +424,7 @@ const getEmployeesByDept = (req, res) => {
         res.end(JSON.stringify(results));
     });
 };
+
 const getMaintenanceRequests = (req, res) => {
     pool.query(queries.getMaintenanceRequests, (error, results) => {
         if (error) {
@@ -435,8 +437,10 @@ const getMaintenanceRequests = (req, res) => {
         res.end(JSON.stringify(results));
     });
 };
+
 const updateMaintenanceStatus = (req, res) => {
     let body = "";
+
     req.on("data", (chunk) => {
         body += chunk.toString();
     });
@@ -451,20 +455,47 @@ const updateMaintenanceStatus = (req, res) => {
             return;
         }
 
-        const { maintenanceID, status } = parsedBody;
+        const { maintenanceID, status, startDate, endDate } = parsedBody;
 
-        pool.query(queries.updateMaintenanceStatus, [status, maintenanceID], (error, results) => {
+        if (!maintenanceID || status === undefined) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "MaintenanceID and status are required" }));
+            return;
+        }
+
+        // Update Ride MaintenanceStatus first
+        pool.query(queries.updateRideMaintenanceStatus, [status, maintenanceID], (error, results) => {
             if (error) {
-                console.error("Error updating maintenance status:", error);
+                console.error("Error updating ride maintenance status:", error);
                 res.writeHead(500, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({ error: "Internal server error" }));
                 return;
             }
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ message: "Maintenance status updated successfully" }));
+
+            console.log("Ride MaintenanceStatus updated successfully");
+
+            // If startDate and endDate are provided, update maintenance table
+            if (startDate && endDate) {
+                pool.query(queries.updateMaintenanceDates, [startDate, endDate, maintenanceID], (error, results) => {
+                    if (error) {
+                        console.error("Error updating maintenance dates:", error);
+                        res.writeHead(500, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ error: "Internal server error" }));
+                        return;
+                    }
+
+                    res.writeHead(200, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ message: "Maintenance status and dates updated successfully" }));
+                });
+            } else {
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ message: "Maintenance status updated successfully" }));
+            }
         });
     });
 };
+
+
 const getLowStockMerchandise = (req, res) => {
     pool.query(queries.getLowStockMerchandise, (error, results) => {
         if (error) {
@@ -527,5 +558,12 @@ module.exports = {
     loginVisitor,
     addVisitor,
     checkVisitorExists,
-    purchasePass
+    purchasePass,
+    getEmployeesByDept,
+    getMaintenanceRequests,
+    updateMaintenanceStatus,
+    getLowStockMerchandise,
+    getSalesReport,
+    getTicketSales,
+    getVisitorRecords
 };
