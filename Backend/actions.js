@@ -410,6 +410,19 @@ const purchasePass = ((req,res) => {
         });
     });
 });
+const getEmployeesByDept = (req, res) => {
+    const { department } = req.query;
+    pool.query(queries.getEmployeesByDepartment, [department], (error, results) => {
+        if (error) {
+            console.error("Error fetching employees by department:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
 
 
 //Check to see if you need to make a module.exports function here as well
