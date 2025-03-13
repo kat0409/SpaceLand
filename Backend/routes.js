@@ -49,7 +49,12 @@ function routes(req, res) {
     if(url.startsWith('/purchase-pass') && method === 'POST'){
         return actions.purchasePass(req,res);
     }
-    // Add more routes as needed...
+
+    if (url.startsWith('/supervisor/employees') && method === 'GET') {
+        return actions.getEmployeesByDept(req, res);
+    }
+
+    
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
