@@ -74,6 +74,10 @@ function routes(req, res) {
         return actions.getTicketSales(req, res);
     }
 
+    if (url.startsWith('/supervisor/visitors') && method === 'GET') {
+        return actions.getVisitorRecords(req, res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
