@@ -20,6 +20,12 @@ const routeMap = {
         '/merchandise', 
         '/maintenance', 
         '/merchandise-transactions', 
+        '/supervisor/employees',
+        '/supervisor/maintenance-requests',
+        '/supervisor/low-stock',
+        '/supervisor/sales-report',
+        '/supervisor/ticket-sales',
+        '/supervisor/visitors'
     ],
     'POST': [
         '/add-employee', 
@@ -28,7 +34,8 @@ const routeMap = {
         '/login',
         '/add-visitor',
         '/check-visitor',
-        '/purchase-pass'
+        '/purchase-pass',
+        '/supervisor/update-maintenance-status'
     ],
     'PUT': [
         '/update-employee', 
