@@ -1,47 +1,58 @@
-import { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+// src/components/Hero.jsx
+import { Link } from "react-router-dom";
 
 export default function Hero() {
-  const videoRef = useRef(null);
-
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.playbackRate = 0.25; // ⬅️ slower: try 0.25, 0.5, 0.75 etc
-    }
-  }, []);
-
   return (
     <section className="relative w-full h-screen overflow-hidden">
-      {/* Galaxy Video Background */}
-      <video
-        ref={videoRef}
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute top-0 left-0 w-full h-full object-cover z-[-1]"
-      >
-        <source src="/assets/galaxy.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-
-      {/* Gradient Overlay for Fade Effect */}
-      <div className="absolute bottom-0 w-full h-64 bg-gradient-to-b from-transparent to-black z-0 pointer-events-none" />
-
-      {/* Hero Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
-        <h1 className="text-5xl md:text-6xl font-bold mb-4">
-          Welcome to <span className="text-purple-400">Spaceland</span>
-        </h1>
-        <p className="text-lg md:text-xl text-gray-200 max-w-2xl">
-          Houston’s ultimate space-themed rollercoaster adventure awaits.
-        </p>
-        <Link
-          to="/rides"
-          className="mt-8 bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition"
+      {/* 🔭 Galaxy Video Background */}
+      <div className="absolute inset-0 w-full h-full z-[-1]">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
         >
-          Explore Rides
-        </Link>
+          <source src="/assets/galaxy.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
+        {/* 🌠 Refined LEFT-TO-RIGHT Fade overlay */}
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage:
+              'linear-gradient(to right, black 0%, rgba(0, 0, 0, 0.7) 25%, rgba(0, 0, 0, 0.3) 40%, rgba(0, 0, 0, 0) 60%)',
+            backdropFilter: 'blur(1.5px)',
+          }}
+        />
+      </div>
+
+      {/* 🌌 Hero Content */}
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 items-center h-full px-6 md:px-12">
+        <div className="text-white text-left space-y-6">
+          <h1
+            className="text-[70px] md:text-[90px] font-extrabold tracking-widest drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]"
+            style={{ fontFamily: 'Orbitron, sans-serif' }}
+          >
+            Welcome
+          </h1>
+          <p
+            className="text-lg md:text-xl max-w-xl text-gray-200"
+            style={{
+              fontFamily: 'Orbitron, sans-serif',
+              fontWeight: 600,
+            }}
+          >
+            Houston’s ultimate space-themed rollercoaster adventure awaits.
+          </p>
+          <Link
+            to="/rides"
+            className="inline-block bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition"
+          >
+            Explore Rides
+          </Link>
+        </div>
       </div>
     </section>
   );
