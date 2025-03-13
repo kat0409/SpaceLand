@@ -1,174 +1,85 @@
-//Make any query you can think of an store it here
+const actions = require('./actions');
 
-const getRides = 'SELECT * FROM rides';
+function routes(req, res) {
+    const url = req.url;
+    const method = req.method;
 
-const getEmployees = 'SELECT * FROM employee';
+    if (url.startsWith('/rides') && method === 'GET') {
+        return actions.getRides(req, res);
+    }
 
-const addEmployee = 'INSERT INTO employee (FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth) VALUES (?,?,?,?,?,?,?,?,?,?)';
+    if (url.startsWith('/employees') && method === 'GET') {
+        return actions.getEmployees(req, res);
+    }
 
-const getRidesNeedingMaintenance = 'SELECT * FROM rides WHERE MaintenanceNeed = 1';
+    if (url.startsWith('/add-employee') && method === 'POST') {
+        return actions.addEmployee(req, res);
+    }
 
-const addMaintenance = 'INSERT INTO maintenance (RideID, MaintenanceStartDate, MaintenanceEndDate, MaintenanceEmployeeID, eventID) VALUES (?,?,?,?,?,)';
+    if (url.startsWith('/rides-needing-maintenance') && method === 'GET') {
+        return actions.getRidesNeedingMaintenance(req, res);
+    }
 
-const getMerchandiseTransactions = 'SELECT * FROM merchandiseTransactions';
+    if (url.startsWith('/add-maintenance') && method === 'POST') {
+        return actions.addMaintenance(req, res);
+    }
 
-const addMerchandiseTransaction = 'INSERT INTO merchandiseTransactions (VisitorID, transactionDate, quantity, totalAmount) VALUES (?,?,?,?)';
+    if (url.startsWith('/merchandise-transactions') && method === 'GET') {
+        return actions.getMerchandiseTransactions(req, res);
+    }
 
-const addRestaurant = 'INSERT INTO restaurant (restaurantName, mealPlanTier) VALUES (?,?)';
+    if (url.startsWith('/login') && method === 'POST') {
+        return actions.loginVisitor(req, res);
+    }
 
-const getMealPlans = 'SELECT * FROM restaurant';
+    /*if (url.startsWith('/add-employee') && method === 'GET') {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ message: "This route requires POST method." }));
+        return;
+    }*/
 
-const getRestaurantTransactions = 'SELECT * FROM restaurantTransactions';
+    if ( url.startsWith('/add-visitor') && method === 'POST') {
+        return actions.addVisitor(req, res);
+    }
 
-const addRestaurantTransaction = 'INSERT INTO restaurantTransactions (restaurantID, VisitorID, transactionDate, Amount) VALUES (?, ?, ?, ?)';
+    if (url.startsWith('/check-visitor') && method === 'POST') {
+        return actions.checkVisitorExists(req, res);
+    }
 
-const getSupervisors = 'SELECT * FROM supervisors';
+    if(url.startsWith('/purchase-pass') && method === 'POST'){
+        return actions.purchasePass(req,res);
+    }
 
-const getSupervisorIDbyDept = 'SELECT SupervisorID FROM supervisors WHERE departmentName = ?';
+    if (url.startsWith('/supervisor/employees') && method === 'GET') {
+        return actions.getEmployeesByDept(req, res);
+    }
 
-const updateEmployeeForDeletion = 'UPDATE employee SET employmentStatus = 0 WHERE EmployeeID = ?';
+    if (url.startsWith('/supervisor/maintenance-requests') && method === 'GET') {
+        return actions.getMaintenanceRequests(req, res);
+    }
 
-const updateEmployeeForRehire = 'UPDATE employee SET employmentStatus = 1 WHERE EmployeeID = ?';
+    if (url.startsWith('/supervisor/update-maintenance-status') && method === 'POST') {
+        return actions.updateMaintenanceStatus(req, res);
+    }
 
-const updateEmployeeInfo = 'UPDATE employee SET FirstName = ?, LastName = ?, Email = ?, Address = ?, SupervisorID = ?, username = ?, password = ?, Department = ?, employmentStatus = ?, dateOfBirth = ?';
+    if (url.startsWith('/supervisor/low-stock') && method === 'GET') {
+        return actions.getLowStockMerchandise(req, res);
+    }
 
-const getEmployeeInfo = 'SELECT * FROM employee WHERE EmployeeID = ?';
+    if (url.startsWith('/supervisor/sales-report') && method === 'GET') {
+        return actions.getSalesReport(req, res);
+    }
 
-//const addVisitor = 'INSERT INTO visitors (VisitorID,FirstName,LastName,Phone,Email,Address,DateOfBirth,AccessibilityNeeds,Gender,Username,Password,Height,Age,MilitaryStatus) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+    if (url.startsWith('/supervisor/ticket-sales') && method === 'GET') {
+        return actions.getTicketSales(req, res);
+    }
 
-const getVisitorInfo = 'SELECT * FROM visitors WHERE VisitorID = ?';
+    if (url.startsWith('/supervisor/visitors') && method === 'GET') {
+        return actions.getVisitorRecords(req, res);
+    }
 
-const getUnsentNotifications = `
-    SELECT ln.notificationID, ln.merchandiseID, m.itemName
-    FROM low_stock_notifications ln
-    JOIN merchandise m ON ln.merchandiseID = m.merchandiseID
-    WHERE ln.sent = 0;
-`;
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Route not handled by router' }));
+}
 
-const getSupervisorEmailByDepartment = `
-    SELECT email FROM supervisors WHERE departmentName = ?;
-`;
-
-const markNotificationAsSent = `
-    UPDATE low_stock_notifications
-    SET sent = 1
-    WHERE notificationID = ?;
-`;
-const getEmployeesByDepartment = 
-'SELECT * FROM employee WHERE Department = ?';
-
-
-const authenticateVisitor = 'SELECT * FROM visitors WHERE username = ? AND password = ?';
-
-const addVisitor = `
-    INSERT INTO visitors (FirstName, LastName, Phone, Email, Address, DateOfBirth, 
-        AccessibilityNeeds, Gender, Username, Password, Height, Age, MilitaryStatus)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-`;
-
-const checkVisitorExists = `
-    SELECT * FROM visitors WHERE Username = ?
-`;
-
-const purchasePass = 'INSERT INTO tickets (ticketType, price, VisitorID, purchaseDate) VALUES (?,?,?,NOW())';
-
-const getEmployeesByDepartment = `
-    SELECT * FROM employee WHERE Department = ?
-`;
-
-const getMaintenanceRequests = `
-    SELECT * FROM maintenance WHERE MaintenanceStatus = 0
-`;
-
-const updateMaintenanceStatus = `
-    UPDATE maintenance SET MaintenanceStatus = ? WHERE MaintenanceID = ?
-`;
-
-const getLowStockMerchandise = `
-    SELECT * FROM merchandise WHERE quantity < 10
-`;
-
-const getSalesReport = `
-    SELECT * FROM merchandiseTransactions
-`;
-
-const getTicketSales = `
-    SELECT * FROM tickets
-`;
-
-const getVisitorRecords = `
-    SELECT * FROM visitors
-`;
-
-
-module.exports = {
-    getRides,
-    getEmployees,
-    addEmployee,
-    getRidesNeedingMaintenance,
-    addMaintenance,
-    getMerchandiseTransactions,
-    addMerchandiseTransaction,
-    addRestaurant,
-    getMealPlans,
-    getRestaurantTransactions,
-    addRestaurantTransaction,
-    getSupervisors,
-    getSupervisorIDbyDept,
-    updateEmployeeForDeletion,
-    updateEmployeeForRehire,
-    updateEmployeeInfo,
-    getEmployeeInfo,
-    addVisitor,
-    getVisitorInfo,
-    getUnsentNotifications,
-    getSupervisorEmailByDepartment,
-    markNotificationAsSent,
-    authenticateVisitor,
-    checkVisitorExists,
-    purchasePass,
-    getEmployeesByDepartment,
-    getMaintenanceRequests,
-    updateMaintenanceStatus,
-    getLowStockMerchandise,
-    getSalesReport,
-    getTicketSales,
-    getVisitorRecords
-};
-
-//checkMerchQuantity
-//getSupervisorEmailByDepartment
-//updateMerchQuantity
-//getTickets
-//addTickets
-//getTicketTransactions
-//getAllVisitors
-//addVisitors
-//getDisabledVisitors
-//getWeather
-//getInclementWeather
-//getDaysClosedForWeather
-//addDayClosedForWeather
-//addRides
-//authenticateUser
-//getSupervisorInfo
-//decodeToken
-//updateVisitorInfo
-//updateSupervisorInfo
-//updateAllEmployees
-//addMerchItem
-//getMerchItem
-//updateMerchItem
-//markItemForDeletion
-//sendMaintenanceMessage
-//updateMerchItemQuantity
-//getMerchItemQuantity
-//getEmployeeDepartment
-//getSupervisorDepartment
-//orderMoreMerch ????
-//getEventList
-//addEventToList
-//markEventForCancellation
-//updateEvent
-
-//Reports?
+module.exports = routes;
