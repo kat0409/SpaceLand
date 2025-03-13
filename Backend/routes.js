@@ -49,7 +49,34 @@ function routes(req, res) {
     if(url.startsWith('/purchase-pass') && method === 'POST'){
         return actions.purchasePass(req,res);
     }
-    // Add more routes as needed...
+
+    if (url.startsWith('/supervisor/employees') && method === 'GET') {
+        return actions.getEmployeesByDept(req, res);
+    }
+
+    if (url.startsWith('/supervisor/maintenance-requests') && method === 'GET') {
+        return actions.getMaintenanceRequests(req, res);
+    }
+
+    if (url.startsWith('/supervisor/update-maintenance-status') && method === 'POST') {
+        return actions.updateMaintenanceStatus(req, res);
+    }
+
+    if (url.startsWith('/supervisor/low-stock') && method === 'GET') {
+        return actions.getLowStockMerchandise(req, res);
+    }
+
+    if (url.startsWith('/supervisor/sales-report') && method === 'GET') {
+        return actions.getSalesReport(req, res);
+    }
+
+    if (url.startsWith('/supervisor/ticket-sales') && method === 'GET') {
+        return actions.getTicketSales(req, res);
+    }
+
+    if (url.startsWith('/supervisor/visitors') && method === 'GET') {
+        return actions.getVisitorRecords(req, res);
+    }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
