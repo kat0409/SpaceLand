@@ -70,6 +70,10 @@ function routes(req, res) {
         return actions.getSalesReport(req, res);
     }
 
+    if (url.startsWith('/supervisor/ticket-sales') && method === 'GET') {
+        return actions.getTicketSales(req, res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
