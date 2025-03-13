@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+
+/* Typewriter Animation */
+@keyframes typewriter {
+    0% { width: 0 }
+    100% { width: 100% }
+  }
+  
+  @keyframes blink {
+    0%, 100% { opacity: 1 }
+    50% { opacity: 0 }
+  }
+  
+  .typewriter {
+    overflow: hidden;
+    white-space: nowrap;
+    /* 🔥 removed border-right here */
+    width: 0;
+    animation: typewriter 2.2s steps(8, end) forwards;
+  }
+  
+  .typewriter-cursor {
+    display: inline-block;
+    animation: blink 1s infinite;
+    font-weight: 600;
+    font-size: 90px; /* match Welcome font size */
+    margin-left: 6px;
+    color: white;
+  }
+/* src/styles/globals.css */
+@keyframes text-glow {
+    0%, 100% {
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+    50% {
+      text-shadow: 0 0 14px rgba(255, 255, 255, 0.6), 0 0 28px rgba(255, 255, 255, 0.4);
+    }
+  }
+  
+  .animate-text-glow {
+    animation: text-glow 3s ease-in-out infinite;
+  }
+  
+  /* 🌌 Galaxy Particles Float Effect */
+  @keyframes galaxy-particles {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+  
+  .animate-galaxy-particles {
+    animation: galaxy-particles 20s ease-in-out infinite;
+  }
+  
+  /* 🌟 Pulse Glow Button */
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 8px rgba(166, 99, 255, 0.3), 0 0 16px rgba(125, 99, 255, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 16px rgba(166, 99, 255, 0.6), 0 0 30px rgba(125, 99, 255, 0.4);
+    }
+  }
+  
+  .animate-pulse-glow {
+    animation: pulse-glow 2.5s ease-in-out infinite;
+  }
+
+
+
+/* ✨ Global Styles */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
+}
+
+body {
+  font-family: 'Orbitron', sans-serif;
+  background-color: black;
+  color: white;
+  margin: 0;
+  padding: 0;
+}
+
+/* Optional: Hide system cursor */
+html,
+body,
+button,
+a,
+input,
+textarea,
+select,
+label {
+  cursor: none !important;
+}
+
+.cursor-pointer,
+.cursor-default,
+.cursor-text,
+.cursor-wait,
+.cursor-crosshair,
+.cursor-move {
+  cursor: none !important;
+}

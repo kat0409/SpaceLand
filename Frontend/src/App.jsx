@@ -1,35 +1,41 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.jsx
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { motion } from "framer-motion";
+import Home from "./pages/Home";
+import Rides from "./pages/Rides";
+import Events from "./pages/Events";
+import Auth from "./pages/Auth";
+import UserPortal from "./pages/UserPortal";
+import EmployeeLogin from "./pages/EmployeeLogin";
+import EmployeeDashboard from "./pages/EmployeeDashboard";
+import Dining from "./pages/Dining";
+import Pricing from "./pages/Pricing";
+import CursorOverlay from "./components/ui/CursorOverlay";
+import SupervisorPortal from "./pages/SupervisorPortal";
 
-function App() {
-  const [count, setCount] = useState(0)
-
+export default function App() {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    
+    <Router>
+      <CursorOverlay />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <Routes>
+          <Route path="/supervisor-portal" element={<SupervisorPortal />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/employee-login" element={<EmployeeLogin />} />
+          <Route path="/employee-portal" element={<EmployeeDashboard />} />
+          <Route path="/rides" element={<Rides />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/portal" element={<UserPortal />} />
+          <Route path="/dining" element={<Dining />} />
+        </Routes>
+      </motion.div>
+    </Router>
+  );
 }
-
-export default App

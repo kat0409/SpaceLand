@@ -1,33 +1,80 @@
 const http = require('http');
-const mysql = require('mysql2');
-const url = require('url')
+const url = require('url');
+const cors = require('cors');
+const eRoutes = require('./routes');
 
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'space_land2025',
-    password: '$paceland25',
-    database: 'space_land_25'
+//If you are calling a getter function, use GET
+//If you are calling an add function, use POST
+
+const corsMiddleWare = cors();
+
+//GET: fetch data from the database
+//POST: add data to the database
+//PUT: update data in the database
+
+// Define route handlers in a map for efficiency
+const routeMap = {
+    'GET': [
+        '/rides', 
+        '/employees', 
+        '/merchandise', 
+        '/maintenance', 
+        '/merchandise-transactions', 
+        '/supervisor/employees',
+        '/supervisor/maintenance-requests',
+        '/supervisor/low-stock',
+        '/supervisor/sales-report',
+        '/supervisor/ticket-sales',
+        '/supervisor/visitors'
+    ],
+    'POST': [
+        '/add-employee', 
+        '/add-maintenance',
+        '/add-merchandise-transaction',
+        '/login',
+        '/add-visitor',
+        '/check-visitor',
+        '/purchase-pass',
+        '/supervisor/update-maintenance-status'
+    ],
+    'PUT': [
+        '/update-employee', 
+        '/update-merchandise-quantity', 
+        '/update-maintenance', 
+    ],
+    'DELETE': [
+        '/delete-employee',
+        '/delete-maintenance', 
+    ],
+};
+
+const server = http.createServer((req, res) => {
+    corsMiddleWare(req, res, () => {
+        const parsedUrl = url.parse(req.url, true);
+        const {pathname} = parsedUrl;
+        const method = req.method;
+
+        if(pathname === '/'){
+            res.writeHead(200, {"Content-Type":"application/json"});
+            res.end(JSON.stringify("From backend side"));
+            return;
+        }
+
+        const isMatch  = (routeMap[method] || []).some(route =>
+            pathname.startsWith(route)
+        );
+
+        if(isMatch){
+            return eRoutes(req,res);
+        }
+
+        res.writeHead(404, {"Content-Type": "application/json"});
+        res.end(JSON.stringify({error: "Route not found"}));
+    });
 });
-
-connection.connect((err) => {
-    if(err){
-        console.error('Error connecting to MySQL:', err);
-        return;
-    }
-    console.log('Connected to MySQL database!');
-});
-
-/*const server = http.createServer((request, response) => {
-    const parsedURL = url.parse(request.url, true);
-    const queryParameters = parse
-
-    response.statusCode = 200
-    response.setHeader('Content-Type', 'text/html') //header is where we put the content type, authorization tokens, etc.; second parameter is the content type
-    response.write('<h1> Hello World </h1>') //what we send back to the client through the server
-    response.end()
-    
-})*/
 
 const PORT  = process.env.PORT || 3000 //check if there is an environment variable
 
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
