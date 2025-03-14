@@ -538,7 +538,6 @@ module.exports = {
     getRidesNeedingMaintenance,
     addMaintenance,
     getMerchandiseTransactions,
-    checkAndSendNotifications,
     loginVisitor,
     addVisitor,
     checkVisitorExists,
