@@ -12,7 +12,7 @@ const addMaintenance = 'INSERT INTO maintenance (RideID, MaintenanceStartDate, M
 
 const getMerchandiseTransactions = 'SELECT * FROM merchandiseTransactions';
 
-const addMerchandiseTransaction = 'INSERT INTO merchandiseTransactions (VisitorID, transactionDate, quantity, totalAmount) VALUES (?,?,?,?)';
+const addMerchandiseTransaction = 'INSERT INTO merchandiseTransactions (merchandiseID, VisitorID, transactionDate, quantity, totalAmount) VALUES (?,?,?,?,?)';
 
 const addRestaurant = 'INSERT INTO restaurant (restaurantName, mealPlanTier) VALUES (?,?)';
 
