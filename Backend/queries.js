@@ -57,6 +57,8 @@ const markNotificationAsSent = `
 
 const authenticateVisitor = 'SELECT * FROM visitors WHERE username = ? AND password = ?';
 
+const authenticateEmployee = 'SELECT * FROM employee WHERE username = ? AND password = ?';
+
 const addVisitor = `
     INSERT INTO visitors (FirstName, LastName, Phone, Email, Address, DateOfBirth, 
         AccessibilityNeeds, Gender, Username, Password, Height, Age, MilitaryStatus)
@@ -105,6 +107,7 @@ const getVisitorRecords = `
     SELECT * FROM visitors
 `;
 
+//Reports?
 
 module.exports = {
     getRides,
@@ -139,7 +142,8 @@ module.exports = {
     getTicketSales,
     getVisitorRecords,
     updateMaintenanceDates,
-    updateRideMaintenanceStatus
+    updateRideMaintenanceStatus,
+    authenticateEmployee
 };
 
 //checkMerchQuantity
