@@ -108,14 +108,14 @@ label {
 .uiverse-btn {
   display: grid;
   place-items: center;
-  background: #e3edf7;
+  background: #000000;
   padding: 1.4em;
   border-radius: 10px;
   /*box-shadow: 6px 6px 10px -1px rgba(0,0,0,0.15),
               -6px -6px 10px -1px rgba(255,255,255,0.7);
   This shadow didn't seem to work where it was put.
   */
-  border: 1px solid rgba(0,0,0,0);
+  border: 1px solid rgba(0, 0, 0, 0.7);
   cursor: pointer;
   transition: transform 0.5s;
 }
