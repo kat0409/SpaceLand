@@ -1,6 +1,8 @@
 // src/components/Footer.jsx
+import GithubButton from './GithubButton';
 export default function Footer() {
     return (
+      
       <footer
         id="footer"
         className="bg-gradient-to-t from-black via-gray-900 to-black text-white py-10 px-6"
@@ -33,6 +35,10 @@ export default function Footer() {
               <a href="#" className="hover:text-purple-400 transition duration-300">Twitter</a>
               <a href="#" className="hover:text-purple-400 transition duration-300">Instagram</a>
             </div>
+            <div className="mb-4">
+              <GithubButton />
+            </div>
+
   
             {/* Employee Login Button */}
             <a
