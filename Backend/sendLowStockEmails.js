@@ -9,3 +9,11 @@ const pool  = mysql.createPool({
     database: process.env.DB_NAME
 }).promise();
 
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
