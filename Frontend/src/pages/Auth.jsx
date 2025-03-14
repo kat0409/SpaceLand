@@ -54,7 +54,7 @@ export default function Auth() {
     };
 
     try {
-      const res = await fetch(`http://localhost:3000/`, {
+      const res = await fetch(`http://localhost:3000/add-visitor`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
