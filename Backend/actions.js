@@ -3,60 +3,6 @@ const pool = require('./db.js');
 const queries = require('./queries.js');
 const nodemailer = require('nodemailer');
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'your-email@gmail.com',//Do i need to make a fake supervisor email?
-        pass: 'your-email-password', //Do i need to make a fake supervisor email password?
-    },
-});
-
-// Function to send email notification
-const sendNotification = async (supervisorEmail, itemName) => {
-    const mailOptions = {
-        from: 'your-email@gmail.com',//modify this later
-        to: supervisorEmail,
-        subject: 'Low Stock Alert',
-        text: `The item "${itemName}" has reached 0 quantity. Please order more.`,
-    };
-
-    try {
-        await transporter.sendMail(mailOptions);
-        console.log('Notification sent successfully.');
-        return true;
-    } catch (error) {
-        console.error('Error sending notification:', error);
-        return false;
-    }
-};
-
-// Function to check for unsent notifications and send emails
-const checkAndSendNotifications = async () => {
-    try {
-        // Fetch unsent notifications
-        const [notifications] = await pool.query(queries.getUnsentNotifications);
-
-        // Fetch supervisor email
-        const [supervisor] = await pool.query(queries.getSupervisorEmailByDepartment);
-        const supervisorEmail = supervisor[0].email;
-
-        // Process each notification
-        for (const notification of notifications) {
-            const { notificationID, merchandiseID, itemName } = notification;
-
-            // Send notification
-            const emailSent = await sendNotification(supervisorEmail, itemName);
-
-            // Mark notification as sent
-            if (emailSent) {
-                await pool.query(queries.markNotificationAsSent, [notificationID]);
-            }
-        }
-    } catch (error) {
-        console.error('Error processing notifications:', error);
-    }
-};
-
 //Fetch all rides
 const getRides = (request, response) => {
     pool.query(queries.getRides, (error, results) => {
