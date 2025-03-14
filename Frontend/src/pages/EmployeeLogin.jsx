@@ -15,10 +15,13 @@ export default function EmployeeLogin() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
+
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   };
 
@@ -34,7 +37,7 @@ export default function EmployeeLogin() {
     setError('');
 
     try {
-      const response = await fetch('https://spaceland.onrender.com/employee-login', {
+      const response = await fetch(`${BACKEND_URL}/employee-login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,22 +45,21 @@ export default function EmployeeLogin() {
         body: JSON.stringify(formData),
       });
 
-      const result = await response.json();
+      const data = await response.json();
 
-      if (response.ok) {
-        // Store full employee data in localStorage
-        localStorage.setItem('employee', JSON.stringify(result));
+      if (response.ok && data.role) {
+        // Store login info
+        localStorage.setItem('employeeID', data.employeeID);
+        localStorage.setItem('role', data.role);
 
-        // Redirect based on department role
-        const department = result.Department?.toLowerCase();
-        if (department === 'supervisor') {
-          localStorage.setItem('supervisorID', result.EmployeeID);
+        // Redirect based on role (not department anymore)
+        if (data.role.toLowerCase() === 'supervisor') {
           navigate('/supervisor-portal');
         } else {
-          navigate('/employee-portal');
+          navigate('/employee-dashboard');
         }
       } else {
-        setError(result.error || 'Login failed.');
+        setError(data.error || 'Invalid credentials.');
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -77,9 +79,7 @@ export default function EmployeeLogin() {
         className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white px-6 py-20 flex items-center justify-center"
       >
         <div className="w-full max-w-md bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-2xl shadow-lg">
-          <h2 className="text-3xl font-bold mb-4 text-center">
-            👩‍🚀 Employee Login
-          </h2>
+          <h2 className="text-3xl font-bold mb-4 text-center">👩‍🚀 Employee Login</h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
