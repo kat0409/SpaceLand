@@ -411,8 +411,18 @@ const purchasePass = ((req,res) => {
     });
 });
 
+const url = require('url');
+
 const getEmployeesByDept = (req, res) => {
-    const { department } = req.query;
+    const parsedUrl = url.parse(req.url, true); 
+    const { department } = parsedUrl.query; 
+
+    if (!department) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Missing 'department' query parameter" }));
+        return;
+    }
+
     pool.query(queries.getEmployeesByDepartment, [department], (error, results) => {
         if (error) {
             console.error("Error fetching employees by department:", error);
