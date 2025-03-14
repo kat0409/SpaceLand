@@ -28,6 +28,10 @@ function routes(req, res) {
         return actions.getMerchandiseTransactions(req, res);
     }
 
+    if(url.startsWith('/add-merchandise-transaction') && method === 'POST'){
+        return actions.addMerchandiseTransaction(req,res);
+    }
+
     if (url.startsWith('/login') && method === 'POST') {
         return actions.loginVisitor(req, res);
     }

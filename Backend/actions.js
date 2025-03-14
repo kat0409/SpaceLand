@@ -208,6 +208,34 @@ const getMerchandiseTransactions = (request, response) =>{
     });
 };
 
+const addMerchandiseTransaction = (req,res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        const {merchandiseID, VisitorID, transactionDate, quantity, totalAmount} = JSON.parse(body);
+
+        if (!merchandiseID || !VisitorID || !transactionDate || !quantity ||!totalAmount){
+            res.writeHead(400, {"Content-Type":"application/json"});
+            res.end(JSON.stringify({error: "merchandiseID, VisitorID, transactionDate, quantity, totalAmount are required fields"}));
+        }
+
+        pool.query(queries.addMerchandiseTransaction, [merchandiseID, VisitorID, transactionDate, quantity, totalAmount], (error, results) => {
+            if (error){
+                console.error("Error adding merchandise transaction:", error);
+                res.writeHead(500, {"Content-Type": "application/json"});
+                res.end(JSON.stringify({error: "Internal server error"}));
+                return;
+            }
+            res.writeHead(201, {"Content-Type": "application.json"});
+            res.end(JSON.stringify({message: "Merchandise transaction added successfully."}));
+        });
+    });
+};
+
 const loginVisitor = (req, res) => {
     let body = "";
 
@@ -575,5 +603,6 @@ module.exports = {
     getLowStockMerchandise,
     getSalesReport,
     getTicketSales,
-    getVisitorRecords
+    getVisitorRecords,
+    addMerchandiseTransaction
 };
