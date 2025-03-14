@@ -25,7 +25,7 @@ const routeMap = {
         '/supervisor/low-stock',
         '/supervisor/sales-report',
         '/supervisor/ticket-sales',
-        '/supervisor/visitors'
+        '/supervisor/visitors',
     ],
     'POST': [
         '/add-employee', 
@@ -35,7 +35,8 @@ const routeMap = {
         '/add-visitor',
         '/check-visitor',
         '/purchase-pass',
-        '/supervisor/update-maintenance-status'
+        '/supervisor/update-maintenance-status',
+        '/portal/userinfo'
     ],
     'PUT': [
         '/update-employee', 
@@ -49,6 +50,7 @@ const routeMap = {
 };
 
 const server = http.createServer((req, res) => {
+    console.log("SERVER");
     corsMiddleWare(req, res, () => {
         const parsedUrl = url.parse(req.url, true);
         const {pathname} = parsedUrl;

@@ -97,6 +97,11 @@ const getVisitorRecords = `
     SELECT * FROM visitors
 `;
 
+const getUserInfo = 
+`
+    SELECT * FROM visitors WHERE VisitorID = ?
+`;
+
 
 module.exports = {
     getRides,
@@ -130,7 +135,8 @@ module.exports = {
     getLowStockMerchandise,
     getSalesReport,
     getTicketSales,
-    getVisitorRecords
+    getVisitorRecords,
+    getUserInfo
 };
 
 //checkMerchQuantity
