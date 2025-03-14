@@ -49,13 +49,20 @@ export default function Auth() {
       Age: signupData.age || null,
       MilitaryStatus: signupData.militaryStatus ? 1 : 0,
     };
-
+    console.log("HERE");
     try {
-      const res = await fetch(`${BACKEND_URL}/add-visitor`, {
+      // const res = await fetch(`${BACKEND_URL}/add-visitor`, {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(payload),
+      // });
+      console.log("HERE 2");
+      const res = await fetch(`http://localhost:3000/add-visitor`, {//CHANGE MADE:KEVIN
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      console.log("HERE 3");
 
       const data = await res.json();
       console.log("Signup Response:", data);
