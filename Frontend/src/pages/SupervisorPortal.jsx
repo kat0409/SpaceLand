@@ -3,133 +3,155 @@ import { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
+
 export default function SupervisorPortal() {
-  const [supervisorID, setSupervisorID] = useState(null);
   const [employees, setEmployees] = useState([]);
-  const [maintenance, setMaintenance] = useState([]);
+  const [maintenanceRequests, setMaintenanceRequests] = useState([]);
   const [lowStock, setLowStock] = useState([]);
-  const [sales, setSales] = useState([]);
-  const [tickets, setTickets] = useState([]);
-  const [visitors, setVisitors] = useState([]);
+  const [ticketSales, setTicketSales] = useState([]);
+  const [visitorRecords, setVisitorRecords] = useState([]);
 
-  // 🔁 MOCK DATA FOR DESIGN PREVIEW
+  const supervisorID = localStorage.getItem('supervisorID');
+
   useEffect(() => {
-    setSupervisorID("123"); // Mock supervisor ID
+    fetch(`${BACKEND_URL}/supervisor/employees?department=YourDepartmentHere`)
+      .then(res => res.json())
+      .then(data => setEmployees(data))
+      .catch(err => console.error('Employees Error:', err));
 
-    setEmployees([
-      { EmployeeID: 1, FirstName: "Alice", LastName: "Johnson", Department: "Operations" },
-      { EmployeeID: 2, FirstName: "Bob", LastName: "Smith", Department: "Maintenance" },
-    ]);
+    fetch(`${BACKEND_URL}/supervisor/maintenance-requests`)
+      .then(res => res.json())
+      .then(data => setMaintenanceRequests(data))
+      .catch(err => console.error('Maintenance Error:', err));
 
-    setMaintenance([
-      { RideID: 101, MaintenanceStartDate: "2025-03-14" },
-      { RideID: 102, MaintenanceStartDate: "2025-03-15" },
-    ]);
+    fetch(`${BACKEND_URL}/supervisor/low-stock`)
+      .then(res => res.json())
+      .then(data => setLowStock(data))
+      .catch(err => console.error('Low Stock Error:', err));
 
-    setLowStock([
-      { itemName: "Rocket Fuel Soda", quantity: 2 },
-      { itemName: "Alien Plushie", quantity: 1 },
-    ]);
+    fetch(`${BACKEND_URL}/supervisor/ticket-sales`)
+      .then(res => res.json())
+      .then(data => setTicketSales(data))
+      .catch(err => console.error('Ticket Sales Error:', err));
 
-    setSales([
-      { VisitorID: 201, totalAmount: 42.99 },
-      { VisitorID: 202, totalAmount: 58.00 },
-    ]);
-
-    setTickets([
-      { TicketID: 301, ticketType: "Cosmic" },
-      { TicketID: 302, ticketType: "General" },
-    ]);
-
-    setVisitors([
-      { FirstName: "John", LastName: "Pork", Username: "porkman" },
-      { FirstName: "Jane", LastName: "Doe", Username: "janed" },
-    ]);
+    fetch(`${BACKEND_URL}/supervisor/visitors`)
+      .then(res => res.json())
+      .then(data => setVisitorRecords(data))
+      .catch(err => console.error('Visitor Records Error:', err));
   }, []);
 
   return (
     <>
       <Header />
       <section className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white px-6 py-20">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold mb-6">🚀 Supervisor Portal</h2>
-          <p className="text-gray-400 mb-10">Welcome, Supervisor #{supervisorID}</p>
+        <h1 className="text-4xl font-bold mb-8 text-center">🛰 Supervisor Portal</h1>
 
-          {/* Employee Section */}
-          <div className="mb-10">
-            <h3 className="text-2xl font-semibold mb-4">👨‍💼 Employees in Your Department</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              {employees.map(emp => (
-                <div key={emp.EmployeeID} className="bg-white/5 p-4 rounded-xl border border-white/10">
-                  <p><span className="font-bold">Name:</span> {emp.FirstName} {emp.LastName}</p>
-                  <p><span className="font-bold">Department:</span> {emp.Department}</p>
-                </div>
-              ))}
+        <div className="space-y-12">
+          {/* EMPLOYEES */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">👨‍💼 Employees in Department</h2>
+            <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-purple-300">
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {employees.map(emp => (
+                    <tr key={emp.EmployeeID} className="border-t border-white/10">
+                      <td>{emp.FirstName} {emp.LastName}</td>
+                      <td>{emp.Email}</td>
+                      <td>{emp.Department}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
-          {/* Maintenance Section */}
-          <div className="mb-10">
-            <h3 className="text-2xl font-semibold mb-4">🛠️ Rides Needing Maintenance</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              {maintenance.map((m, index) => (
-                <div key={index} className="bg-white/5 p-4 rounded-xl border border-white/10">
-                  <p><span className="font-bold">Ride ID:</span> {m.RideID}</p>
-                  <p><span className="font-bold">Start Date:</span> {m.MaintenanceStartDate}</p>
-                </div>
-              ))}
+          {/* MAINTENANCE REQUESTS */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">🛠 Maintenance Requests</h2>
+            <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
+              <ul className="space-y-2">
+                {maintenanceRequests.map(req => (
+                  <li key={req.MaintenanceID} className="border-b border-white/10 pb-2">
+                    Ride ID: {req.RideID} | Status: {req.MaintenanceStatus ? 'Completed' : 'Pending'}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
 
-          {/* Low Stock Section */}
-          <div className="mb-10">
-            <h3 className="text-2xl font-semibold mb-4">📦 Low Stock Alerts</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              {lowStock.map((item, index) => (
-                <div key={index} className="bg-white/5 p-4 rounded-xl border border-white/10">
-                  <p><span className="font-bold">Item:</span> {item.itemName}</p>
-                  <p><span className="font-bold">Quantity:</span> {item.quantity}</p>
-                </div>
-              ))}
+          {/* LOW STOCK MERCHANDISE */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">📦 Low Stock Alerts</h2>
+            <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
+              <ul className="space-y-2">
+                {lowStock.map(item => (
+                  <li key={item.merchandiseID} className="border-b border-white/10 pb-2">
+                    {item.itemName} — Qty: {item.quantity}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
 
-          {/* Merchandise Sales */}
-          <div className="mb-10">
-            <h3 className="text-2xl font-semibold mb-4">💰 Merchandise Sales</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              {sales.map((sale, index) => (
-                <div key={index} className="bg-white/5 p-4 rounded-xl border border-white/10">
-                  <p><span className="font-bold">Visitor ID:</span> {sale.VisitorID}</p>
-                  <p><span className="font-bold">Total:</span> ${sale.totalAmount.toFixed(2)}</p>
-                </div>
-              ))}
+          {/* TICKET SALES */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">🎟 Ticket Sales</h2>
+            <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-purple-300">
+                  <tr>
+                    <th>Ticket ID</th>
+                    <th>Visitor ID</th>
+                    <th>Type</th>
+                    <th>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ticketSales.map(ticket => (
+                    <tr key={ticket.ticketID} className="border-t border-white/10">
+                      <td>{ticket.ticketID}</td>
+                      <td>{ticket.VisitorID}</td>
+                      <td>{ticket.ticketType}</td>
+                      <td>${ticket.price}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
-          {/* Ticket Sales */}
-          <div className="mb-10">
-            <h3 className="text-2xl font-semibold mb-4">🎟️ Ticket Sales</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              {tickets.map((ticket, index) => (
-                <div key={index} className="bg-white/5 p-4 rounded-xl border border-white/10">
-                  <p><span className="font-bold">Ticket ID:</span> {ticket.TicketID}</p>
-                  <p><span className="font-bold">Type:</span> {ticket.ticketType}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Visitor Records */}
-          <div className="mb-10">
-            <h3 className="text-2xl font-semibold mb-4">📋 Visitor Records</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              {visitors.map((visitor, index) => (
-                <div key={index} className="bg-white/5 p-4 rounded-xl border border-white/10">
-                  <p><span className="font-bold">Name:</span> {visitor.FirstName} {visitor.LastName}</p>
-                  <p><span className="font-bold">Username:</span> {visitor.Username}</p>
-                </div>
-              ))}
+          {/* VISITOR RECORDS */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">📋 Visitor Records</h2>
+            <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-purple-300">
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Username</th>
+                    <th>Military</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visitorRecords.map(visitor => (
+                    <tr key={visitor.VisitorID} className="border-t border-white/10">
+                      <td>{visitor.FirstName} {visitor.LastName}</td>
+                      <td>{visitor.Email}</td>
+                      <td>{visitor.Username}</td>
+                      <td>{visitor.MilitaryStatus ? 'Yes' : 'No'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
