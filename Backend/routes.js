@@ -107,6 +107,10 @@ function routes(req, res) {
         return actions.getVisitorAccountInfo(req,res);
     }
 
+    if(url.startsWith('/supervisor/account-info') && method === 'GET'){
+        return actions.getSupervisorAccountInfo(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }

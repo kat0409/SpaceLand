@@ -545,35 +545,108 @@ const lowStockMerchandiseReport = (req, res) => {
 
 const rideMaintenanceReport = (req,res) => {
     pool.query(queries.rideMaintenanceReport, (error, results) => {
-        console.error("Error fetching ride maintenance report:", error);
-        res.writeHead(500, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Internal server error" }));
-        return;
+        if (error) {
+            console.error("Error fetching ride maintenance report:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
     });
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(results));
 };
 
 const visitorPurchasesReport = (req,res) => {
     pool.query(queries.visitorPurchasesReport, (error, results) => {
-        console.error("Error fetching visitor purchases report:", error);
-        res.writeHead(500, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Internal server error" }));
-        return;
+        if (error) {
+            console.error("Error fetching visitor purchases report:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
     });
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(results));
 };
 
 const attendanceAndRevenueReport = (req,res) => {
-    pool.query(queries.visitorPurchasesReport, (error, results) => {
-        console.error("Error fetching visitor purchases report:", error);
-        res.writeHead(500, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Internal server error" }));
-        return;
+    pool.query(queries.attendanceAndRevenueReport, (error, results) => {
+        if (error) {
+            console.error("Error fetching attendance and revenue report:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
     });
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(results));
+};
+
+const getVisitorAccountInfo = (req, res) => {
+    const parsedUrl = url.parse(req.url, true); 
+    const { Username, Password } = parsedUrl.query; 
+
+    if (!Username || !Password) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Missing 'username' and 'password' query parameter" }));
+        return;
+    }
+
+    pool.query(queries.getVisitorAccountInfo, [Username, Password], (error, results) => {
+        if (error) {
+            console.error("Error visitor account information:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
+
+const getEmployeeAccountInfo = (req,res) => {
+    const parsedUrl = url.parse(req.url, true); 
+    const { username, password } = parsedUrl.query; 
+
+    if (!username || !password) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Missing 'username' or 'password' query parameter" }));
+        return;
+    }
+
+    pool.query(queries.getEmployeeAccountInfo, [username, password], (error, results) => {
+        if (error) {
+            console.error("Error fetching employee account info:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
+const getSupervisorAccountInfo = (req,res) => {
+    const parsedUrl = url.parse(req.url, true); 
+    const { username, password } = parsedUrl.query; 
+
+    if (!username || !password) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Missing 'username' or 'password' query parameter" }));
+        return;
+    }
+
+    pool.query(queries.getSupervisorAccountInfo, [username, password], (error, results) => {
+        if (error) {
+            console.error("Error fetching supervisor account info:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
 };
 
 //Check to see if you need to make a module.exports function here as well
@@ -599,5 +672,8 @@ module.exports = {
     lowStockMerchandiseReport,
     rideMaintenanceReport,
     visitorPurchasesReport,
-    attendanceAndRevenueReport
+    attendanceAndRevenueReport,
+    getVisitorAccountInfo,
+    getEmployeeAccountInfo,
+    getSupervisorAccountInfo
 };

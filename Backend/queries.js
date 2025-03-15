@@ -194,6 +194,14 @@ const getEmployeeAccountInfo = `
     WHERE e.username = ? AND e.password = ?;
 `;
 
+const getSupervisorAccountInfo = `
+    SELECT s.FirstName, s.LastName, s.SupervisorID, s.email,
+    s.address, s.departmentName,
+    s.gender, s.dateOfBirth, s.phoneNumber
+    FROM supervisors s
+    WHERE s.username = ? AND s.password = ?;
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -234,7 +242,8 @@ module.exports = {
     visitorPurchasesReport,
     attendanceAndRevenueReport,
     getVisitorAccountInfo,
-    getEmployeeAccountInfo
+    getEmployeeAccountInfo,
+    getSupervisorAccountInfo
 };
 
 //checkMerchQuantity

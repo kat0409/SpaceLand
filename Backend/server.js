@@ -29,7 +29,10 @@ const routeMap = {
         '/supervisor/low-stock',
         '/supervisor/visitor-purchases',
         '/supervisor/ride-maintenance',
-        '/supervisor/attendance-revenue'
+        '/supervisor/attendance-revenue',
+        '/employee/account-info',
+        '/supervisor/account-info',
+        '/account-info'
     ],
     'POST': [
         '/add-employee', 
