@@ -198,9 +198,9 @@ const getVisitorAccountInfo = `
 const getEmployeeAccountInfo = `
     SELECT e.FirstName, e.LastName, e.EmployeeID, e.Email,
     e.Address, e.SupervisorID, e.Department,
-    e.employmentStatus, e.dateOfBirth
+    e.employmentStatus
     FROM employee e
-    WHERE e.username = ? AND e.password = ?;
+    WHERE e.EmployeeID = ?;
 `;
 
 const getSupervisorAccountInfo = `

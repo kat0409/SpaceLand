@@ -35,7 +35,7 @@ export default function EmployeeLogin() {
     setLoading(true);
     setError('');
 
-    console.log("Sending request to:", `${BACKEND_URL}/employee-login`);
+    //console.log("Sending request to:", `${BACKEND_URL}/employee-login`);
   
     try {
       const empRes = await fetch(`${BACKEND_URL}/employee-login`, {  // Calls `/employee/login`
