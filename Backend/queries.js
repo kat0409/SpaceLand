@@ -114,6 +114,8 @@ const addRide = `
     VALUES (?,?,?,?,?,?,?,?)
 `;
 
+const checkRideExists = `SELECT * FROM rides WHERE RideName = ?`;
+
 //Reports
 const lowStockMerchandiseReport = `
     SELECT 
@@ -209,6 +211,12 @@ const getSupervisorAccountInfo = `
     WHERE s.username = ? AND s.password = ?;
 `;
 
+const updateMealPlan = `
+    UPDATE restaurant
+    SET mealPlanTier = ?, price = ?
+    WHERE restaurantID = ?
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -252,7 +260,8 @@ module.exports = {
     getEmployeeAccountInfo,
     getSupervisorAccountInfo,
     addRide,
-    authenticateSupervisor
+    authenticateSupervisor,
+    checkRideExists
 };
 
 //checkMerchQuantity

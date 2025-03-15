@@ -29,10 +29,6 @@ function routes(req, res) {
         return actions.getMerchandiseTransactions(req, res);
     }
 
-    if(url.startsWith('/add-merchandise-transaction') && method === 'POST'){
-        return actions.addMerchandiseTransaction(req,res);
-    }
-
     if (url.startsWith('/login') && method === 'POST') {
         return actions.loginVisitor(req, res);
     }
@@ -93,6 +89,10 @@ function routes(req, res) {
         return actions.rideMaintenanceReport(req,res);
     }
 
+    if(url.startsWith('/add-merchandise-transaction') && method === 'POST'){
+        return actions.addMerchandiseTransaction(req,res);
+    }
+
     if(url.startsWith('/supervisor/visitor-purchases') && method === 'GET'){
         return actions.visitorPurchasesReport(req,res);
     }
@@ -113,16 +113,20 @@ function routes(req, res) {
         return actions.getSupervisorAccountInfo(req,res);
     }
 
-    if(url.startsWith('/supervisor/add-ride') && method === 'POST'){//make
-        return actions.addMerchandiseTransaction(req,res);
+    if(url.startsWith('/supervisor/add-ride') && method === 'POST'){
+        return actions.addRide(req,res);
     }
 
-    if(url.startsWith('/supervisor/login') && method === 'POST'){//make
+    if(url.startsWith('/supervisor/login') && method === 'POST'){
         return actions.loginSupervisor(req,res);
     }
 
-    if(url.startsWith('/employee/login') && method === 'POST'){//make
+    if(url.startsWith('/employee/login') && method === 'POST'){
         return actions.loginEmployee(req,res);
+    }
+
+    if(url.startsWith('/supervisor/update-meal-plan') && method === 'PUT'){
+        return actions.updateMealPlan(req,res);
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });

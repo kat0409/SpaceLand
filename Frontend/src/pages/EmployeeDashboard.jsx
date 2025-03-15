@@ -11,26 +11,29 @@ export default function EmployeeDashboard() {
   const employeeID = localStorage.getItem('employeeID');
 
   useEffect(() => {
+    if (!employeeID) {
+      setError('Employee ID not found in localStorage.');
+      return;
+    }
+
     const fetchEmployeeData = async () => {
       try {
-        const response = await fetch(
-          `${BACKEND_URL}/employee/account-info?employeeID=${employeeID}`
-        );
+        const res = await fetch(`${BACKEND_URL}/employee/account-info?employeeID=${employeeID}`);
+        const data = await res.json();
 
-        const data = await response.json();
-        if (response.ok && data.length > 0) {
+        if (res.ok && data.length > 0) {
           setEmployee(data[0]);
         } else {
           setError('Unable to fetch employee info.');
         }
       } catch (err) {
-        console.error(err);
-        setError('Error fetching employee info.');
+        console.error('Fetch Error:', err);
+        setError('Error fetching employee data.');
       }
     };
 
     fetchEmployeeData();
-  }, []);
+  }, [employeeID]);
 
   return (
     <>
