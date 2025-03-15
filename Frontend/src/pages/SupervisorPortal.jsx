@@ -3,112 +3,156 @@ import { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-export default function SupervisorPortal() {
-  const [supervisorData, setSupervisorData] = useState({
-    SupervisorID: localStorage.getItem('supervisorID') || '',
-    Name: localStorage.getItem('employeeName') || '',
-    Department: localStorage.getItem('department') || '',
-  });
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
+export default function SupervisorPortal() {
   const [employees, setEmployees] = useState([]);
-  const [maintenanceRides, setMaintenanceRides] = useState([]);
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [maintenanceRequests, setMaintenanceRequests] = useState([]);
+  const [lowStock, setLowStock] = useState([]);
+  const [ticketSales, setTicketSales] = useState([]);
+  const [visitorRecords, setVisitorRecords] = useState([]);
+
+  const supervisorID = localStorage.getItem('supervisorID');
 
   useEffect(() => {
-    const fetchSupervisorPortalData = async () => {
-      try {
-        // Fetch all employees and filter by department
-        const empRes = await fetch('https://spaceland.onrender.com/employees');
-        const empData = await empRes.json();
-        const filteredEmployees = empData.filter(
-          (emp) => emp.Department === supervisorData.Department
-        );
-        setEmployees(filteredEmployees);
+    fetch(`${BACKEND_URL}/supervisor/employees?department=YourDepartmentHere`)
+      .then(res => res.json())
+      .then(data => setEmployees(data))
+      .catch(err => console.error('Employees Error:', err));
 
-        // Fetch rides needing maintenance
-        const rideRes = await fetch('https://spaceland.onrender.com/rides');
-        const rideData = await rideRes.json();
-        const filteredRides = rideData.filter((ride) => ride.MaintenanceNeed === 1);
-        setMaintenanceRides(filteredRides);
+    fetch(`${BACKEND_URL}/supervisor/maintenance-requests`)
+      .then(res => res.json())
+      .then(data => setMaintenanceRequests(data))
+      .catch(err => console.error('Maintenance Error:', err));
 
-        // Fetch unsent notifications (if backend has route for this)
-        const notifRes = await fetch('https://spaceland.onrender.com/notifications');
-        if (notifRes.ok) {
-          const notifData = await notifRes.json();
-          setNotifications(notifData);
-        }
-      } catch (err) {
-        console.error('Supervisor dashboard error:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetch(`${BACKEND_URL}/supervisor/low-stock`)
+      .then(res => res.json())
+      .then(data => setLowStock(data))
+      .catch(err => console.error('Low Stock Error:', err));
 
-    fetchSupervisorPortalData();
+    fetch(`${BACKEND_URL}/supervisor/ticket-sales`)
+      .then(res => res.json())
+      .then(data => setTicketSales(data))
+      .catch(err => console.error('Ticket Sales Error:', err));
+
+    fetch(`${BACKEND_URL}/supervisor/visitors`)
+      .then(res => res.json())
+      .then(data => setVisitorRecords(data))
+      .catch(err => console.error('Visitor Records Error:', err));
   }, []);
 
   return (
     <>
       <Header />
       <section className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white px-6 py-20">
-        <div className="max-w-5xl mx-auto space-y-12">
-          <h1 className="text-4xl font-bold mb-8 text-center">🛰 Supervisor Portal</h1>
+        <h1 className="text-4xl font-bold mb-8 text-center">🛰 Supervisor Portal</h1>
 
-          {/* Supervisor Info */}
-          <div className="bg-white/10 p-6 rounded-xl border border-white/10 space-y-2">
-            <h2 className="text-2xl font-semibold mb-2">🧑‍💼 Supervisor Info</h2>
-            <p><strong>ID:</strong> {supervisorData.SupervisorID}</p>
-            <p><strong>Name:</strong> {supervisorData.Name}</p>
-            <p><strong>Department:</strong> {supervisorData.Department}</p>
+        <div className="space-y-12">
+          {/* EMPLOYEES */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">👨‍💼 Employees in Department</h2>
+            <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-purple-300">
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {employees.map(emp => (
+                    <tr key={emp.EmployeeID} className="border-t border-white/10">
+                      <td>{emp.FirstName} {emp.LastName}</td>
+                      <td>{emp.Email}</td>
+                      <td>{emp.Department}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          {/* Employees */}
-          <div className="bg-white/10 p-6 rounded-xl border border-white/10">
-            <h2 className="text-2xl font-semibold mb-4">👥 Department Employees</h2>
-            {employees.length ? (
+          {/* MAINTENANCE REQUESTS */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">🛠 Maintenance Requests</h2>
+            <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
               <ul className="space-y-2">
-                {employees.map((emp) => (
-                  <li key={emp.EmployeeID} className="border border-gray-700 p-4 rounded-lg bg-white/5">
-                    {emp.FirstName} {emp.LastName} — {emp.Email}
+                {maintenanceRequests.map(req => (
+                  <li key={req.MaintenanceID} className="border-b border-white/10 pb-2">
+                    Ride ID: {req.RideID} | Status: {req.MaintenanceStatus ? 'Completed' : 'Pending'}
                   </li>
                 ))}
               </ul>
-            ) : (
-              <p className="text-gray-400">No employees found in your department.</p>
-            )}
+            </div>
           </div>
 
-          {/* Maintenance Rides */}
-          <div className="bg-white/10 p-6 rounded-xl border border-white/10">
-            <h2 className="text-2xl font-semibold mb-4">🔧 Rides Needing Maintenance</h2>
-            {maintenanceRides.length ? (
+          {/* LOW STOCK MERCHANDISE */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">📦 Low Stock Alerts</h2>
+            <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
               <ul className="space-y-2">
-                {maintenanceRides.map((ride) => (
-                  <li key={ride.RideID} className="border border-gray-700 p-4 rounded-lg bg-white/5">
-                    {ride.rideName} — Maintenance Required
+                {lowStock.map(item => (
+                  <li key={item.merchandiseID} className="border-b border-white/10 pb-2">
+                    {item.itemName} — Qty: {item.quantity}
                   </li>
                 ))}
               </ul>
-            ) : (
-              <p className="text-gray-400">No rides currently need maintenance.</p>
-            )}
+            </div>
           </div>
 
-          {/* Notifications */}
-          <div className="bg-white/10 p-6 rounded-xl border border-white/10">
-            <h2 className="text-2xl font-semibold mb-4">📢 Low Stock Notifications</h2>
-            {notifications.length ? (
-              <ul className="space-y-2">
-                {notifications.map((note, idx) => (
-                  <li key={idx} className="border border-gray-700 p-4 rounded-lg bg-white/5">
-                    Item: {note.itemName} — Notification ID: {note.notificationID}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-400">No low stock notifications at the moment.</p>
-            )}
+          {/* TICKET SALES */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">🎟 Ticket Sales</h2>
+            <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-purple-300">
+                  <tr>
+                    <th>Ticket ID</th>
+                    <th>Visitor ID</th>
+                    <th>Type</th>
+                    <th>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ticketSales.map(ticket => (
+                    <tr key={ticket.ticketID} className="border-t border-white/10">
+                      <td>{ticket.ticketID}</td>
+                      <td>{ticket.VisitorID}</td>
+                      <td>{ticket.ticketType}</td>
+                      <td>${ticket.price}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* VISITOR RECORDS */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">📋 Visitor Records</h2>
+            <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-purple-300">
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Username</th>
+                    <th>Military</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visitorRecords.map(visitor => (
+                    <tr key={visitor.VisitorID} className="border-t border-white/10">
+                      <td>{visitor.FirstName} {visitor.LastName}</td>
+                      <td>{visitor.Email}</td>
+                      <td>{visitor.Username}</td>
+                      <td>{visitor.MilitaryStatus ? 'Yes' : 'No'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
