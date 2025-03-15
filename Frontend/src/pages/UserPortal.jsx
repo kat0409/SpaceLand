@@ -27,19 +27,23 @@ export default function UserPortal() {
       MilitaryStatus: ""
     }
   );
+  const userIDTemp = {userID: 1};
 
   const handleUserInfoClick = async (e) => {
     // setError('');
     // setSuccessMessage('');
-    console.log("HERE");
 
     try {
-      //const res = await fetch(`http://localhost:3000/add-visitor`, {//CHANGE MADE:KEVIN
       const res = await fetch(`http://localhost:3000/portal/userinfo`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userInfo),
+        body: JSON.stringify(userIDTemp)
       });
+      // const res = await fetch(`http://localhost:3000/add-visitor`, {//CHANGE MADE:KEVIN
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(payload),
+      // });
 
       const data = await res.json();
 

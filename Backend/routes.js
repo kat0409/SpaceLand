@@ -77,9 +77,8 @@ function routes(req, res) {
     if (url.startsWith('/supervisor/visitors') && method === 'GET') {
         return actions.getVisitorRecords(req, res);
     }
-    
-    if (url.startsWith('/portal/userinfo') && method === 'POST') {//CHANGE TO GET AFTERWARD
-        console.log("MADE IT TO ROUTES");
+
+    if (url.startsWith('/portal/userinfo') && method === 'POST') {
         return actions.getUserInfo(req, res);
     }
 
