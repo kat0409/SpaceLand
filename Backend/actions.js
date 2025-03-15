@@ -529,6 +529,30 @@ const getVisitorRecords = (req, res) => {
     });
 };
 
+//Reports
+const lowStockMerchandiseReport = (req, res) => {
+    pool.query(queries.lowStockMerchandiseReport, (error, results) => {
+        if (error) {
+            console.error("Error fetching low stock merchandise report:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
+const rideMaintenanceReport = (req,res) => {
+    pool.query(queries.rideMaintenanceReport, (error, results) => {
+        console.error("Error fetching ride maintenance report:", error);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Internal server error" }));
+        return;
+    });
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(results));
+};
 
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
@@ -549,5 +573,7 @@ module.exports = {
     getSalesReport,
     getTicketSales,
     getVisitorRecords,
-    addMerchandiseTransaction
+    addMerchandiseTransaction,
+    lowStockMerchandiseReport,
+    rideMaintenanceReport
 };

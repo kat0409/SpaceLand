@@ -124,6 +124,20 @@ const lowStockMerchandiseReport = `
         ln.sent = FALSE;
 `;
 
+const rideMaintenanceReport = `
+    SELECT 
+        r.RideName AS Ride,
+        m.MaintenanceStartDate AS Start_Date,
+        m.MaintenanceEndDate AS End_Date,
+        CONCAT(e.FirstName, ' ', e.LastName) AS Maintenance_Employee
+    FROM 
+        maintenance m
+    JOIN 
+        rides r ON m.RideID = r.RideID
+    JOIN 
+        employee e ON m.MaintenanceEmployeeID = e.EmployeeID;
+`;
+
 
 module.exports = {
     getRides,
@@ -160,7 +174,8 @@ module.exports = {
     updateMaintenanceDates,
     updateRideMaintenanceStatus,
     authenticateEmployee,
-    lowStockMerchandiseReport
+    lowStockMerchandiseReport,
+    rideMaintenanceReport
 };
 
 //checkMerchQuantity
