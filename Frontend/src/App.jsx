@@ -12,6 +12,7 @@ import Dining from "./pages/Dining";
 import Pricing from "./pages/Pricing";
 import CursorOverlay from "./components/ui/CursorOverlay";
 import SupervisorPortal from "./pages/SupervisorPortal";
+import Purchase from "./pages/Purchase";
 
 export default function App() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
           <Route path="/auth" element={<Auth />} />
           <Route path="/portal" element={<UserPortal />} />
           <Route path="/dining" element={<Dining />} />
+          <Route path="/purchase" element={<Purchase />} />
         </Routes>
       </motion.div>
     </Router>
