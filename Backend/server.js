@@ -43,17 +43,30 @@ const routeMap = {
         '/check-visitor',
         '/purchase-pass',
         '/supervisor/update-maintenance-status',
+        '/supervisor/add-ride',//make
+        '/supervisor/login',//make
+        '/employee/login'//make
     ],
     'PUT': [
         '/update-employee', 
         '/update-merchandise-quantity', 
-        '/update-maintenance', 
+        '/update-maintenance',
+        '/supervisor/update-meal-plan',//make
+        '/supervisor/update-employee-info',//make
+        '/supervisor/update-visitor-info',//make
+        '/supervisor/update-operating-hours'//make
     ],
     'DELETE': [
-        '/delete-employee',
-        '/delete-maintenance', 
+        '/supervisor/delete-employee',
+        '/supervisor/delete-maintenance', 
+        '/supervisor/delete-item',//make
+        '/supervisor/delete-meal-plan',//make
+        '/supervisor/delete-ride',//make
+        '/'
     ],
 };
+
+//add a trigger to email the maintenance employees of a ride that needs maintenance when it is marked as 1 in its maintenance need
 
 /*const server = http.createServer((req, res) => {
     corsMiddleWare(req, res, () => {
