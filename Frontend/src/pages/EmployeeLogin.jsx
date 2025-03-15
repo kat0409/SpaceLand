@@ -14,7 +14,6 @@ export default function EmployeeLogin() {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
   const handleChange = (e) => {
@@ -37,30 +36,40 @@ export default function EmployeeLogin() {
     setError('');
 
     try {
-      const response = await fetch(`${BACKEND_URL}/employee-login`, {
+      // 🔐 Try EMPLOYEE login first
+      const empRes = await fetch(`${BACKEND_URL}/employee/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      const empData = await empRes.json();
 
-      if (response.ok && data.role) {
-        // Store login info
-        localStorage.setItem('employeeID', data.employeeID);
-        localStorage.setItem('role', data.role);
-
-        // Redirect based on role (not department anymore)
-        if (data.role.toLowerCase() === 'supervisor') {
-          navigate('/supervisor-portal');
-        } else {
-          navigate('/employee-dashboard');
-        }
-      } else {
-        setError(data.error || 'Invalid credentials.');
+      if (empRes.ok && empData.employeeID) {
+        localStorage.setItem('employeeID', empData.employeeID);
+        localStorage.setItem('role', 'employee');
+        navigate('/employee-dashboard');
+        return;
       }
+
+      // 🔐 If employee login fails, try SUPERVISOR login
+      const supRes = await fetch(`${BACKEND_URL}/supervisor/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const supData = await supRes.json();
+
+      if (supRes.ok && supData.supervisorID) {
+        localStorage.setItem('supervisorID', supData.supervisorID);
+        localStorage.setItem('role', 'supervisor');
+        navigate('/supervisor-portal');
+        return;
+      }
+
+      // ❌ If both fail
+      setError(supData.error || empData.error || 'Invalid credentials.');
     } catch (err) {
       console.error('Login error:', err);
       setError('An error occurred while logging in.');
