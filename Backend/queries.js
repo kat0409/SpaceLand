@@ -114,6 +114,8 @@ const addRide = `
     VALUES (?,?,?,?,?,?,?,?)
 `;
 
+const checkRideExists = `SELECT * FROM rides WHERE RideName = ?`;
+
 //Reports
 const lowStockMerchandiseReport = `
     SELECT 
@@ -252,7 +254,8 @@ module.exports = {
     getEmployeeAccountInfo,
     getSupervisorAccountInfo,
     addRide,
-    authenticateSupervisor
+    authenticateSupervisor,
+    checkRideExists
 };
 
 //checkMerchQuantity
