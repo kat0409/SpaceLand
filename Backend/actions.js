@@ -3,60 +3,6 @@ const pool = require('./db.js');
 const queries = require('./queries.js');
 const nodemailer = require('nodemailer');
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'your-email@gmail.com',//Do i need to make a fake supervisor email?
-        pass: 'your-email-password', //Do i need to make a fake supervisor email password?
-    },
-});
-
-// Function to send email notification
-const sendNotification = async (supervisorEmail, itemName) => {
-    const mailOptions = {
-        from: 'your-email@gmail.com',//modify this later
-        to: supervisorEmail,
-        subject: 'Low Stock Alert',
-        text: `The item "${itemName}" has reached 0 quantity. Please order more.`,
-    };
-
-    try {
-        await transporter.sendMail(mailOptions);
-        console.log('Notification sent successfully.');
-        return true;
-    } catch (error) {
-        console.error('Error sending notification:', error);
-        return false;
-    }
-};
-
-// Function to check for unsent notifications and send emails
-const checkAndSendNotifications = async () => {
-    try {
-        // Fetch unsent notifications
-        const [notifications] = await pool.query(queries.getUnsentNotifications);
-
-        // Fetch supervisor email
-        const [supervisor] = await pool.query(queries.getSupervisorEmailByDepartment);
-        const supervisorEmail = supervisor[0].email;
-
-        // Process each notification
-        for (const notification of notifications) {
-            const { notificationID, merchandiseID, itemName } = notification;
-
-            // Send notification
-            const emailSent = await sendNotification(supervisorEmail, itemName);
-
-            // Mark notification as sent
-            if (emailSent) {
-                await pool.query(queries.markNotificationAsSent, [notificationID]);
-            }
-        }
-    } catch (error) {
-        console.error('Error processing notifications:', error);
-    }
-};
-
 //Fetch all rides
 const getRides = (request, response) => {
     pool.query(queries.getRides, (error, results) => {
@@ -208,6 +154,34 @@ const getMerchandiseTransactions = (request, response) =>{
     });
 };
 
+const addMerchandiseTransaction = (req,res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        const {merchandiseID, VisitorID, transactionDate, quantity, totalAmount} = JSON.parse(body);
+
+        if (!merchandiseID || !VisitorID || !transactionDate || !quantity ||!totalAmount){
+            res.writeHead(400, {"Content-Type":"application/json"});
+            res.end(JSON.stringify({error: "merchandiseID, VisitorID, transactionDate, quantity, totalAmount are required fields"}));
+        }
+
+        pool.query(queries.addMerchandiseTransaction, [merchandiseID, VisitorID, transactionDate, quantity, totalAmount], (error, results) => {
+            if (error){
+                console.error("Error adding merchandise transaction:", error);
+                res.writeHead(500, {"Content-Type": "application/json"});
+                res.end(JSON.stringify({error: "Internal server error"}));
+                return;
+            }
+            res.writeHead(201, {"Content-Type": "application.json"});
+            res.end(JSON.stringify({message: "Merchandise transaction added successfully."}));
+        });
+    });
+};
+
 const loginVisitor = (req, res) => {
     let body = "";
 
@@ -249,6 +223,102 @@ const loginVisitor = (req, res) => {
                 res.end(JSON.stringify({
                     message: "Login successful",
                     visitorID: results[0].VisitorID
+                }));
+            }
+        });
+    });
+};
+
+//login employee
+const loginEmployee = (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (err) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const { username, password } = parsedBody;
+
+        if (!username || !password) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Username and password are required fields" }));
+            return;
+        }
+
+        pool.query(queries.authenticateEmployee, [username, password], (err, results) => {
+            if (err) {
+                console.error("Error querying loginEmployee:", err);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+
+            if (results.length === 0) {
+                res.writeHead(401, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Invalid credentials" }));
+            } else {
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({
+                    message: "Login successful",
+                    employeeID: results[0].EmployeeID//check later
+                }));
+            }
+        });
+    });
+};
+
+//login supervisor
+const loginSupervisor = (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (err) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const { username, password } = parsedBody;
+
+        if (!username || !password) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Username and password are required fields" }));
+            return;
+        }
+
+        pool.query(queries.authenticateSupervisor, [username, password], (err, results) => {
+            if (err) {
+                console.error("Error querying loginSupervisor:", err);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+
+            if (results.length === 0) {
+                res.writeHead(401, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Invalid credentials" }));
+            } else {
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({
+                    message: "Login successful",
+                    supervisorID: results[0].SupervisorID//check later
                 }));
             }
         });
@@ -411,8 +481,18 @@ const purchasePass = ((req,res) => {
     });
 });
 
+const url = require('url');
+
 const getEmployeesByDept = (req, res) => {
-    const { department } = req.query;
+    const parsedUrl = url.parse(req.url, true); 
+    const { department } = parsedUrl.query; 
+
+    if (!department) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Missing 'department' query parameter" }));
+        return;
+    }
+
     pool.query(queries.getEmployeesByDepartment, [department], (error, results) => {
         if (error) {
             console.error("Error fetching employees by department:", error);
@@ -545,6 +625,125 @@ const getVisitorRecords = (req, res) => {
     });
 };
 
+//Reports
+const lowStockMerchandiseReport = (req, res) => {
+    pool.query(queries.lowStockMerchandiseReport, (error, results) => {
+        if (error) {
+            console.error("Error fetching low stock merchandise report:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
+const rideMaintenanceReport = (req,res) => {
+    pool.query(queries.rideMaintenanceReport, (error, results) => {
+        if (error) {
+            console.error("Error fetching ride maintenance report:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
+const visitorPurchasesReport = (req,res) => {
+    pool.query(queries.visitorPurchasesReport, (error, results) => {
+        if (error) {
+            console.error("Error fetching visitor purchases report:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
+const attendanceAndRevenueReport = (req,res) => {
+    pool.query(queries.attendanceAndRevenueReport, (error, results) => {
+        if (error) {
+            console.error("Error fetching attendance and revenue report:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
+const getVisitorAccountInfo = (req, res) => {
+    const parsedUrl = url.parse(req.url, true); 
+    const { Username, Password } = parsedUrl.query; 
+
+    if (!Username || !Password) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Missing 'username' and 'password' query parameter" }));
+        return;
+    }
+
+    pool.query(queries.getVisitorAccountInfo, [Username, Password], (error, results) => {
+        if (error) {
+            console.error("Error visitor account information:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
+
+const getEmployeeAccountInfo = (req,res) => {
+    const parsedUrl = url.parse(req.url, true); 
+    const { username, password } = parsedUrl.query; 
+
+    if (!username || !password) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Missing 'username' or 'password' query parameter" }));
+        return;
+    }
+
+    pool.query(queries.getEmployeeAccountInfo, [username, password], (error, results) => {
+        if (error) {
+            console.error("Error fetching employee account info:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
+const getSupervisorAccountInfo = (req,res) => {
+    const parsedUrl = url.parse(req.url, true); 
+    const { username, password } = parsedUrl.query; 
+
+    if (!username || !password) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Missing 'username' or 'password' query parameter" }));
+        return;
+    }
+
+    pool.query(queries.getSupervisorAccountInfo, [username, password], (error, results) => {
+        if (error) {
+            console.error("Error fetching supervisor account info:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
 
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
@@ -554,7 +753,6 @@ module.exports = {
     getRidesNeedingMaintenance,
     addMaintenance,
     getMerchandiseTransactions,
-    checkAndSendNotifications,
     loginVisitor,
     addVisitor,
     checkVisitorExists,
@@ -565,5 +763,15 @@ module.exports = {
     getLowStockMerchandise,
     getSalesReport,
     getTicketSales,
-    getVisitorRecords
+    getVisitorRecords,
+    addMerchandiseTransaction,
+    lowStockMerchandiseReport,
+    rideMaintenanceReport,
+    visitorPurchasesReport,
+    attendanceAndRevenueReport,
+    getVisitorAccountInfo,
+    getEmployeeAccountInfo,
+    getSupervisorAccountInfo,
+    loginEmployee,
+    loginSupervisor
 };
