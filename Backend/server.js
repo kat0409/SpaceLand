@@ -43,7 +43,7 @@ const routeMap = {
         '/check-visitor',
         '/purchase-pass',
         '/supervisor/update-maintenance-status',
-        '/supervisor/add-ride',//make
+        '/supervisor/add-ride',
         '/supervisor/login',
         '/employee/login'
     ],

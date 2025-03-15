@@ -211,6 +211,11 @@ const getSupervisorAccountInfo = `
     WHERE s.username = ? AND s.password = ?;
 `;
 
+const updateMealPlan = `
+    UPDATE restaurant
+    SET mealPlanTier = ? AND 
+`;
+
 module.exports = {
     getRides,
     getEmployees,
