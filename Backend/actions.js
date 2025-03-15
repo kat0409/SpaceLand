@@ -554,6 +554,19 @@ const rideMaintenanceReport = (req,res) => {
     res.end(JSON.stringify(results));
 };
 
+const visitorPurchasesReport = (req,res) => {
+    pool.query(queries.visitorPurchasesReport, (error, results) => {
+        console.error("Error fetching visitor purchases report:", error);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Internal server error" }));
+        return;
+    });
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(results));
+};
+
+const attendanceAndRevenueReport = 
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -575,5 +588,6 @@ module.exports = {
     getVisitorRecords,
     addMerchandiseTransaction,
     lowStockMerchandiseReport,
-    rideMaintenanceReport
+    rideMaintenanceReport,
+    visitorPurchasesReport
 };
