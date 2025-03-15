@@ -121,7 +121,7 @@ function routes(req, res) {
         return actions.loginSupervisor(req,res);
     }
 
-    if(url.startsWith('/employee/login') && method === 'POST'){
+    if(url.startsWith('/employee-login') && method === 'POST'){
         return actions.loginEmployee(req,res);
     }
 
