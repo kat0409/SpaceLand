@@ -55,11 +55,11 @@ const markNotificationAsSent = `
     WHERE notificationID = ?;
 `;
 
-const authenticateVisitor = 'SELECT * FROM visitors WHERE username = ? AND password = ?';
+const authenticateVisitor = 'SELECT VisitorID FROM visitors WHERE username = ? AND password = ?';
 
-const authenticateEmployee = 'SELECT * FROM employee WHERE username = ? AND password = ?';
+const authenticateEmployee = 'SELECT EmployeeID  FROM employee WHERE username = ? AND password = ?';
 
-const authenticateSupervisor = 'SELECT * FROM supervisors WHERE username = ? AND password = ?';
+const authenticateSupervisor = 'SELECT SupervisorID FROM supervisors WHERE username = ? AND password = ?';
 
 const addVisitor = `
     INSERT INTO visitors (FirstName, LastName, Phone, Email, Address, DateOfBirth, 
