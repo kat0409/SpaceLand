@@ -111,6 +111,18 @@ function routes(req, res) {
         return actions.getSupervisorAccountInfo(req,res);
     }
 
+    if(url.startsWith('/supervisor/add-ride') && method === 'POST'){//make
+        return actions.addMerchandiseTransaction(req,res);
+    }
+
+    if(url.startsWith('/supervisor/login') && method === 'POST'){//make
+        return actions.loginSupervisor(req,res);
+    }
+
+    if(url.startsWith('/employee/login') && method === 'POST'){//make
+        return actions.loginEmployee(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
