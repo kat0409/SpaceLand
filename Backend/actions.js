@@ -701,27 +701,36 @@ const getVisitorAccountInfo = (req, res) => {
     });
 };
 
+const getEmployeeAccountInfo = (req, res) => {
+    const parsedUrl = url.parse(req.url, true);
+    const { employeeID } = parsedUrl.query; 
 
-const getEmployeeAccountInfo = (req,res) => {
-    const parsedUrl = url.parse(req.url, true); 
-    const { EmployeeID } = parsedUrl.query; 
-
-    if (EmployeeID) {
+    if (!employeeID) {
         res.writeHead(400, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Missing 'username' or 'password' query parameter" }));
+        res.end(JSON.stringify({ error: "Missing 'employeeID' query parameter" }));
         return;
     }
 
-    pool.query(queries.getEmployeeAccountInfo, [EmployeeID], (error, results) => {
+    pool.query(queries.getEmployeeAccountInfo, [employeeID], (error, results) => {
         if (error) {
             console.error("Error fetching employee account info:", error);
             res.writeHead(500, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ error: "Internal server error" }));
             return;
         }
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(results));
+    
+        console.log("Query Results:", results); // Debugging line
+    
+        if (results.length === 0) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Employee not found" }));
+        } else {
+            console.log("Sending Employee Data:", results[0]); // Debugging line
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(results[0])); 
+        }
     });
+    
 };
 
 const getSupervisorAccountInfo = (req,res) => {
