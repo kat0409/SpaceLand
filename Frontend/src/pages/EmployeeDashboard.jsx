@@ -4,52 +4,62 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 export default function EmployeeDashboard() {
-  const [employeeData, setEmployeeData] = useState(null);
-  const [supervisorName, setSupervisorName] = useState('');
-  const employeeID = localStorage.getItem('employeeID'); // or from context
+  const [employee, setEmployee] = useState(null);
+  const [error, setError] = useState('');
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
+
+  const employeeID = localStorage.getItem('employeeID');
 
   useEffect(() => {
-    const fetchEmployee = async () => {
-      try {
-        const res = await fetch(`http://localhost:3000/getEmployeeInfo?id=${employeeID}`);
-        const data = await res.json();
-        setEmployeeData(data[0]); // assuming array response
+    if (!employeeID) {
+      setError('Employee ID not found in localStorage.');
+      return;
+    }
 
-        // Fetch Supervisor Info
-        const supRes = await fetch(`http://localhost:3000/getSupervisorInfo?id=${data[0].SupervisorID}`);
-        const supData = await supRes.json();
-        const supervisor = supData[0];
-        setSupervisorName(`${supervisor.firstName} ${supervisor.lastName}`);
+    const fetchEmployeeData = async () => {
+      try {
+        const res = await fetch(`${BACKEND_URL}/employee/account-info?employeeID=${employeeID}`);
+        const data = await res.json();
+
+        if (res.ok && data.length > 0) {
+          setEmployee(data[0]);
+        } else {
+          setError('Unable to fetch employee info.');
+        }
       } catch (err) {
-        console.error('Error fetching employee data', err);
+        console.error('Fetch Error:', err);
+        setError('Error fetching employee data.');
       }
     };
 
-    if (employeeID) fetchEmployee();
+    fetchEmployeeData();
   }, [employeeID]);
 
   return (
     <>
       <Header />
-      <section className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white px-6 py-16">
-        <div className="max-w-4xl mx-auto bg-white/10 p-8 rounded-2xl border border-white/10 shadow-lg">
-          <h2 className="text-3xl font-bold mb-6">🧑‍🚀 Employee Dashboard</h2>
+      <main className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white px-6 py-16">
+        <div className="max-w-3xl mx-auto bg-white/5 backdrop-blur-lg p-8 rounded-2xl shadow-lg border border-white/10">
+          <h1 className="text-3xl font-bold mb-4 text-center">🧑‍💼 Employee Dashboard</h1>
 
-          {!employeeData ? (
-            <p>Loading employee details...</p>
-          ) : (
-            <div className="space-y-4 text-lg">
-              <p><span className="font-semibold text-purple-400">Employee ID:</span> {employeeData.EmployeeID}</p>
-              <p><span className="font-semibold text-purple-400">Name:</span> {employeeData.FirstName} {employeeData.LastName}</p>
-              <p><span className="font-semibold text-purple-400">Email:</span> {employeeData.Email}</p>
-              <p><span className="font-semibold text-purple-400">Address:</span> {employeeData.Address}</p>
-              <p><span className="font-semibold text-purple-400">Department:</span> {employeeData.Department}</p>
-              <p><span className="font-semibold text-purple-400">Employment Status:</span> {employeeData.employmentStatus}</p>
-              <p><span className="font-semibold text-purple-400">Supervisor:</span> {supervisorName}</p>
+          {error && <p className="text-red-400 mb-4 text-center">{error}</p>}
+
+          {employee ? (
+            <div className="space-y-4 text-sm md:text-base">
+              <p><strong>Name:</strong> {employee.FirstName} {employee.LastName}</p>
+              <p><strong>Email:</strong> {employee.Email}</p>
+              <p><strong>Department:</strong> {employee.Department}</p>
+              <p><strong>Supervisor ID:</strong> {employee.SupervisorID}</p>
+              <p><strong>Address:</strong> {employee.Address}</p>
+              <p><strong>Employment Status:</strong> {employee.employmentStatus === 1 ? 'Active' : 'Inactive'}</p>
+              <p><strong>Date of Birth:</strong> {new Date(employee.dateOfBirth).toLocaleDateString()}</p>
+              <p><strong>Username:</strong> {employee.username}</p>
             </div>
+          ) : !error && (
+            <p className="text-center text-gray-400">Loading employee data...</p>
           )}
         </div>
-      </section>
+      </main>
       <Footer />
     </>
   );

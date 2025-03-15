@@ -57,10 +57,10 @@ export default function Hero() {
           </p>
 
           <Link
-            to="/rides"
-            className="inline-block bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition animate-pulse-glow"
+            to="/purchase"
+            className="mt-6 inline-block bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition animate-pulse-glow"
           >
-            Explore Rides
+            Buy Tickets
           </Link>
         </div>
       </div>
