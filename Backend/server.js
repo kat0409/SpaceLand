@@ -45,7 +45,7 @@ const routeMap = {
         '/supervisor/update-maintenance-status',
         '/supervisor/add-ride',
         '/supervisor/login',
-        '/employee/login'
+        '/employee-login'
     ],
     'PUT': [
         '/update-employee', 
@@ -94,11 +94,10 @@ const routeMap = {
 
 const server = http.createServer((req, res) => {
     // ✅ Allow CORS manually
-    res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173"); // OR better: "http://localhost:5173"
+    res.setHeader("Access-Control-Allow-Origin", "*"); // OR better: "http://localhost:5173"
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  
-    // ✅ Handle OPTIONS preflight requests
+
     if (req.method === "OPTIONS") {
       res.writeHead(204);
       res.end();
