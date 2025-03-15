@@ -213,7 +213,8 @@ const getSupervisorAccountInfo = `
 
 const updateMealPlan = `
     UPDATE restaurant
-    SET mealPlanTier = ? AND 
+    SET mealPlanTier = ?, price = ?
+    WHERE restaurantID = ?
 `;
 
 module.exports = {
