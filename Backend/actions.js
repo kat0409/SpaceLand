@@ -271,7 +271,7 @@ const loginEmployee = (req, res) => {
                 res.end(JSON.stringify({
                     message: "Login successful",
                     employeeID: results[0].EmployeeID,//check later
-                    role: "employee"
+                    //role: "employee"
                 }));
             }
         });
@@ -704,15 +704,15 @@ const getVisitorAccountInfo = (req, res) => {
 
 const getEmployeeAccountInfo = (req,res) => {
     const parsedUrl = url.parse(req.url, true); 
-    const { username, password } = parsedUrl.query; 
+    const { EmployeeID } = parsedUrl.query; 
 
-    if (!username || !password) {
+    if (EmployeeID) {
         res.writeHead(400, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "Missing 'username' or 'password' query parameter" }));
         return;
     }
 
-    pool.query(queries.getEmployeeAccountInfo, [username, password], (error, results) => {
+    pool.query(queries.getEmployeeAccountInfo, [EmployeeID], (error, results) => {
         if (error) {
             console.error("Error fetching employee account info:", error);
             res.writeHead(500, { "Content-Type": "application/json" });
