@@ -138,6 +138,28 @@ const rideMaintenanceReport = `
         employee e ON m.MaintenanceEmployeeID = e.EmployeeID;
 `;
 
+const visitorPurchasesReport = `
+    SELECT 
+        v.VisitorID,
+        CONCAT(v.FirstName, ' ', v.LastName) AS Visitor_Name,
+        t.ticketType AS Ticket_Type,
+        tt.quantity AS Ticket_Quantity,
+        tt.totalAmount AS Ticket_Total_Spent,
+        m.itemName AS Merchandise_Bought,
+        mt.quantity AS Merchandise_Quantity,
+        mt.totalAmount AS Merchandise_Total_Spent
+    FROM 
+        visitors v
+    LEFT JOIN 
+        tickets t ON v.VisitorID = t.VisitorID
+    LEFT JOIN 
+        tickettransactions tt ON t.ticketID = tt.ticketID
+    LEFT JOIN 
+        merchandisetransactions mt ON v.VisitorID = mt.VisitorID
+    LEFT JOIN 
+        merchandise m ON mt.merchandiseID = m.merchandiseID;
+`;
+
 
 module.exports = {
     getRides,
@@ -175,7 +197,8 @@ module.exports = {
     updateRideMaintenanceStatus,
     authenticateEmployee,
     lowStockMerchandiseReport,
-    rideMaintenanceReport
+    rideMaintenanceReport,
+    visitorPurchasesReport
 };
 
 //checkMerchQuantity
