@@ -12,6 +12,12 @@ export default function SupervisorPortal() {
   const [ticketSales, setTicketSales] = useState([]);
   const [visitorRecords, setVisitorRecords] = useState([]);
 
+  //maybe
+  const [lowStockReport, setLowStockReport] = useState([]);
+  const [rideMaintenanceReport, setRideMaintenanceReport] = useState([]);
+  const [visitorPurchasesReport, setVisitorPurchasesReport] = useState([]);
+
+
   const supervisorID = localStorage.getItem('supervisorID');
 
   useEffect(() => {
