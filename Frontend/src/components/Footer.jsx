@@ -1,3 +1,5 @@
+import GithubButton from './GithubButton';
+
 // src/components/Footer.jsx
 export default function Footer() {
     return (
@@ -33,14 +35,21 @@ export default function Footer() {
               <a href="#" className="hover:text-purple-400 transition duration-300">Twitter</a>
               <a href="#" className="hover:text-purple-400 transition duration-300">Instagram</a>
             </div>
-  
-            {/* Employee Login Button */}
-            <a
-              href="/employee-login"
-              className="inline-block bg-gradient-to-r from-purple-600 to-indigo-500 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow hover:from-purple-700 hover:to-indigo-600 transition-all"
-            >
-              Employee Login
-            </a>
+            <div className="flex gap-2">
+              {/*GitHub Button*/}
+              <a className="mb-4" href="https://github.com/kat0409/SpaceLand.git">
+                  <GithubButton />
+              </a>
+              {/* Employee Login Button */}
+              <div>
+                  <a
+                    href="/employee-login"
+                    className="inline-block bg-gradient-to-r from-purple-600 to-indigo-500 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow hover:from-purple-700 hover:to-indigo-600 transition-all"
+                  >
+                    Employee Login
+                  </a>
+              </div>
+            </div>
           </div>
         </div>
   
