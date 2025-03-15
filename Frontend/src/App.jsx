@@ -29,7 +29,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/employee-login" element={<EmployeeLogin />} /> {/* Employee Login */}
-          <Route path="/employee-portal" element={<EmployeeDashboard />} />
+          <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
           <Route path="/rides" element={<Rides />} />
           <Route path="/events" element={<Events />} />
           <Route path="/auth" element={<Auth />} /> {/* Visitor Login (Keep this) */}
