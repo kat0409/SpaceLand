@@ -1,4 +1,5 @@
 const actions = require('./actions');
+const { rideMaintenanceReport } = require('./queries');
 
 function routes(req, res) {
     const url = req.url;
@@ -80,6 +81,14 @@ function routes(req, res) {
 
     if (url.startsWith('/supervisor/visitors') && method === 'GET') {
         return actions.getVisitorRecords(req, res);
+    }
+
+    if(url.startsWith('/supervisor/low-stock') && method === 'GET'){
+        return actions.lowStockMerchandiseReport(req,res);
+    }
+
+    if(url.startsWith('/supervisor/ride-maintenance') && method === 'GET'){
+        return actions.rideMaintenanceReport(req,res);
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
