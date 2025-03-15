@@ -95,6 +95,18 @@ function routes(req, res) {
         return actions.visitorPurchasesReport(req,res);
     }
 
+    if(url.startsWith('/supervisor/attendance-revenue') && method === 'GET'){
+        return actions.attendanceAndRevenueReport(req,res);
+    }
+
+    if(url.startsWith('/employee/account-info') && method === 'GET'){
+        return actions.getEmployeeAccountInfo(req,res);
+    }
+
+    if(url.startsWith('/account-info') && method === 'GET'){
+        return actions.getVisitorAccountInfo(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
