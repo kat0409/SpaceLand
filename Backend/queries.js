@@ -59,6 +59,8 @@ const authenticateVisitor = 'SELECT * FROM visitors WHERE username = ? AND passw
 
 const authenticateEmployee = 'SELECT * FROM employee WHERE username = ? AND password = ?';
 
+const authenticateSupervisor = 'SELECT * FROM supervisors WHERE username = ? AND password = ?';
+
 const addVisitor = `
     INSERT INTO visitors (FirstName, LastName, Phone, Email, Address, DateOfBirth, 
         AccessibilityNeeds, Gender, Username, Password, Height, Age, MilitaryStatus)
@@ -105,6 +107,11 @@ const getTicketSales = `
 
 const getVisitorRecords = `
     SELECT * FROM visitors
+`;
+
+const addRide = `
+    INSERT INTO rides (RideID, RideName, MinHeight, MaxWeight,Capacity,Duration,MaintenanceStatus, MaintenanceNeed)
+    VALUES (?,?,?,?,?,?,?,?)
 `;
 
 //Reports
@@ -243,7 +250,9 @@ module.exports = {
     attendanceAndRevenueReport,
     getVisitorAccountInfo,
     getEmployeeAccountInfo,
-    getSupervisorAccountInfo
+    getSupervisorAccountInfo,
+    addRide,
+    authenticateSupervisor
 };
 
 //checkMerchQuantity

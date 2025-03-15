@@ -61,8 +61,7 @@ const routeMap = {
         '/supervisor/delete-maintenance', 
         '/supervisor/delete-item',//make
         '/supervisor/delete-meal-plan',//make
-        '/supervisor/delete-ride',//make
-        '/'
+        '/supervisor/delete-ride'//make
     ],
 };
 
