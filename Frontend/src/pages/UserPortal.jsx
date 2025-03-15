@@ -4,10 +4,11 @@ import HeaderLoggedIn from '../components/HeaderLoggedIn';
 import Footer from '../components/Footer';
 import {useState} from "react";
 
+//this function is based on Mark's Auth function in "Frontend\src\pages\Auth.jsx".
 export default function UserPortal() {
   const [activeTab, setActiveTab] = useState("userInfo");
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  // const [error, setError] = useState('');
+  // const [successMessage, setSuccessMessage] = useState('');
   const [userInfo, setUserInfo] = useState
   (
     {
@@ -27,36 +28,53 @@ export default function UserPortal() {
       MilitaryStatus: ""
     }
   );
-  const userIDTemp = {userID: 1};
+  const sentData = {visitorID: localStorage.getItem("visitorID")};
 
   const handleUserInfoClick = async (e) => {
-    // setError('');
-    // setSuccessMessage('');
+    setError('');
+    setSuccessMessage('');
 
+    console.log(sentData);
     try {
-      const res = await fetch(`http://localhost:3000/portal/userinfo`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userIDTemp)
-      });
-      // const res = await fetch(`http://localhost:3000/add-visitor`, {//CHANGE MADE:KEVIN
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(payload),
-      // });
+      let res = await fetch
+      (
+        `http://localhost:3000/portal/userinfo`, 
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(sentData)
+        }
+      );
+      console.log("status is " + res.status);
 
-      const data = await res.json();
+      let tempOutput = await res.json();
+      console.log(tempOutput);
 
-      console.log("Here's the retrieved data:\n", data);
+      setUserInfo
+      (
+        {
+          VisitorID: tempOutput.VisitorID,
+          FirstName: tempOutput.FirstName,
+          LastName: tempOutput.LastName,
+          Phone: tempOutput.Phone,
+          Email: tempOutput.Email,
+          Address: tempOutput.Address,
+          DateOfBirth: tempOutput.DateOfBirth,
+          AccessibilityNeeds: tempOutput.AccessibilityNeeds,
+          Gender: tempOutput.Gender,
+          Username: tempOutput.Username,
+          Password: tempOutput.Password,
+          Height: tempOutput.Height, 
+          Age: tempOutput.Age,
+          MilitaryStatus: tempOutput.MilitaryStatus
+        }
+      )
 
-      // if (res.ok && data.visitorID) {
-      //   localStorage.setItem("visitorID", data.visitorID);
-      //   setSuccessMessage("Login successful!");
-      //   setTimeout(() => (window.location.href = "/portal"), 1000);
-      // } else {
-      //   setError(data.error || "Invalid credentials.");
-      // }
-    } catch (err) {
+      // return tempOutput;
+
+    } 
+    catch (err) 
+    {
       console.error("Retrieval error:", err);
       setError("Retrieval failed. Please try again later.");
     }
@@ -78,7 +96,23 @@ export default function UserPortal() {
 
         {/*User Info*/}
         {activeTab === 'userInfo' && (
-          <p className="text-2xl font-bold mb-4 text-center">User Info</p>
+          <div>
+            <p className="text-2xl font-bold mb-4 text-center">User Info</p>
+            <p>{userInfo.AccessibilityNeeds}</p>
+            <p>{userInfo.Address}</p>
+            <p>{userInfo.Age}</p>
+            <p>{userInfo.DateOfBirth}</p>
+            <p>{userInfo.Email}</p>
+            <p>{userInfo.FirstName}</p>
+            <p>{userInfo.Gender}</p>
+            <p>{userInfo.Height}</p>
+            <p>{userInfo.LastName}</p>
+            <p>{userInfo.MilitaryStatus}</p>
+            <p>{userInfo.Password}</p>
+            <p>{userInfo.Phone}</p>
+            <p>{userInfo.Username}</p>
+            <p>{userInfo.VisitorID}</p>
+          </div>
       )}
 
       {/*Past Purchases*/}

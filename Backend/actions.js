@@ -540,12 +540,10 @@ const getUserInfo = (req, res) => {
                 res.end(JSON.stringify({ error: "Invalid JSON format" }));
                 return;
             }
+            const visitorId = parsedBody.visitorID;
 
-            const userID = parsedBody["userID"];
-            console.log(userID);
-
-            console.log(req);
-            pool.query(queries.getUserInfo, [userID], (error, results) => {
+            //console.log(req);
+            pool.query(queries.getUserInfo, [visitorId], (error, results) => {
             if (error) {
                 console.error("Error fetching visitor records:", error);
                 res.writeHead(500, { "Content-Type": "application/json" });
@@ -553,7 +551,7 @@ const getUserInfo = (req, res) => {
                 return;
             }
             res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify(results));
+            res.end(JSON.stringify(results[0]));
             });
         }
     )
