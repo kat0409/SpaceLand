@@ -113,7 +113,7 @@ function routes(req, res) {
         return actions.getSupervisorAccountInfo(req,res);
     }
 
-    if(url.startsWith('/supervisor/add-ride') && method === 'POST'){//make
+    if(url.startsWith('/supervisor/add-ride') && method === 'POST'){
         return actions.addRide(req,res);
     }
 
@@ -123,6 +123,10 @@ function routes(req, res) {
 
     if(url.startsWith('/employee/login') && method === 'POST'){
         return actions.loginEmployee(req,res);
+    }
+
+    if(url.startsWith('/supervisor/update-meal-plan') && method === 'PUT'){
+        return actions.updateMealPlan(req,res);
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });

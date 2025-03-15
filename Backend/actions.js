@@ -270,7 +270,8 @@ const loginEmployee = (req, res) => {
                 res.writeHead(200, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({
                     message: "Login successful",
-                    employeeID: results[0].EmployeeID//check later
+                    employeeID: results[0].EmployeeID,//check later
+                    role: "employee"
                 }));
             }
         });
