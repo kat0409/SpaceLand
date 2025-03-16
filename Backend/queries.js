@@ -100,10 +100,6 @@ const getVisitorRecords = `
     SELECT * FROM visitors
 `;
 
-//Only delete employee if employee has been fired, employmentStatus = 0
-const deleteEmployee = `
-    DELETE FROM employee WHERE employmentStatus == 0 AND EmployeeID = ?
-`;
 
 
 
@@ -141,7 +137,6 @@ module.exports = {
     getSalesReport,
     getTicketSales,
     getVisitorRecords,
-    deleteEmployee
 };
 
 //checkMerchQuantity
