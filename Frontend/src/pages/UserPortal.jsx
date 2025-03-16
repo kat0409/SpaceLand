@@ -49,11 +49,10 @@ export default function UserPortal() {
               body: JSON.stringify(sentData)
             }
           );
-          //console.log("status is " + res.status);
+          console.log("status is " + res.status);
 
           let tempOutput = await res.json();
           console.log(tempOutput);
-          //console.log(tempOutput);
 
           setUserInfo
           (
@@ -73,7 +72,7 @@ export default function UserPortal() {
               Age: tempOutput.Age,
               MilitaryStatus: tempOutput.MilitaryStatus
             }
-          );
+          )
         } 
         catch (err) 
         {
