@@ -13,23 +13,68 @@ export default function EmployeeLogin() {
   });
 
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // TODO: Replace with real authentication logic when backend is ready
-    if (formData.username && formData.password) {
-      console.log('Logging in employee:', formData);
-      navigate('/employee-portal'); // placeholder for now
-    } else {
+    if (!formData.username || !formData.password) {
       setError('Please fill in both fields.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      // 🔐 Try EMPLOYEE login first
+      const empRes = await fetch(`${BACKEND_URL}/employee/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const empData = await empRes.json();
+
+      if (empRes.ok && empData.employeeID) {
+        localStorage.setItem('employeeID', empData.employeeID);
+        localStorage.setItem('role', 'employee');
+        navigate('/employee-dashboard');
+        return;
+      }
+
+      // 🔐 If employee login fails, try SUPERVISOR login
+      const supRes = await fetch(`${BACKEND_URL}/supervisor/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const supData = await supRes.json();
+
+      if (supRes.ok && supData.supervisorID) {
+        localStorage.setItem('supervisorID', supData.supervisorID);
+        localStorage.setItem('role', 'supervisor');
+        navigate('/supervisor-portal');
+        return;
+      }
+
+      // ❌ If both fail
+      setError(supData.error || empData.error || 'Invalid credentials.');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('An error occurred while logging in.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -43,9 +88,7 @@ export default function EmployeeLogin() {
         className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white px-6 py-20 flex items-center justify-center"
       >
         <div className="w-full max-w-md bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-2xl shadow-lg">
-          <h2 className="text-3xl font-bold mb-4 text-center">
-            👩‍🚀 Employee Login
-          </h2>
+          <h2 className="text-3xl font-bold mb-4 text-center">👩‍🚀 Employee Login</h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -76,9 +119,12 @@ export default function EmployeeLogin() {
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 text-white font-semibold py-2 rounded-lg transition"
+              disabled={loading}
+              className={`w-full bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 text-white font-semibold py-2 rounded-lg transition ${
+                loading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
-              Login
+              {loading ? 'Logging in...' : 'Login'}
             </button>
           </form>
         </div>

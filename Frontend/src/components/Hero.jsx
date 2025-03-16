@@ -1,46 +1,68 @@
 // src/components/Hero.jsx
-import { motion } from 'framer-motion';
+import { Link } from "react-router-dom";
 
 export default function Hero() {
   return (
-    <section id="home"className="relative h-screen w-full overflow-hidden bg-black text-white">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="/assets/space-bg.jpg"
-          alt="Galaxy Background"
-          className="w-full h-full object-cover brightness-75"
+    <section className="relative w-full h-screen overflow-hidden">
+      {/* 🔭 Galaxy Video Background */}
+      <div className="absolute inset-0 w-full h-full z-[-1]">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
+        >
+          <source src="/assets/galaxy.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
+        {/* 🌠 Refined LEFT-TO-RIGHT Fade overlay */}
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage:
+              'linear-gradient(to right, black 0%, rgba(0, 0, 0, 0.7) 25%, rgba(0, 0, 0, 0.3) 40%, rgba(0, 0, 0, 0) 60%)',
+            backdropFilter: 'blur(1.5px)',
+          }}
         />
+        {/* 🌠 Bottom fade overlay */}
+<div className="absolute bottom-0 w-full h-40 bg-gradient-to-b from-transparent to-black z-10 pointer-events-none" />
+        
+
+        {/* ✨ Optional: Particle animation overlay behind text */}
+        <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
+          <div className="w-full h-full bg-[url('/assets/particles.png')] bg-repeat bg-cover opacity-10 animate-galaxy-particles" />
+        </div>
       </div>
 
-      {/* Overlay Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
-        <motion.h1
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1 }}
-          className="text-5xl md:text-7xl font-bold tracking-tight drop-shadow-lg"
-        >
-          Welcome to <span className="text-purple-400">Spaceland</span>
-        </motion.h1>
+      {/* 🌌 Hero Content */}
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 items-center h-full px-6 md:px-12">
+        <div className="text-white text-left space-y-6">
+          <h1
+            className="typewriter font-extrabold tracking-widest text-[70px] md:text-[90px] drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]"
+            style={{ fontFamily: 'Orbitron, sans-serif' }}
+          >
+            Welcome<span className="typewriter-cursor">|</span>
+          </h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.3, delay: 0.2 }}
-          className="mt-4 text-lg md:text-xl text-gray-200 max-w-xl"
-        >
-          Houston’s ultimate space-themed rollercoaster adventure awaits.
-        </motion.p>
+          <p
+            className="text-lg md:text-xl max-w-xl text-gray-200"
+            style={{
+              fontFamily: 'Orbitron, sans-serif',
+              fontWeight: 600,
+            }}
+          >
+            Houston’s ultimate space-themed rollercoaster adventure awaits.
+          </p>
 
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ duration: 0.3 }}
-          className="mt-8 px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:from-indigo-600 hover:to-purple-700 transition-all"
-        >
-          Explore Rides
-        </motion.button>
+          <Link
+            to="/purchase"
+            className="mt-6 inline-block bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition animate-pulse-glow"
+          >
+            Buy Tickets
+          </Link>
+        </div>
       </div>
     </section>
   );
