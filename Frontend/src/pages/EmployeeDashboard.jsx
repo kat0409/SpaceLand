@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 export default function EmployeeDashboard() {
   const [employee, setEmployee] = useState(null);
   const [error, setError] = useState('');
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
   const employeeID = localStorage.getItem('employeeID');
 
@@ -52,7 +52,6 @@ export default function EmployeeDashboard() {
               <p><strong>Supervisor ID:</strong> {employee.SupervisorID}</p>
               <p><strong>Address:</strong> {employee.Address}</p>
               <p><strong>Employment Status:</strong> {employee.employmentStatus === 1 ? 'Active' : 'Inactive'}</p>
-              <p><strong>Date of Birth:</strong> {new Date(employee.dateOfBirth).toLocaleDateString()}</p>
               <p><strong>Username:</strong> {employee.username}</p>
             </div>
           ) : !error && (

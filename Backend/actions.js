@@ -270,8 +270,8 @@ const loginEmployee = (req, res) => {
                 res.writeHead(200, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({
                     message: "Login successful",
-                    employeeID: results[0].EmployeeID,
-                    role: "employee"//check later
+                    employeeID: results[0].EmployeeID,//check later
+                    //role: "employee"
                 }));
             }
         });
@@ -627,19 +627,6 @@ const getVisitorRecords = (req, res) => {
 };
 
 //Reports
-const lowStockMerchandiseReport = (req, res) => {
-    pool.query(queries.lowStockMerchandiseReport, (error, results) => {
-        if (error) {
-            console.error("Error fetching low stock merchandise report:", error);
-            res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Internal server error" }));
-            return;
-        }
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(results));
-    });
-};
-
 const rideMaintenanceReport = (req,res) => {
     pool.query(queries.rideMaintenanceReport, (error, results) => {
         if (error) {
@@ -701,27 +688,35 @@ const getVisitorAccountInfo = (req, res) => {
     });
 };
 
+const getEmployeeAccountInfo = (req, res) => {
+    const parsedUrl = url.parse(req.url, true);
+    const { employeeID } = parsedUrl.query; 
 
-const getEmployeeAccountInfo = (req,res) => {
-    const parsedUrl = url.parse(req.url, true); 
-    const { EmployeeID } = parsedUrl.query; 
-
-    if (EmployeeID) {
+    if (!employeeID) {
         res.writeHead(400, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Missing 'username' or 'password' query parameter" }));
+        res.end(JSON.stringify({ error: "Missing 'employeeID' query parameter" }));
         return;
     }
 
-    pool.query(queries.getEmployeeAccountInfo, [EmployeeID], (error, results) => {
+    pool.query(queries.getEmployeeAccountInfo, [employeeID], (error, results) => {
         if (error) {
             console.error("Error fetching employee account info:", error);
             res.writeHead(500, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ error: "Internal server error" }));
             return;
         }
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(results));
-    });
+    
+        console.log("Query Results:", results); // Debugging line
+    
+        if (results.length === 0) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Employee not found" }));
+        } else {
+            console.log("Sending Employee Data:", results[0]); // Debugging line
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(results[0])); 
+        }
+    });    
 };
 
 const getSupervisorAccountInfo = (req,res) => {
@@ -746,6 +741,112 @@ const getSupervisorAccountInfo = (req,res) => {
     });
 };
 
+
+const checkRideExists = (req, res) => {
+    let body = '';
+
+    req.on('data', (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (err) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Invalid JSON' }));
+            return;
+        }
+
+        const { RideName } = parsedBody;
+
+        if (!RideName) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'RideName is required' }));
+            return;
+        }
+
+        pool.query(queries.checkRideExists, [RideName], (err, results) => {
+            if (err) {
+                console.error('Error querying checkRideExists:', err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Internal server error' }));
+                return;
+            }
+
+            if (results.length > 0) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ exists: true }));
+            } else {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ exists: false }));
+            }
+        });
+    });
+};
+
+const addRide = (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (error) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const {
+            RideID, RideName, MinHeight, MaxWeight, Capacity, Duration, MaintenanceStatus, MaintenanceNeed
+        } = parsedBody;
+
+        if (!RideID || !RideName || !MinHeight || !MaxWeight || !Capacity || !Duration || !MaintenanceStatus || !MaintenanceNeed) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "All ride fields are required." }));
+            return;
+        }
+
+        pool.query(queries.checkRideExists, [RideName], (error, results) => {
+            if (error) {
+                console.error("Error checking existing ride:", error);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+
+            if (results.length > 0) {
+                res.writeHead(400, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Ride already exists" }));
+                return;
+            }
+
+            pool.query(
+                queries.addRide,
+                [RideID, RideName, MinHeight, MaxWeight, Capacity, Duration, MaintenanceStatus, MaintenanceNeed],
+                (error, results) => {
+                    if (error) {
+                        console.error("Error adding ride:", error);
+                        res.writeHead(500, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ error: "Internal server error" }));
+                        return;
+                    }
+
+                    res.writeHead(201, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ message: "Ride added successfully", RideID: results.insertId }));
+                }
+            );
+        });
+    });
+};
+
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -766,7 +867,6 @@ module.exports = {
     getTicketSales,
     getVisitorRecords,
     addMerchandiseTransaction,
-    lowStockMerchandiseReport,
     rideMaintenanceReport,
     visitorPurchasesReport,
     attendanceAndRevenueReport,
@@ -774,5 +874,7 @@ module.exports = {
     getEmployeeAccountInfo,
     getSupervisorAccountInfo,
     loginEmployee,
-    loginSupervisor
+    loginSupervisor,
+    addRide,
+    checkRideExists
 };

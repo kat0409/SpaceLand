@@ -55,11 +55,11 @@ const markNotificationAsSent = `
     WHERE notificationID = ?;
 `;
 
-const authenticateVisitor = 'SELECT * FROM visitors WHERE username = ? AND password = ?';
+const authenticateVisitor = 'SELECT VisitorID FROM visitors WHERE username = ? AND password = ?';
 
-const authenticateEmployee = 'SELECT * FROM employee WHERE username = ? AND password = ?';
+const authenticateEmployee = 'SELECT EmployeeID  FROM employee WHERE username = ? AND password = ?';
 
-const authenticateSupervisor = 'SELECT * FROM supervisors WHERE username = ? AND password = ?';
+const authenticateSupervisor = 'SELECT SupervisorID FROM supervisors WHERE username = ? AND password = ?';
 
 const addVisitor = `
     INSERT INTO visitors (FirstName, LastName, Phone, Email, Address, DateOfBirth, 
@@ -71,6 +71,8 @@ const checkVisitorExists = `
     SELECT * FROM visitors WHERE Username = ?
 `;
 
+
+//not yet in ui
 const purchasePass = 'INSERT INTO tickets (ticketType, price, VisitorID, purchaseDate) VALUES (?,?,?,NOW())';
 
 const getEmployeesByDepartment = `
@@ -81,7 +83,7 @@ const getMaintenanceRequests = `
     SELECT * FROM rides WHERE MaintenanceNeed = 1
 `;
 
-const updateRideMaintenanceStatus = `
+const updateRideMaintenanceStatus = `//not yet in ui
     UPDATE rides 
     SET MaintenanceStatus = ? 
     WHERE RideID = (SELECT RideID FROM maintenance WHERE MaintenanceID = ?)
@@ -117,22 +119,6 @@ const addRide = `
 const checkRideExists = `SELECT * FROM rides WHERE RideName = ?`;
 
 //Reports
-const lowStockMerchandiseReport = `
-    SELECT 
-        m.itemName AS Merchandise_Item,
-        m.quantity AS Remaining_Stock,
-        s.email AS Supervisor_Email,
-        ln.timestamp AS Notification_Date
-    FROM 
-        lowstocknotifications ln
-    JOIN 
-        merchandise m ON ln.merchandiseID = m.merchandiseID
-    JOIN 
-        supervisors s ON ln.supervisorID = s.SupervisorID
-    WHERE 
-        ln.sent = FALSE;
-`;
-
 const rideMaintenanceReport = `
     SELECT 
         r.RideName AS Ride,
@@ -172,19 +158,20 @@ const visitorPurchasesReport = `
 const attendanceAndRevenueReport = `
     SELECT 
         oh.date AS Operating_Date,
-        COUNT(t.ticketID) AS Tickets_Sold,
-        SUM(tt.totalAmount) AS Total_Ticket_Revenue,
+        COUNT(DISTINCT t.ticketID) AS Tickets_Sold,
+        COALESCE(SUM(tt.totalAmount), 0) AS Total_Ticket_Revenue,
         oh.weatherCondition AS Weather_Condition
     FROM 
         operating_hours oh
-    JOIN 
+    LEFT JOIN 
         tickets t ON oh.ticketID = t.ticketID
-    JOIN 
+    LEFT JOIN 
         tickettransactions tt ON t.ticketID = tt.ticketID
     GROUP BY 
         oh.date, oh.weatherCondition
     ORDER BY 
         oh.date DESC;
+
 `;
 
 const getVisitorAccountInfo = `
@@ -198,9 +185,9 @@ const getVisitorAccountInfo = `
 const getEmployeeAccountInfo = `
     SELECT e.FirstName, e.LastName, e.EmployeeID, e.Email,
     e.Address, e.SupervisorID, e.Department,
-    e.employmentStatus, e.dateOfBirth
+    e.employmentStatus
     FROM employee e
-    WHERE e.username = ? AND e.password = ?;
+    WHERE e.EmployeeID = ?;
 `;
 
 const getSupervisorAccountInfo = `
@@ -252,7 +239,6 @@ module.exports = {
     updateMaintenanceDates,
     updateRideMaintenanceStatus,
     authenticateEmployee,
-    lowStockMerchandiseReport,
     rideMaintenanceReport,
     visitorPurchasesReport,
     attendanceAndRevenueReport,
