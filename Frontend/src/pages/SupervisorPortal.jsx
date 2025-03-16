@@ -13,7 +13,7 @@ export default function SupervisorPortal() {
   const [visitorRecords, setVisitorRecords] = useState([]);
 
   //maybe
-  const [lowStockReport, setLowStockReport] = useState([]);
+  const [attendanceAndRevenueReport, setAttendanceAndRevenueReport] = useState([]);
   const [rideMaintenanceReport, setRideMaintenanceReport] = useState([]);
   const [visitorPurchasesReport, setVisitorPurchasesReport] = useState([]);
 
@@ -46,10 +46,10 @@ export default function SupervisorPortal() {
       .then(data => setVisitorRecords(data))
       .catch(err => console.error('Visitor Records Error:', err));
 
-      fetch(`${BACKEND_URL}/supervisor/low-stock-merchandise`)
+    fetch(`${BACKEND_URL}/reports/attendance-revenue`)
       .then(res => res.json())
-      .then(data => setLowStockReport(data))
-      .catch(err => console.error('Low Stock Merchandise Report Error:', err));
+      .then(data => setAttendanceAndRevenueReport(data))
+      .catch(err => console.error('Attendance and Revenue Report Error:', err));
   
     fetch(`${BACKEND_URL}/supervisor/ride-maintenance`)
       .then(res => res.json())
@@ -149,33 +149,33 @@ export default function SupervisorPortal() {
             </div>
           </div>
 
-          {/* Low Stock Merchandise Report */}
+          {/* Attendance and Revenue Report */}
           <div>
-            <h2 className="text-2xl font-semibold mb-4">📉 Low Stock Merchandise Report</h2>
+            <h2 className="text-2xl font-semibold mb-4">📊 Attendance & Revenue Report</h2>
             <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
-              {lowStockReport.length > 0 ? (
+              {attendanceAndRevenueReport.length > 0 ? (
                 <table className="w-full text-sm">
                   <thead className="text-left text-purple-300">
                     <tr>
-                      <th>Item Name</th>
-                      <th>Remaining Stock</th>
-                      <th>Supervisor Email</th>
-                      <th>Notification Date</th>
+                      <th>Operating Date</th>
+                      <th>Tickets Sold</th>
+                      <th>Total Ticket Revenue</th>
+                      <th>Weather Condition</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {lowStockReport.map((item, idx) => (
+                    {attendanceAndRevenueReport.map((entry, idx) => (
                       <tr key={idx} className="border-t border-white/10">
-                        <td>{item.Merchandise_Item}</td>
-                        <td>{item.Remaining_Stock}</td>
-                        <td>{item.Supervisor_Email}</td>
-                        <td>{new Date(item.Notification_Date).toLocaleDateString()}</td>
+                        <td>{new Date(entry.Operating_Date).toLocaleDateString()}</td>
+                        <td>{entry.Tickets_Sold}</td>
+                        <td>${entry.Total_Ticket_Revenue.toFixed(2)}</td>
+                        <td>{entry.Weather_Condition}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               ) : (
-                <p>No low stock notifications.</p>
+                <p>No attendance or revenue data available.</p>
               )}
             </div>
           </div>

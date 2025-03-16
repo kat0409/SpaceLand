@@ -117,22 +117,6 @@ const addRide = `
 const checkRideExists = `SELECT * FROM rides WHERE RideName = ?`;
 
 //Reports
-const lowStockMerchandiseReport = `
-    SELECT 
-        m.itemName AS Merchandise_Item,
-        m.quantity AS Remaining_Stock,
-        s.email AS Supervisor_Email,
-        ln.timestamp AS Notification_Date
-    FROM 
-        lowstocknotifications ln
-    JOIN 
-        merchandise m ON ln.merchandiseID = m.merchandiseID
-    JOIN 
-        supervisors s ON ln.supervisorID = s.SupervisorID
-    WHERE 
-        ln.sent = FALSE;
-`;
-
 const rideMaintenanceReport = `
     SELECT 
         r.RideName AS Ride,
@@ -252,7 +236,6 @@ module.exports = {
     updateMaintenanceDates,
     updateRideMaintenanceStatus,
     authenticateEmployee,
-    lowStockMerchandiseReport,
     rideMaintenanceReport,
     visitorPurchasesReport,
     attendanceAndRevenueReport,

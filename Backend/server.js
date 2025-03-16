@@ -26,7 +26,6 @@ const routeMap = {
         '/supervisor/sales-report',
         '/supervisor/ticket-sales',
         '/supervisor/visitors',
-        '/supervisor/low-stock',
         '/supervisor/visitor-purchases',
         '/supervisor/ride-maintenance',
         '/supervisor/attendance-revenue',
