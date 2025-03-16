@@ -46,7 +46,7 @@ export default function SupervisorPortal() {
       .then(data => setVisitorRecords(data))
       .catch(err => console.error('Visitor Records Error:', err));
 
-    fetch(`${BACKEND_URL}/reports/attendance-revenue`)
+    fetch(`${BACKEND_URL}/supervisor/attendance-revenue`)
       .then(res => res.json())
       .then(data => setAttendanceAndRevenueReport(data))
       .catch(err => console.error('Attendance and Revenue Report Error:', err));
@@ -168,7 +168,7 @@ export default function SupervisorPortal() {
                       <tr key={idx} className="border-t border-white/10">
                         <td>{new Date(entry.Operating_Date).toLocaleDateString()}</td>
                         <td>{entry.Tickets_Sold}</td>
-                        <td>${entry.Total_Ticket_Revenue.toFixed(2)}</td>
+                        <td>${(parseFloat(entry.Total_Ticket_Revenue) || 0).toFixed(2)}</td>
                         <td>{entry.Weather_Condition}</td>
                       </tr>
                     ))}

@@ -867,7 +867,6 @@ module.exports = {
     getTicketSales,
     getVisitorRecords,
     addMerchandiseTransaction,
-    lowStockMerchandiseReport,
     rideMaintenanceReport,
     visitorPurchasesReport,
     attendanceAndRevenueReport,

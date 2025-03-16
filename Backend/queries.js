@@ -71,6 +71,8 @@ const checkVisitorExists = `
     SELECT * FROM visitors WHERE Username = ?
 `;
 
+
+//not yet in ui
 const purchasePass = 'INSERT INTO tickets (ticketType, price, VisitorID, purchaseDate) VALUES (?,?,?,NOW())';
 
 const getEmployeesByDepartment = `
@@ -81,7 +83,7 @@ const getMaintenanceRequests = `
     SELECT * FROM rides WHERE MaintenanceNeed = 1
 `;
 
-const updateRideMaintenanceStatus = `
+const updateRideMaintenanceStatus = `//not yet in ui
     UPDATE rides 
     SET MaintenanceStatus = ? 
     WHERE RideID = (SELECT RideID FROM maintenance WHERE MaintenanceID = ?)
@@ -156,19 +158,20 @@ const visitorPurchasesReport = `
 const attendanceAndRevenueReport = `
     SELECT 
         oh.date AS Operating_Date,
-        COUNT(t.ticketID) AS Tickets_Sold,
-        SUM(tt.totalAmount) AS Total_Ticket_Revenue,
+        COUNT(DISTINCT t.ticketID) AS Tickets_Sold,
+        COALESCE(SUM(tt.totalAmount), 0) AS Total_Ticket_Revenue,
         oh.weatherCondition AS Weather_Condition
     FROM 
         operating_hours oh
-    JOIN 
+    LEFT JOIN 
         tickets t ON oh.ticketID = t.ticketID
-    JOIN 
+    LEFT JOIN 
         tickettransactions tt ON t.ticketID = tt.ticketID
     GROUP BY 
         oh.date, oh.weatherCondition
     ORDER BY 
         oh.date DESC;
+
 `;
 
 const getVisitorAccountInfo = `
