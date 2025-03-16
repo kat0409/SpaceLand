@@ -17,7 +17,10 @@ export default function Auth() {
   const [successMessage, setSuccessMessage] = useState('');
 
   // Optional: use .env for backend URL
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://spaceland.onrender.com";
+  //const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://spaceland.onrender.com";
+  const BACKEND_URL = "http://localhost:3000"; // Change this if backend is deployed
+
+  console.log(BACKEND_URL);
 
   const handleSignupChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -51,7 +54,7 @@ export default function Auth() {
     };
 
     try {
-      const res = await fetch(`${BACKEND_URL}/add-visitor`, {
+      const res = await fetch(`http://localhost:3000/add-visitor`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -165,3 +168,47 @@ export default function Auth() {
     </>
   );
 }
+
+const registerVisitor = async (visitorData) => {
+  try {
+    const response = await fetch('http://localhost:3000/add-visitor', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(visitorData)
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      console.log('Registration Successful:', data);
+    } else {
+      console.error('Error:', data.error);
+    }
+  } catch (error) {
+    console.error('Request failed:', error);
+  }
+};
+
+const loginVisitor = async (username, password) => {
+  try {
+    const response = await fetch('http://localhost:3000/login-visitor', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      console.log('Login Successful:', data);
+      localStorage.setItem('visitorID', data.visitorID); // Save session
+    } else {
+      console.error('Error:', data.error);
+    }
+  } catch (error) {
+    console.error('Request failed:', error);
+  }
+};
+

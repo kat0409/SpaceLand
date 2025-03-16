@@ -81,10 +81,6 @@ function routes(req, res) {
         return actions.getVisitorRecords(req, res);
     }
 
-    if(url.startsWith('/supervisor/low-stock') && method === 'GET'){
-        return actions.lowStockMerchandiseReport(req,res);
-    }
-
     if(url.startsWith('/supervisor/ride-maintenance') && method === 'GET'){
         return actions.rideMaintenanceReport(req,res);
     }
@@ -121,7 +117,7 @@ function routes(req, res) {
         return actions.loginSupervisor(req,res);
     }
 
-    if(url.startsWith('/employee/login') && method === 'POST'){
+    if(url.startsWith('/employee-login') && method === 'POST'){
         return actions.loginEmployee(req,res);
     }
 
