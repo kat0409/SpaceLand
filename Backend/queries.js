@@ -221,6 +221,7 @@ const deleteEmployee = `
 `;
 
 
+
 module.exports = {
     getRides,
     getEmployees,
@@ -266,7 +267,8 @@ module.exports = {
     addRide,
     authenticateSupervisor,
     checkRideExists,
-    deleteEmployee
+    deleteEmployee,
+    updateEmployeeInfo
 };
 
 //checkMerchQuantity
