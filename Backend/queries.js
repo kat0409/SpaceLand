@@ -101,7 +101,7 @@ const getVisitorRecords = `
 `;
 
 const fireEmployee = `
-    DELETE FROM employee WHERE employmentStatus == 0 AND EmployeeID > 0
+    DELETE FROM employee WHERE employmentStatus == 0 AND EmployeeID = ?
 `;
 
 
