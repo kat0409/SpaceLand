@@ -627,19 +627,6 @@ const getVisitorRecords = (req, res) => {
 };
 
 //Reports
-const lowStockMerchandiseReport = (req, res) => {
-    pool.query(queries.lowStockMerchandiseReport, (error, results) => {
-        if (error) {
-            console.error("Error fetching low stock merchandise report:", error);
-            res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Internal server error" }));
-            return;
-        }
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(results));
-    });
-};
-
 const rideMaintenanceReport = (req,res) => {
     pool.query(queries.rideMaintenanceReport, (error, results) => {
         if (error) {
