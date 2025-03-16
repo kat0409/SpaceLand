@@ -762,7 +762,7 @@ const updateEmployeeInfo = (req, res) => {
             res.end(JSON.stringify({ error: "Invalid JSON format" }));
             return;
         }});
-
+        //Possible changes employees can make
         const { EmployeeID, LastName, Email, address, SupervisorID, password, Department} = parsedBody;
 
         if (!EmployeeID) {
@@ -840,6 +840,7 @@ const updateEmployeeInfo = (req, res) => {
     });
 });
 }
+
 
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
