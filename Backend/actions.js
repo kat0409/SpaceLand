@@ -767,7 +767,7 @@ const updateEmployeeInfo = (req, res) => {
 
         if (!EmployeeID) {
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "EmployeeID is required" }));
+            res.end(JSON.stringify({ error: "Employee ID is required" }));
             return;
         }
 
@@ -862,7 +862,7 @@ const updateMealPlan = (req, res) => {
         const { restaurantID, mealPlanTier, price } = parsedBody;
         if (!restaurantID || !mealPlanTier || !price) {
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "RestaurantID, mealPlanTier, and Price are required" }));
+            res.end(JSON.stringify({ error: "Restaurant ID, meal plan tier, and price are required" }));
             return;
         }
         pool.query(queries.updateMealPlan, [restaurantID, mealPlanTier, price], (error, results) => {
@@ -878,6 +878,40 @@ const updateMealPlan = (req, res) => {
         });
     }
 
+    const deleteEmployee = (req, res) => {
+        let body = "";
+    
+        req.on("data", (chunk) => {
+            body += chunk.toString();
+        });
+    
+        req.on("end", () => {
+            let parsedBody;
+            try {
+                parsedBody = JSON.parse(body);
+            } catch (error) {
+                res.writeHead(400, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Invalid JSON format" }));
+                return;
+            }});
+            const { EmployeeID, employmentStatus } = parsedBody;
+            if (!EmployeeID || !employmentStatus) {
+                res.writeHead(400, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Employee ID and employment status are required" }));
+                return;
+            }
+            pool.query(queries.deleteEmployee, [EmployeeID, employmentStatus], (error, results) => {
+                if (error) {
+                    console.error("Error updating meal plan:", error);
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ error: "Internal server error" }));
+                    return;
+                }
+    
+             
+                  console.log("Meal plan updated successfully");
+    })
+    };      
 
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
@@ -909,5 +943,6 @@ module.exports = {
     loginEmployee,
     loginSupervisor,
     updateEmployeeInfo,
-    updateMealPlan
+    updateMealPlan,
+    deleteEmployee
 }
