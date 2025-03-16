@@ -267,8 +267,7 @@ module.exports = {
     addRide,
     authenticateSupervisor,
     checkRideExists,
-    deleteEmployee,
-    updateEmployeeInfo
+    deleteEmployee
 };
 
 //checkMerchQuantity
