@@ -216,6 +216,10 @@ const updateMealPlan = `
     SET mealPlanTier = ?, price = ?
     WHERE restaurantID = ?
 `;
+const deleteEmployee = `
+    DELETE FROM employee WHERE employmentStatus == 0 AND EmployeeID = ?
+`;
+
 
 module.exports = {
     getRides,
