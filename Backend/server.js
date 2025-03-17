@@ -45,6 +45,7 @@ const routeMap = {
         '/supervisor/add-ride',
         '/supervisor/login',
         '/employee-login',
+        '/employee-login',
     ],
     'PUT': [
         '/update-employee', 
