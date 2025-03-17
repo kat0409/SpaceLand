@@ -541,6 +541,7 @@ const getUserInfo = (req, res) => {
                 return;
             }
             const visitorId = parsedBody.visitorID;
+            console.log(visitorId);
 
             //console.log(req);
             pool.query(queries.getUserInfo, [visitorId], (error, results) => {
@@ -550,6 +551,7 @@ const getUserInfo = (req, res) => {
                 res.end(JSON.stringify({ error: "Internal server error" }));
                 return;
             }
+            console.log(results);
             res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify(results[0]));
             });

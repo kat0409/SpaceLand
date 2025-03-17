@@ -7,6 +7,7 @@ import {useEffect} from "react";
  
 //this function is based on Mark's Auth function in "Frontend\src\pages\Auth.jsx".
 export default function UserPortal() {
+
   const [activeTab, setActiveTab] = useState("userInfo");
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -29,16 +30,47 @@ export default function UserPortal() {
       MilitaryStatus: ""
     }
   );
+  const [pastPurchasesState, setPastPurchasesState] = useState(null);
+
+  //this object is meant to emulate what the purchaseObject should return
+  let testPastPurchaseObject = 
+  [
+    {
+      transactionID: 1,
+      ticketID: 123,
+      VisitorID: 125,
+      transactionDate: "July 25, 2024",
+      quantity: 2,
+      totalAmount: 45
+    },
+    {
+      transactionID: 2,
+      ticketID: 3,
+      VisitorID: 15,
+      transactionDate: "August 19, 2025",
+      quantity: 2,
+      totalAmount: 45
+    },
+    {
+      transactionID: 3,
+      ticketID: 3,
+      VisitorID: 5,
+      transactionDate: "September 3, 2024",
+      quantity: 5,
+      totalAmount: 45
+    }
+  ];
+
   const sentData = {visitorID: localStorage.getItem("visitorID")};
 
   useEffect(() => 
     {
-      async function fetchData()
+      async function fetchVisitorData()
       {
         setError('');
         setSuccessMessage('');
 
-        console.log(sentData);
+        //console.log(sentData);
         try {
           let res = await fetch
           (
@@ -49,10 +81,10 @@ export default function UserPortal() {
               body: JSON.stringify(sentData)
             }
           );
-          console.log("status is " + res.status);
+          //console.log("status is " + res.status);
 
           let tempOutput = await res.json();
-          console.log(tempOutput);
+          //console.log(tempOutput);
 
           setUserInfo
           (
@@ -80,10 +112,72 @@ export default function UserPortal() {
           setError("Retrieval failed. Please try again later.");
         }
       }
-      fetchData();
+
+      //past purchases will be retrieved from the server here
+      // async function fetchPurchaseData()
+      // {
+      //   setError('');
+      //   setSuccessMessage('');
+
+      //   console.log(sentData);
+      //   try {
+      //     let res = await fetch
+      //     (
+      //       `http://localhost:3000/portal/userinfo`, //UPDATE TO ROUTE
+      //       {
+      //         method: "POST",
+      //         headers: { "Content-Type": "application/json" },
+      //         body: JSON.stringify(sentData)
+      //       }
+      //     );
+      //     console.log("status is " + res.status);
+
+      //     let tempOutput = await res.json();
+      //     console.log(tempOutput);
+      //   } 
+      //   catch (err) 
+      //   {
+      //     console.error("Retrieval error:", err);
+      //     setError("Retrieval failed. Please try again later.");
+      //   }
+      // }
+      
+      setPastPurchasesState(testPastPurchaseObject);//CHANGE TO tempOutput
+      fetchVisitorData();
     },
     []
+  
+  
+  
   );
+
+  let arrOfPurchases = [];
+  //testPastPurchaseObject should be replaced with the actually received object
+  // for (let curr of testPastPurchaseObject)
+  // {
+  //   let testObject = 
+  //   {
+  //     transactionID: curr.transactionID,
+  //     ticketID: curr.ticketID,
+  //     VisitorID: curr.VisitorID,
+  //     transactionDate: curr.transactionDate,
+  //     quantity: curr.quantity,
+  //     totalAmount: curr.totalAmount
+  //   }
+  //   arrOfPurchases.push
+  //   (
+  //     testObject
+  //   );
+  // }
+  //console.log(testPastPurchaseObject[0]);
+  // console.log(pastPurchasesState);
+  // setPastPurchasesState
+  // (
+  //   (previous) =>
+  //   {
+  //     return {previous};
+  //   }
+  // );
 
   return (
     <>
@@ -129,7 +223,30 @@ export default function UserPortal() {
 
       {/*Past Purchases*/}
       {activeTab === 'pastPurchases' && (
-        <h3 className="text-2xl font-bold mb-4">Past Purchases</h3>
+        <div>
+          <div className="gap-4 border border-gray-700 p-4 rounded-lg bg-white/5">
+            <div className="grid grid-cols-5 border border-gray-700 rounded-lg bg-white/5">
+              <p className="border border-gray-700 rounded-lg bg-white/5"><strong>Ticket ID</strong></p>
+              <p className="border border-gray-700 rounded-lg bg-white/5"><strong>Visitor ID</strong></p>
+              <p className="border border-gray-700 rounded-lg bg-white/5"><strong>Transaction Date</strong></p>
+              <p className="border border-gray-700 rounded-lg bg-white/5"><strong>Quantity</strong></p>
+              <p className="border border-gray-700 rounded-lg bg-white/5"><strong>Total Amount</strong></p>
+            </div>
+            {pastPurchasesState.map
+              ((purchase) => 
+                (
+                  <div key={purchase.transactionID} className="grid grid-cols-5 border border-gray-700 rounded-lg bg-white/5">
+                    <p className="border border-gray-700 rounded-lg bg-white/5">{purchase.ticketID}</p>
+                    <p className="border border-gray-700 rounded-lg bg-white/5">{purchase.VisitorID}</p>
+                    <p className="border border-gray-700 rounded-lg bg-white/5">{purchase.transactionDate}</p>
+                    <p className="border border-gray-700 rounded-lg bg-white/5">{purchase.quantity}</p>
+                    <p className="border border-gray-700 rounded-lg bg-white/5">{purchase.totalAmount}</p>
+                  </div>
+                )
+              )
+            }
+          </div>
+        </div>
       )}
       </section>
       <Footer />
