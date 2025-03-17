@@ -21,8 +21,8 @@ export default function EmployeeDashboard() {
         const res = await fetch(`${BACKEND_URL}/employee/account-info?employeeID=${employeeID}`);
         const data = await res.json();
 
-        if (res.ok && data.length > 0) {
-          setEmployee(data[0]);
+        if (res.ok && data && data.EmployeeID) {
+          setEmployee(data);
         } else {
           setError('Unable to fetch employee info.');
         }
