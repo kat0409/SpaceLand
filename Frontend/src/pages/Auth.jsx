@@ -18,7 +18,7 @@ export default function Auth() {
 
   // Optional: use .env for backend URL
   //const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://spaceland.onrender.com";
-  const BACKEND_URL = "http://localhost:3000"; // Change this if backend is deployed
+  const BACKEND_URL = "https://spaceland.onrender.com"; // Change this if backend is deployed
 
   console.log(BACKEND_URL);
 
@@ -54,7 +54,7 @@ export default function Auth() {
     };
 
     try {
-      const res = await fetch(`http://localhost:3000/add-visitor`, {
+      const res = await fetch(`https://spaceland.onrender.com/add-visitor`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -171,7 +171,7 @@ export default function Auth() {
 
 const registerVisitor = async (visitorData) => {
   try {
-    const response = await fetch('http://localhost:3000/add-visitor', {
+    const response = await fetch('https://spaceland.onrender.com-visitor', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -192,7 +192,7 @@ const registerVisitor = async (visitorData) => {
 
 const loginVisitor = async (username, password) => {
   try {
-    const response = await fetch('http://localhost:3000/login-visitor', {
+    const response = await fetch('https://spaceland.onrender.com/login-visitor', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
