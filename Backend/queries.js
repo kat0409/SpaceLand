@@ -83,7 +83,7 @@ const getMaintenanceRequests = `
     SELECT * FROM rides WHERE MaintenanceNeed = 1
 `;
 
-const updateRideMaintenanceStatus = `//not yet in ui
+const updateRideMaintenanceStatus = `
     UPDATE rides 
     SET MaintenanceStatus = ? 
     WHERE RideID = (SELECT RideID FROM maintenance WHERE MaintenanceID = ?)
