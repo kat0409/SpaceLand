@@ -2,84 +2,61 @@
 import { useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import {motion} from "framer-motion";
 
-export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
-
-  const handleToggle = () => setIsLogin(!isLogin);
+//the following is almost entirely based on "Frontend/src/pages/Dining.jsx"
+export default function Events() {
+  let events = 
+  [
+    {
+      eventName: "Starlight Festival",
+      date: "Ocsadaa 15, 2024",
+      image: "/assets/starlight-festival.jpg"
+    },
+    {
+      eventName: "Space Race Marathon",
+      date: "November 05, 2024",
+      image: "/assets/space-race.jpg"
+    },
+    {
+      eventName: "Starlight Festival",
+      date: "Ocsadaa 15, 2024",
+      image: "/assets/alien-night.jpg"
+    }
+  ];
 
   return (
     <>
       <Header />
-      <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black px-6 py-20 text-white">
-        <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl shadow-lg p-10 w-full max-w-md space-y-6">
-          <h2 className="text-3xl font-bold text-center">
-            {isLogin ? "🚀 Log In to Spaceland" : "🪐 Create Your Account"}
+      <section className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black py-24 px-6 text-white">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-5xl font-bold mb-8">
+            🎊 Events at <span className="text-purple-400">Spaceland</span>
           </h2>
-
-          {/* FORM */}
-          <form className="space-y-5">
-            {!isLogin && (
-              <div>
-                <label className="block mb-1 text-sm">Full Name</label>
-                <input
-                  type="text"
-                  placeholder="Jane Astro"
-                  className="w-full px-4 py-2 rounded-lg bg-black/20 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-            )}
-
-            <div>
-              <label className="block mb-1 text-sm">Email</label>
-              <input
-                type="email"
-                placeholder="you@spacemail.com"
-                className="w-full px-4 py-2 rounded-lg bg-black/20 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
-            </div>
-
-            <div>
-              <label className="block mb-1 text-sm">Password</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                className="w-full px-4 py-2 rounded-lg bg-black/20 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 transition-all font-semibold py-2 rounded-lg shadow"
-            >
-              {isLogin ? "Log In" : "Sign Up"}
-            </button>
-          </form>
-
-          {/* TOGGLE BUTTON */}
-          <p className="text-sm text-center text-gray-300">
-            {isLogin ? (
-              <>
-                Don't have an account?{" "}
-                <button
-                  onClick={handleToggle}
-                  className="text-purple-400 hover:underline"
-                >
-                  Sign up here
-                </button>
-              </>
-            ) : (
-              <>
-                Already have an account?{" "}
-                <button
-                  onClick={handleToggle}
-                  className="text-purple-400 hover:underline"
-                >
-                  Log in here
-                </button>
-              </>
-            )}
+          <p className="text-gray-300 max-w-2xl mx-auto mb-12">
+            During your spacefare, entitle yourselves to some of the most entertaining opportunities in the Milky Way.
           </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            {events.map((res, index) => (
+              <motion.div
+                key={index}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-white/5 border border-gray-700 backdrop-blur-lg rounded-2xl overflow-hidden shadow-xl text-left"
+              >
+                <img
+                  src={res.image}
+                  alt={res.name}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-6">
+                  <h3 className="text-2xl font-bold mb-2">{res.eventName}</h3>
+                  <p className="text-sm text-gray-300">{res.date}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
       <Footer />

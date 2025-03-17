@@ -35,9 +35,11 @@ export default function EmployeeDashboard() {
         <div className="max-w-4xl mx-auto bg-white/10 p-8 rounded-2xl border border-white/10 shadow-lg">
           <h2 className="text-3xl font-bold mb-6">🧑‍🚀 Employee Dashboard</h2>
 
-          {!employeeData ? (
+          {!employeeData ? 
+          (
             <p>Loading employee details...</p>
-          ) : (
+          ) : 
+          (
             <div className="space-y-4 text-lg">
               <p><span className="font-semibold text-purple-400">Employee ID:</span> {employeeData.EmployeeID}</p>
               <p><span className="font-semibold text-purple-400">Name:</span> {employeeData.FirstName} {employeeData.LastName}</p>
