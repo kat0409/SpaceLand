@@ -75,26 +75,13 @@ const checkVisitorExists = `
 //not yet in ui
 // Insert a new transaction
 const createTransaction = `
-    INSERT INTO tickettransactions (VisitorID, transactionDate, totalAmount) 
-    VALUES (?, NOW(), ?)
-`;
-
-// Insert ticket types into transaction details
-const insertTicketDetails = `
-INSERT INTO tickettransaction_details (transactionID, ticketType, quantity, price) 
-VALUES ?
-`;
-
-// Retrieve ticket details for ticket insertion
-const getTransactionDetails =  `
-    SELECT detailID, ticketType, quantity, price 
-    FROM tickettransaction_details 
-    WHERE transactionID = ?;
+    INSERT INTO tickettransactions (VisitorID, transactionDate, quantity, totalAmount, ticketType) 
+    VALUES (?, NOW(), ?, ?, ?)
 `;
 
 // Insert actual tickets (one per quantity purchased)
 const insertTickets = `
-    INSERT INTO tickets (price, purchaseDate, detailID) 
+    INSERT INTO tickets (price, purchaseDate, transactionID, ticketType) 
     VALUES ?
 `;
 
@@ -271,8 +258,6 @@ module.exports = {
     authenticateSupervisor,
     checkRideExists,
     createTransaction,
-    insertTicketDetails,
-    getTransactionDetails,
     insertTickets
 };
 

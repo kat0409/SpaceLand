@@ -49,8 +49,12 @@ function routes(req, res) {
         return actions.checkVisitorExists(req, res);
     }
 
-    if(url.startsWith('/purchase-pass') && method === 'POST'){
-        return actions.purchasePass(req,res);
+    if(url.startsWith('/purchase-cosmic-pass') && method === 'POST'){
+        return actions.purchaseCosmicPass(req,res);
+    }
+
+    if(url.startsWith('/purchase-general-pass') && method === 'POST'){
+        return actions.purchaseGeneralPass(req,res);
     }
 
     if (url.startsWith('/supervisor/employees') && method === 'GET') {
