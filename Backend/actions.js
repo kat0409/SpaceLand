@@ -443,6 +443,75 @@ const checkVisitorExists = (req, res) => {
     });
 };
 
+const purchasePass = async (req, res) => {
+    let body = '';
+
+    req.on('data', (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', async () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (err) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Invalid JSON format' }));
+            return;
+        }
+
+        const { VisitorID, ticketTypes } = parsedBody; // ticketTypes = [{ type, quantity, price }]
+
+        if (!VisitorID || !Array.isArray(ticketTypes) || ticketTypes.length === 0) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Invalid input. Must include VisitorID and ticketTypes array.' }));
+            return;
+        }
+
+        const connection = await pool.promise().getConnection();
+        await connection.beginTransaction();
+
+        try {
+            // Step 1: Insert transaction into `tickettransactions`
+            const totalAmount = ticketTypes.reduce((sum, ticket) => sum + (ticket.price * ticket.quantity), 0);
+            const [transactionResult] = await connection.query(
+                queries.createTransaction, 
+                [VisitorID, totalAmount]
+            );
+            const transactionID = transactionResult.insertId;
+
+            // Step 2: Insert ticket details into `tickettransaction_details`
+            const detailsValues = ticketTypes.map(ticket => [transactionID, ticket.type, ticket.quantity, ticket.price]);
+            await connection.query(queries.insertTicketDetails, [detailsValues]);
+
+            // Step 3: Retrieve `detailID`s for ticket insertion
+            const [details] = await connection.query(queries.getTransactionDetails, [transactionID]);
+
+            // Step 4: Insert individual tickets
+            const ticketValues = [];
+            details.forEach(detail => {
+                for (let i = 0; i < detail.quantity; i++) {
+                    ticketValues.push([detail.price, new Date(), detail.detailID]);
+                }
+            });
+
+            await connection.query(queries.insertTickets, [ticketValues]);
+
+            // Commit transaction
+            await connection.commit();
+            connection.release();
+
+            res.writeHead(201, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Tickets purchased successfully', transactionID }));
+        } catch (error) {
+            console.error('Transaction Error:', error);
+            await connection.rollback();
+            connection.release();
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Failed to process ticket purchase' }));
+        }
+    });
+};
 
 const url = require('url');
 
