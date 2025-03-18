@@ -443,44 +443,6 @@ const checkVisitorExists = (req, res) => {
     });
 };
 
-const purchasePass = ((req,res) => {
-    let body = '';
-
-    req.on('data', (chunk) => {
-        body += chunk.toString();
-    });
-
-    req.on('end', () => {
-        let parsedBody;
-        try {
-            parsedBody = JSON.parse(body);
-        } catch (err) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Invalid JSON format' }));
-            return;
-        }
-
-        const { VisitorID, ticketType, price } = parsedBody;
-
-        if (!VisitorID || !ticketType || !price) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'VisitorID, PassType, and Price are required.' }));
-            return;
-        }
-
-        pool.query(queries.purchasePass, [ticketType, price, VisitorID], (err, results) => {
-            if (err) {
-                console.error('Error purchasing pass:', err);
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'Internal server error' }));
-                return;
-            }
-
-            res.writeHead(201, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Pass purchased successfully', TicketID: results.insertId }));
-        });
-    });
-});
 
 const url = require('url');
 
