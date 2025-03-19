@@ -902,14 +902,14 @@ const updateMealPlan = (req, res) => {
             }
             pool.query(queries.deleteEmployee, [EmployeeID, employmentStatus], (error, results) => {
                 if (error) {
-                    console.error("Error updating meal plan:", error);
+                    console.error("Error deleting employee:", error);
                     res.writeHead(500, { "Content-Type": "application/json" });
                     res.end(JSON.stringify({ error: "Internal server error" }));
                     return;
                 }
     
              
-                  console.log("Meal plan updated successfully");
+                  console.log("Employee deleted successfully");
     })
     };      
 
