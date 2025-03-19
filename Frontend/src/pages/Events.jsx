@@ -10,7 +10,7 @@ export default function Events() {
   [
     {
       eventName: "Starlight Festival",
-      date: "Ocsadaa 15, 2024",
+      date: "October 15, 2024",
       image: "/assets/starlight-festival.jpg"
     },
     {
@@ -19,8 +19,8 @@ export default function Events() {
       image: "/assets/space-race.jpg"
     },
     {
-      eventName: "Starlight Festival",
-      date: "Ocsadaa 15, 2024",
+      eventName: "Alien Night",
+      date: "September 1, 2024",
       image: "/assets/alien-night.jpg"
     }
   ];
