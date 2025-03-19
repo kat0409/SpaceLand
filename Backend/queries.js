@@ -147,22 +147,23 @@ const visitorPurchasesReport = `
     SELECT 
         v.VisitorID,
         CONCAT(v.FirstName, ' ', v.LastName) AS Visitor_Name,
-        t.ticketType AS Ticket_Type,
-        tt.quantity AS Ticket_Quantity,
-        tt.totalAmount AS Ticket_Total_Spent,
-        m.itemName AS Merchandise_Bought,
-        mt.quantity AS Merchandise_Quantity,
-        mt.totalAmount AS Merchandise_Total_Spent
+        COALESCE(tt.ticketType, 'No Ticket Purchased') AS Ticket_Type,
+        COALESCE(tt.quantity, 0) AS Ticket_Quantity,
+        COALESCE(tt.totalAmount, 0.00) AS Ticket_Total_Spent,
+        COALESCE(m.itemName, 'No Merchandise Bought') AS Merchandise_Bought,
+        COALESCE(mt.quantity, 0) AS Merchandise_Quantity,
+        COALESCE(mt.totalAmount, 0.00) AS Merchandise_Total_Spent
     FROM 
         visitors v
     LEFT JOIN 
-        tickets t ON v.VisitorID = t.VisitorID
+        tickettransactions tt ON v.VisitorID = tt.VisitorID
     LEFT JOIN 
-        tickettransactions tt ON t.ticketID = tt.ticketID
+        tickets t ON tt.transactionID = t.transactionID
     LEFT JOIN 
         merchandisetransactions mt ON v.VisitorID = mt.VisitorID
     LEFT JOIN 
         merchandise m ON mt.merchandiseID = m.merchandiseID;
+
 `;
 
 const attendanceAndRevenueReport = `
@@ -174,9 +175,9 @@ const attendanceAndRevenueReport = `
     FROM 
         operating_hours oh
     LEFT JOIN 
-        tickets t ON oh.ticketID = t.ticketID
+        tickets t ON oh.ticketID = t.ticketID  -- Check if this column reference is valid
     LEFT JOIN 
-        tickettransactions tt ON t.ticketID = tt.ticketID
+        tickettransactions tt ON t.transactionID = tt.transactionID  -- Correct join condition
     GROUP BY 
         oh.date, oh.weatherCondition
     ORDER BY 
