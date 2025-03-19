@@ -175,9 +175,9 @@ const attendanceAndRevenueReport = `
     FROM 
         operating_hours oh
     LEFT JOIN 
-        tickets t ON oh.ticketID = t.ticketID  -- Check if this column reference is valid
+        tickets t ON oh.ticketID = t.ticketID 
     LEFT JOIN 
-        tickettransactions tt ON t.transactionID = tt.transactionID  -- Correct join condition
+        tickettransactions tt ON t.transactionID = tt.transactionID 
     GROUP BY 
         oh.date, oh.weatherCondition
     ORDER BY 
