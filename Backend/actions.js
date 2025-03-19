@@ -803,17 +803,7 @@ const updateEmployeeInfo = (req, res) => {
             console.log("Email updated successfully");
 
         });
-        pool.query(queries.updateEmployeeInfo, [SupervisorID], (error, results) => {
-            if (error) {
-                console.error("Error updating Supervisor ID:", error);
-                res.writeHead(500, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ error: "Internal server error" }));
-                return;
-            }
-
-            console.log("Supervisor ID updated successfully");
-
-        });
+        
         pool.query(queries.updateEmployeeInfo, [password], (error, results) => {
             if (error) {
                 console.error("Error updating password:", error);
@@ -825,15 +815,15 @@ const updateEmployeeInfo = (req, res) => {
             console.log("Password updated successfully");
 
         });
-        pool.query(queries.updateEmployeeInfo, [Department], (error, results) => {
+        pool.query(queries.updateEmployeeInfo, [Department, SupervisorID], (error, results) => {
             if (error) {
-                console.error("Error updating Department:", error);
+                console.error("Error updating Department and Supervisor ID:", error);
                 res.writeHead(500, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({ error: "Internal server error" }));
                 return;
             }
 
-            console.log("Department updated successfully");
+            console.log("Department and Supervisor updated successfully");
 
         });
         
