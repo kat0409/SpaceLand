@@ -168,7 +168,7 @@ export default function Auth() {
     </>
   );
 }
-
+///visitor login might not work anymore because we added these redundant functions
 const registerVisitor = async (visitorData) => {
   try {
     const response = await fetch('https://spaceland.onrender.com/add-visitor', {
