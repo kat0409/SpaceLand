@@ -59,7 +59,7 @@ const authenticateVisitor = 'SELECT VisitorID FROM visitors WHERE username = ? A
 
 const authenticateEmployee = 'SELECT EmployeeID  FROM employee WHERE username = ? AND password = ?';
 
-const authenticateSupervisor = 'SELECT SupervisorID FROM supervisors WHERE username = ? AND password = ? AND departmentIDNumber = ?';
+const authenticateSupervisor = `SELECT SupervisorID, departmentIDNumber FROM supervisors WHERE username = ? AND password = ?`;
 
 const addVisitor = `
     INSERT INTO visitors (FirstName, LastName, Phone, Email, Address, DateOfBirth, 
