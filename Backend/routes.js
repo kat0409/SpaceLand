@@ -127,6 +127,10 @@ function routes(req, res) {
         return actions.updateMealPlan(req,res);
     }
 
+    if(url.startsWith('/supervisor/notifications') && method == 'GET'){
+        return actions.sendLowStockNotifications(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
