@@ -31,7 +31,8 @@ const routeMap = {
         '/supervisor/attendance-revenue',
         '/employee/account-info',
         '/supervisor/account-info',
-        '/account-info'
+        '/account-info',
+        '/supervisor/notifications'
     ],
     'POST': [
         '/add-employee', 
