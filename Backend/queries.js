@@ -95,7 +95,7 @@ const getMaintenanceRequests = `
     SELECT * FROM rides WHERE MaintenanceNeed = 1
 `;
 
-const updateRideMaintenanceStatus = `
+/*const updateRideMaintenanceStatus = `
     UPDATE rides 
     SET MaintenanceStatus = ? 
     WHERE RideID = (SELECT RideID FROM maintenance WHERE MaintenanceID = ?)
@@ -105,7 +105,7 @@ const updateMaintenanceDates = `
     UPDATE maintenance 
     SET MaintenanceStartDate = ?, MaintenanceEndDate = ? 
     WHERE MaintenanceID = ?
-`;
+`;*/
 
 const getLowStockMerchandise = `
     SELECT * FROM merchandise WHERE quantity < 10
@@ -264,8 +264,6 @@ module.exports = {
     getSalesReport,
     getTicketSales,
     getVisitorRecords,
-    updateMaintenanceDates,
-    updateRideMaintenanceStatus,
     authenticateEmployee,
     rideMaintenanceReport,
     visitorPurchasesReport,
