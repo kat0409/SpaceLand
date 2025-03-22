@@ -903,6 +903,24 @@ const updateMealPlan = (req, res) => {
     })
     };      
 
+    const updateVisitorInfo = (req, res) => {
+        let body = "";
+    
+        req.on("data", (chunk) => {
+            body += chunk.toString();
+        });
+    
+        req.on("end", () => {
+            let parsedBody;
+            try {
+                parsedBody = JSON.parse(body);
+            } catch (error) {
+                res.writeHead(400, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Invalid JSON format" }));
+                return;
+            }});
+    }    
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
