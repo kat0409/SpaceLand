@@ -131,6 +131,10 @@ function routes(req, res) {
         return actions.sendLowStockNotifications(req,res);
     }
 
+    if(url.startsWith('/supervisor/maintenance/insert-ride-maintenance') && method == 'POST'){
+        return actions.insertRideMaintenance(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
