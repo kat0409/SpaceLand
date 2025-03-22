@@ -1012,7 +1012,7 @@ const completedRideMaintenance = (req,res) => {
         let parsedBody;
 
         try{
-            parsedBody = JSON.parsed(body);
+            parsedBody = JSON.parse(body);
         } 
         catch (err){
             res.writeHead(400, {"Content-Type": "application/json"});
@@ -1038,6 +1038,7 @@ const completedRideMaintenance = (req,res) => {
         });
     });
 };
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
