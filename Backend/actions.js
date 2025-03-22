@@ -961,6 +961,46 @@ const sendLowStockNotifications = (req, res) => {
     );
 };
 
+const insertRideMaintenance = (req,res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', () => {
+        let parsedBody;
+
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (error) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const {rideID, status, reason} = parsedBody;
+
+        if (!rideID || !status || !reason) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "rideID, status, and reason are required." }));
+            return;
+        }
+
+        pool.query(queries.insertRideMaintenance, [rideID,status,reason], (error, results) => {
+            if (error) {
+                        console.error("Error adding ride:", error);
+                        res.writeHead(500, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ error: "Internal server error" }));
+                        return;
+                    }
+
+                    res.writeHead(201, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ message: "Ride maintenance added successfully", rideID: results.insertId}));
+        });
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -992,5 +1032,6 @@ module.exports = {
     checkRideExists,
     purchaseCosmicPass,
     purchaseGeneralPass,
-    sendLowStockNotifications
+    sendLowStockNotifications,
+    insertRideMaintenance
 };
