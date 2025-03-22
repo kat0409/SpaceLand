@@ -989,7 +989,7 @@ const insertRideMaintenance = (req,res) => {
 
         pool.query(queries.insertRideMaintenance, [rideID,status,reason], (error, results) => {
             if (error) {
-                        console.error("Error adding ride:", error);
+                        console.error("Error adding ride maintenance:", error);
                         res.writeHead(500, { "Content-Type": "application/json" });
                         res.end(JSON.stringify({ error: "Internal server error" }));
                         return;
