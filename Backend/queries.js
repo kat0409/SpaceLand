@@ -132,6 +132,20 @@ const checkRideExists = `SELECT * FROM rides WHERE RideName = ?`;
 
 const insertRideMaintenance = `INSERT INTO rideMaintenance (rideID,status,reason,createdAT) VALUES (?,?,?,NOW())`;
 
+const completedRideMaintenance = `
+    UPDATE ride_maintenance
+    SET status = 'completed'
+    WHERE maintenanceID = (
+    SELECT maintenanceID FROM (
+        SELECT maintenanceID
+        FROM ride_maintenance
+        WHERE rideID = ? AND status IN ('pending', 'in_progress')
+        ORDER BY createdAt DESC
+        LIMIT 1
+    ) AS subquery
+    );
+`;
+
 //Reports
 const rideMaintenanceReport = `
     SELECT 
@@ -265,7 +279,8 @@ module.exports = {
     createTransaction,
     insertTickets,
     sendLowStockNotifications,
-    insertRideMaintenance
+    insertRideMaintenance,
+    completedRideMaintenance
 };
 
 //checkMerchQuantity
