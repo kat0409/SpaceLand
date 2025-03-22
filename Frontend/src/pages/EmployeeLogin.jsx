@@ -14,7 +14,7 @@ export default function EmployeeLogin() {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
   const handleChange = (e) => {
     const { name, value } = e.target;

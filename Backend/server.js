@@ -31,7 +31,8 @@ const routeMap = {
         '/supervisor/attendance-revenue',
         '/employee/account-info',
         '/supervisor/account-info',
-        '/account-info'
+        '/account-info',
+        '/supervisor/notifications'
     ],
     'POST': [
         '/add-employee', 
@@ -40,11 +41,12 @@ const routeMap = {
         '/login',
         '/add-visitor',
         '/check-visitor',
-        '/purchase-pass',
+        '/purchase-cosmic-pass',
+        '/purchase-general-pass',
         '/supervisor/update-maintenance-status',
         '/supervisor/add-ride',
         '/supervisor/login',
-        '/employee-login',
+        '/employee-login'
     ],
     'PUT': [
         '/update-employee', 

@@ -39,8 +39,6 @@ function routes(req, res) {
         return;
     }*/
 
-    if(url.startsWith('/'))
-
     if ( url.startsWith('/add-visitor') && method === 'POST') {
         return actions.addVisitor(req, res);
     }
@@ -49,8 +47,12 @@ function routes(req, res) {
         return actions.checkVisitorExists(req, res);
     }
 
-    if(url.startsWith('/purchase-pass') && method === 'POST'){
-        return actions.purchasePass(req,res);
+    if(url.startsWith('/purchase-cosmic-pass') && method === 'POST'){
+        return actions.purchaseCosmicPass(req,res);
+    }
+
+    if(url.startsWith('/purchase-general-pass') && method === 'POST'){
+        return actions.purchaseGeneralPass(req,res);
     }
 
     if (url.startsWith('/supervisor/employees') && method === 'GET') {
@@ -123,6 +125,10 @@ function routes(req, res) {
 
     if(url.startsWith('/supervisor/update-meal-plan') && method === 'PUT'){
         return actions.updateMealPlan(req,res);
+    }
+
+    if(url.startsWith('/supervisor/notifications') && method == 'GET'){
+        return actions.sendLowStockNotifications(req,res);
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });

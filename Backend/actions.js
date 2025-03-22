@@ -316,10 +316,13 @@ const loginSupervisor = (req, res) => {
                 res.writeHead(401, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({ error: "Invalid credentials" }));
             } else {
+                const { SupervisorID, departmentIDNumber } = results[0];
+
                 res.writeHead(200, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({
                     message: "Login successful",
-                    supervisorID: results[0].SupervisorID//check later
+                    supervisorID: SupervisorID,
+                    departmentIDNumber: departmentIDNumber
                 }));
             }
         });
@@ -443,7 +446,7 @@ const checkVisitorExists = (req, res) => {
     });
 };
 
-const purchasePass = ((req,res) => {
+const purchaseCosmicPass = (req, res) => {
     let body = '';
 
     req.on('data', (chunk) => {
@@ -460,27 +463,108 @@ const purchasePass = ((req,res) => {
             return;
         }
 
-        const { VisitorID, ticketType, price } = parsedBody;
+        const { VisitorID, quantity, price } = parsedBody; 
 
-        if (!VisitorID || !ticketType || !price) {
+        if (!VisitorID || !quantity || !price) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'VisitorID, PassType, and Price are required.' }));
+            res.end(JSON.stringify({ error: 'Invalid input. Must include VisitorID, quantity, and price.' }));
             return;
         }
 
-        pool.query(queries.purchasePass, [ticketType, price, VisitorID], (err, results) => {
+        const totalAmount = quantity * price;
+        const ticketType = "Cosmic";
+
+        // Insert into `tickettransactions`
+        pool.query(queries.createTransaction, [VisitorID, quantity, totalAmount, ticketType], (err, transactionResult) => {
             if (err) {
-                console.error('Error purchasing pass:', err);
+                console.error('Error creating transaction:', err);
                 res.writeHead(500, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ error: 'Internal server error' }));
                 return;
             }
 
-            res.writeHead(201, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Pass purchased successfully', TicketID: results.insertId }));
+            const transactionID = transactionResult.insertId;
+
+            // Insert tickets
+            const ticketValues = [];
+            for (let i = 0; i < quantity; i++) {
+                ticketValues.push([price, new Date(), transactionID, ticketType]);  // Removed detailID
+            }
+
+            pool.query(queries.insertTickets, [ticketValues], (err) => {
+                if (err) {
+                    console.error('Error inserting tickets:', err);
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Internal server error' }));
+                    return;
+                }
+
+                res.writeHead(201, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ message: 'Cosmic Tickets purchased successfully', transactionID }));
+            });
         });
     });
-});
+};
+
+const purchaseGeneralPass = (req, res) => {
+    let body = '';
+
+    req.on('data', (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (err) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Invalid JSON format' }));
+            return;
+        }
+
+        const { VisitorID, quantity, price } = parsedBody; 
+
+        if (!VisitorID || !quantity || !price) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Invalid input. Must include VisitorID, quantity, and price.' }));
+            return;
+        }
+
+        const totalAmount = quantity * price;
+        const ticketType = "General";
+
+        // Insert into `tickettransactions`
+        pool.query(queries.createTransaction, [VisitorID, quantity, totalAmount, ticketType], (err, transactionResult) => {
+            if (err) {
+                console.error('Error creating transaction:', err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Internal server error' }));
+                return;
+            }
+
+            const transactionID = transactionResult.insertId;
+
+            // Insert tickets
+            const ticketValues = [];
+            for (let i = 0; i < quantity; i++) {
+                ticketValues.push([price, new Date(), transactionID, ticketType]);  // Removed detailID
+            }
+
+            pool.query(queries.insertTickets, [ticketValues], (err) => {
+                if (err) {
+                    console.error('Error inserting tickets:', err);
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Internal server error' }));
+                    return;
+                }
+
+                res.writeHead(201, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ message: 'General Tickets purchased successfully', transactionID }));
+            });
+        });
+    });
+};
 
 const url = require('url');
 
@@ -846,6 +930,35 @@ const addRide = (req, res) => {
     });
 };
 
+const sendLowStockNotifications = (req, res) => {
+    const parsedUrl = url.parse(req.url, true);
+    //const queryParams = new URLSearchParams(parsedUrl.query ? parsedUrl.query : '');
+    const SupervisorID = parsedUrl.query.SupervisorID;
+
+    console.log("Received Supervisor ID:", SupervisorID);
+
+    if (!SupervisorID) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: "Supervisor ID is required" }));
+        return;
+    }
+
+    pool.query(
+        queries.sendLowStockNotifications,
+        [SupervisorID],
+        (err, results) => {
+            if (err) {
+                console.error("Error fetching notifications:", err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(results));
+        }
+    );
+};
 
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
@@ -858,7 +971,6 @@ module.exports = {
     loginVisitor,
     addVisitor,
     checkVisitorExists,
-    purchasePass,
     getEmployeesByDept,
     getMaintenanceRequests,
     updateMaintenanceStatus,
@@ -876,5 +988,8 @@ module.exports = {
     loginEmployee,
     loginSupervisor,
     addRide,
-    checkRideExists
+    checkRideExists,
+    purchaseCosmicPass,
+    purchaseGeneralPass,
+    sendLowStockNotifications
 };
