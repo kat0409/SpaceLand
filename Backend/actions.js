@@ -996,7 +996,7 @@ const insertRideMaintenance = (req,res) => {
                     }
 
                     res.writeHead(201, { "Content-Type": "application/json" });
-                    res.end(JSON.stringify({ message: "Ride maintenance added successfully", rideID: results.insertId}));
+                    res.end(JSON.stringify({ message: "Ride maintenance added successfully", maintenanceID: results.insertId}));
         });
     });
 };
@@ -1035,6 +1035,15 @@ const completedRideMaintenance = (req,res) => {
 
             res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ message: "Ride maintenance marked as completed." }));
+        });
+
+        pool.query(queries.removeHomePageAlert, [rideID], (err2) => {
+            if (err2) {
+                console.error("Failed to resolve alert:", err2);
+            }
+        
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Ride maintenance marked as completed and alert resolved." }));
         });
     });
 };
