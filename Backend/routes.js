@@ -61,11 +61,11 @@ function routes(req, res) {
 
     if (url.startsWith('/supervisor/maintenance-requests') && method === 'GET') {
         return actions.getMaintenanceRequests(req, res);
-    }
+    }//wont work anymore
 
-    if (url.startsWith('/supervisor/update-maintenance-status') && method === 'POST') {
+    /*if (url.startsWith('/supervisor/update-maintenance-status') && method === 'POST') {
         return actions.updateMaintenanceStatus(req, res);
-    }
+    }*/
 
     if (url.startsWith('/supervisor/low-stock') && method === 'GET') {
         return actions.getLowStockMerchandise(req, res);
@@ -129,10 +129,14 @@ function routes(req, res) {
 
     if(url.startsWith('/supervisor/notifications') && method == 'GET'){
         return actions.sendLowStockNotifications(req,res);
-    }
+    }//change route
 
     if(url.startsWith('/supervisor/maintenance/insert-ride-maintenance') && method == 'POST'){
         return actions.insertRideMaintenance(req,res);
+    }
+
+    if(url.startsWith('/supervisor/maintenance/update-ride-maintenance-status') && method == 'POST'){
+        return actions.completedRideMaintenance(req,res);
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
