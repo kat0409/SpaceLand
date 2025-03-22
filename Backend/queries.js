@@ -146,6 +146,12 @@ const completedRideMaintenance = `
     );
 `;
 
+const removeHomePageAlert = `
+    UPDATE homepagealerts
+    SET isResolved = 1
+    WHERE rideID = ? AND isResolved = 0;
+`;
+
 //Reports
 const rideMaintenanceReport = `
     SELECT 
@@ -278,7 +284,8 @@ module.exports = {
     insertTickets,
     sendLowStockNotifications,
     insertRideMaintenance,
-    completedRideMaintenance
+    completedRideMaintenance,
+    removeHomePageAlert
 };
 
 //checkMerchQuantity
