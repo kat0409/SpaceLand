@@ -130,6 +130,8 @@ const addRide = `
 
 const checkRideExists = `SELECT * FROM rides WHERE RideName = ?`;
 
+const insertRideMaintenance = `INSERT INTO rideMaintenance (rideID,status,createdAT) VALUES (?,?,NOW())`;
+
 //Reports
 const rideMaintenanceReport = `
     SELECT 
@@ -262,7 +264,8 @@ module.exports = {
     checkRideExists,
     createTransaction,
     insertTickets,
-    sendLowStockNotifications
+    sendLowStockNotifications,
+    insertRideMaintenance
 };
 
 //checkMerchQuantity
