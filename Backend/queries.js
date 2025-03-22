@@ -130,7 +130,7 @@ const addRide = `
 
 const checkRideExists = `SELECT * FROM rides WHERE RideName = ?`;
 
-const insertRideMaintenance = `INSERT INTO rideMaintenance (rideID,status,createdAT) VALUES (?,?,NOW())`;
+const insertRideMaintenance = `INSERT INTO rideMaintenance (rideID,status,reason,createdAT) VALUES (?,?,?,NOW())`;
 
 //Reports
 const rideMaintenanceReport = `
