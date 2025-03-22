@@ -167,6 +167,7 @@ const addMerchandiseTransaction = (req,res) => {
         if (!merchandiseID || !VisitorID || !transactionDate || !quantity ||!totalAmount){
             res.writeHead(400, {"Content-Type":"application/json"});
             res.end(JSON.stringify({error: "merchandiseID, VisitorID, transactionDate, quantity, totalAmount are required fields"}));
+            return;
         }
 
         pool.query(queries.addMerchandiseTransaction, [merchandiseID, VisitorID, transactionDate, quantity, totalAmount], (error, results) => {
@@ -176,7 +177,7 @@ const addMerchandiseTransaction = (req,res) => {
                 res.end(JSON.stringify({error: "Internal server error"}));
                 return;
             }
-            res.writeHead(201, {"Content-Type": "application.json"});
+            res.writeHead(201, {"Content-Type": "application/json"});
             res.end(JSON.stringify({message: "Merchandise transaction added successfully."}));
         });
     });
