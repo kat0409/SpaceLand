@@ -133,12 +133,12 @@ const checkRideExists = `SELECT * FROM rides WHERE RideName = ?`;
 const insertRideMaintenance = `INSERT INTO rideMaintenance (rideID,status,reason,createdAT) VALUES (?,?,?,NOW())`;
 
 const completedRideMaintenance = `
-    UPDATE ride_maintenance
+    UPDATE rideMaintenance
     SET status = 'completed'
     WHERE maintenanceID = (
     SELECT maintenanceID FROM (
         SELECT maintenanceID
-        FROM ride_maintenance
+        FROM rideMaintenance
         WHERE rideID = ? AND status IN ('pending', 'in_progress')
         ORDER BY createdAt DESC
         LIMIT 1
