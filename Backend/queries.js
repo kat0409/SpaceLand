@@ -232,9 +232,9 @@ const addOperatingHours = `
 `;
 
 const updateVisitorInfo = `
-UPDATE vistors
-SET FirstName = ?, LastName = ?, Phone = ?, Email = ?, Address = ?, AccessibilityNeeds = ?, Gender = ?, MilitaryStatus = ?
-WHERE VisitorID = ? AND Username = ? AND Password = ?;
+UPDATE vistors as v
+SET v.FirstName = ?, v.LastName = ?, v.Phone = ?, v.Email = ?, v.Address = ?, v.AccessibilityNeeds = ?, v.Gender = ?, v.MilitaryStatus = ?
+WHERE v.VisitorID = ? AND v.Username = ? AND v.Password = ?;
 `;
 
 module.exports = {
