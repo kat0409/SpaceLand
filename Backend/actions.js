@@ -952,5 +952,6 @@ module.exports = {
     loginSupervisor,
     updateEmployeeInfo,
     updateMealPlan,
-    deleteEmployee
+    deleteEmployee,
+    updateVisitorInfo
 }
