@@ -220,6 +220,11 @@ const deleteEmployee = `
     DELETE FROM employee WHERE employmentStatus == 0 AND EmployeeID = ?
 `;
 
+const updateOperatingHours = `
+    UPDATE operating_hours
+    SET dateOH = ?, openingTime = ?, closingTime = ?
+    WHERE operatingHoursID = ?
+`;
 
 
 module.exports = {
