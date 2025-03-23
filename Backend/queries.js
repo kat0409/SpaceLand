@@ -226,6 +226,10 @@ const updateOperatingHours = `
     WHERE operatingHoursID = ?
 `;
 
+const addOperatingHours = `
+    INSERT INTO operating_hours (dateOH, openingTime, closingTime, weatherConditions)
+    VALUES (?, ?, ?, ?)
+`;
 
 module.exports = {
     getRides,
