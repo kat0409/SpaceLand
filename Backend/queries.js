@@ -214,27 +214,27 @@ const getSupervisorAccountInfo = `
 const updateMealPlan = `
     UPDATE restaurant
     SET mealPlanTier = ?, price = ?
-    WHERE restaurantID = ?
+    WHERE restaurantID = ?;
 `;
 const deleteEmployee = `
-    DELETE FROM employee WHERE employmentStatus == 0 AND EmployeeID = ?
+    DELETE FROM employee WHERE employmentStatus == 0 AND EmployeeID = ?;
 `;
 
 const updateOperatingHours = `
     UPDATE operating_hours
     SET dateOH = ?, openingTime = ?, closingTime = ?
-    WHERE operatingHoursID = ?
+    WHERE operatingHoursID = ?;
 `;
 
 const addOperatingHours = `
     INSERT INTO operating_hours (dateOH, openingTime, closingTime, weatherConditions)
-    VALUES (?, ?, ?, ?)
+    VALUES (?, ?, ?, ?);
 `;
 
 const updateVisitorInfo = `
-UPDATE
-SET
-WHERE
+UPDATE vistors
+SET FirstName = ?, LastName = ?, Phone = ?, Email = ?, Address = ?, AccessibilityNeeds = ?, Gender = ?, MilitaryStatus = ?
+WHERE VisitorID = ? AND Username = ? AND Password = ?;
 `;
 
 module.exports = {
