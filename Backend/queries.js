@@ -273,7 +273,8 @@ module.exports = {
     authenticateSupervisor,
     checkRideExists,
     deleteEmployee,
-    updateMealPlan
+    updateMealPlan,
+    updateOperatingHours
 };
 
 //checkMerchQuantity
