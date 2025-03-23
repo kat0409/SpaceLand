@@ -285,7 +285,8 @@ module.exports = {
     deleteEmployee,
     updateMealPlan,
     updateOperatingHours,
-    addOperatingHours
+    addOperatingHours,
+    updateVisitorInfo
 };
 
 //checkMerchQuantity
