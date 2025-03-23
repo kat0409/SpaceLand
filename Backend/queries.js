@@ -231,6 +231,12 @@ const addOperatingHours = `
     VALUES (?, ?, ?, ?)
 `;
 
+const updateVisitorInfo = `
+UPDATE
+SET
+WHERE
+`;
+
 module.exports = {
     getRides,
     getEmployees,
