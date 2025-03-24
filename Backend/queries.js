@@ -158,13 +158,17 @@ const rideMaintenanceReport = `
         r.RideName AS Ride,
         m.MaintenanceStartDate AS Start_Date,
         m.MaintenanceEndDate AS End_Date,
-        CONCAT(e.FirstName, ' ', e.LastName) AS Maintenance_Employee
+        CONCAT(e.FirstName, ' ', e.LastName) AS Maintenance_Employee,
+        m.status AS Status,
+        m.reason AS Reason
     FROM 
-        maintenance m
+        ridemaintenance m
     JOIN 
-        rides r ON m.RideID = r.RideID
-    JOIN 
-        employee e ON m.MaintenanceEmployeeID = e.EmployeeID;
+        rides r ON m.rideID = r.RideID
+    LEFT JOIN 
+        employee e ON m.MaintenanceEmployeeID = e.EmployeeID
+    ORDER BY 
+        m.MaintenanceStartDate DESC;
 `;
 
 const visitorPurchasesReport = `
