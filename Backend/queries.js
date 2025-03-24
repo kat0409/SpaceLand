@@ -59,7 +59,9 @@ const authenticateVisitor = 'SELECT VisitorID FROM visitors WHERE username = ? A
 
 const authenticateEmployee = 'SELECT EmployeeID  FROM employee WHERE username = ? AND password = ?';
 
-const authenticateSupervisor = 'SELECT SupervisorID FROM supervisors WHERE username = ? AND password = ?';
+const authenticateSupervisor = `SELECT SupervisorID, departmentIDNumber FROM supervisors WHERE username = ? AND password = ?`;
+
+const sendLowStockNotifications =  `SELECT * FROM lowstocknotifications WHERE supervisorID = ? AND isRead = 0 ORDER BY messsageTime DESC`;
 
 const addVisitor = `
     INSERT INTO visitors (FirstName, LastName, Phone, Email, Address, DateOfBirth, 
@@ -73,7 +75,17 @@ const checkVisitorExists = `
 
 
 //not yet in ui
-const purchasePass = 'INSERT INTO tickets (ticketType, price, VisitorID, purchaseDate) VALUES (?,?,?,NOW())';
+// Insert a new transaction
+const createTransaction = `
+    INSERT INTO tickettransactions (VisitorID, transactionDate, quantity, totalAmount, ticketType) 
+    VALUES (?, NOW(), ?, ?, ?)
+`;
+
+// Insert actual tickets (one per quantity purchased)
+const insertTickets = `
+    INSERT INTO tickets (price, purchaseDate, transactionID, ticketType) 
+    VALUES ?
+`;
 
 const getEmployeesByDepartment = `
     SELECT * FROM employee WHERE Department = ?
@@ -83,7 +95,7 @@ const getMaintenanceRequests = `
     SELECT * FROM rides WHERE MaintenanceNeed = 1
 `;
 
-const updateRideMaintenanceStatus = `//not yet in ui
+/*const updateRideMaintenanceStatus = `
     UPDATE rides 
     SET MaintenanceStatus = ? 
     WHERE RideID = (SELECT RideID FROM maintenance WHERE MaintenanceID = ?)
@@ -93,7 +105,7 @@ const updateMaintenanceDates = `
     UPDATE maintenance 
     SET MaintenanceStartDate = ?, MaintenanceEndDate = ? 
     WHERE MaintenanceID = ?
-`;
+`;*/
 
 const getLowStockMerchandise = `
     SELECT * FROM merchandise WHERE quantity < 10
@@ -118,41 +130,68 @@ const addRide = `
 
 const checkRideExists = `SELECT * FROM rides WHERE RideName = ?`;
 
+const insertRideMaintenance = `INSERT INTO rideMaintenance (rideID,status,reason,createdAT,MaintenanceEndDate,MaintenanceEmployeeID,MaintenanceStartDate) VALUES (?,?,?,NOW(),?,?,?)`;
+
+const completedRideMaintenance = `
+    UPDATE rideMaintenance
+    SET status = 'completed'
+    WHERE maintenanceID = (
+    SELECT maintenanceID FROM (
+        SELECT maintenanceID
+        FROM rideMaintenance
+        WHERE rideID = ? AND status IN ('pending', 'in_progress')
+        ORDER BY createdAt DESC
+        LIMIT 1
+    ) AS subquery
+    );
+`;
+
+const removeHomePageAlert = `
+    UPDATE homepagealerts
+    SET isResolved = 1
+    WHERE rideID = ? AND isResolved = 0;
+`;
+
 //Reports
 const rideMaintenanceReport = `
     SELECT 
         r.RideName AS Ride,
         m.MaintenanceStartDate AS Start_Date,
         m.MaintenanceEndDate AS End_Date,
-        CONCAT(e.FirstName, ' ', e.LastName) AS Maintenance_Employee
+        CONCAT(e.FirstName, ' ', e.LastName) AS Maintenance_Employee,
+        m.status AS Status,
+        m.reason AS Reason
     FROM 
-        maintenance m
+        ridemaintenance m
     JOIN 
-        rides r ON m.RideID = r.RideID
-    JOIN 
-        employee e ON m.MaintenanceEmployeeID = e.EmployeeID;
+        rides r ON m.rideID = r.RideID
+    LEFT JOIN 
+        employee e ON m.MaintenanceEmployeeID = e.EmployeeID
+    ORDER BY 
+        m.MaintenanceStartDate DESC;
 `;
 
 const visitorPurchasesReport = `
     SELECT 
         v.VisitorID,
         CONCAT(v.FirstName, ' ', v.LastName) AS Visitor_Name,
-        t.ticketType AS Ticket_Type,
-        tt.quantity AS Ticket_Quantity,
-        tt.totalAmount AS Ticket_Total_Spent,
-        m.itemName AS Merchandise_Bought,
-        mt.quantity AS Merchandise_Quantity,
-        mt.totalAmount AS Merchandise_Total_Spent
+        COALESCE(tt.ticketType, 'No Ticket Purchased') AS Ticket_Type,
+        COALESCE(tt.quantity, 0) AS Ticket_Quantity,
+        COALESCE(tt.totalAmount, 0.00) AS Ticket_Total_Spent,
+        COALESCE(m.itemName, 'No Merchandise Bought') AS Merchandise_Bought,
+        COALESCE(mt.quantity, 0) AS Merchandise_Quantity,
+        COALESCE(mt.totalAmount, 0.00) AS Merchandise_Total_Spent
     FROM 
         visitors v
     LEFT JOIN 
-        tickets t ON v.VisitorID = t.VisitorID
+        tickettransactions tt ON v.VisitorID = tt.VisitorID
     LEFT JOIN 
-        tickettransactions tt ON t.ticketID = tt.ticketID
+        tickets t ON tt.transactionID = t.transactionID
     LEFT JOIN 
         merchandisetransactions mt ON v.VisitorID = mt.VisitorID
     LEFT JOIN 
         merchandise m ON mt.merchandiseID = m.merchandiseID;
+
 `;
 
 const attendanceAndRevenueReport = `
@@ -164,9 +203,9 @@ const attendanceAndRevenueReport = `
     FROM 
         operating_hours oh
     LEFT JOIN 
-        tickets t ON oh.ticketID = t.ticketID
+        tickets t ON oh.ticketID = t.ticketID 
     LEFT JOIN 
-        tickettransactions tt ON t.ticketID = tt.ticketID
+        tickettransactions tt ON t.transactionID = tt.transactionID 
     GROUP BY 
         oh.date, oh.weatherCondition
     ORDER BY 
@@ -229,15 +268,12 @@ module.exports = {
     markNotificationAsSent,
     authenticateVisitor,
     checkVisitorExists,
-    purchasePass,
     getEmployeesByDepartment,
     getMaintenanceRequests,
     getLowStockMerchandise,
     getSalesReport,
     getTicketSales,
     getVisitorRecords,
-    updateMaintenanceDates,
-    updateRideMaintenanceStatus,
     authenticateEmployee,
     rideMaintenanceReport,
     visitorPurchasesReport,
@@ -247,7 +283,13 @@ module.exports = {
     getSupervisorAccountInfo,
     addRide,
     authenticateSupervisor,
-    checkRideExists
+    checkRideExists,
+    createTransaction,
+    insertTickets,
+    sendLowStockNotifications,
+    insertRideMaintenance,
+    completedRideMaintenance,
+    removeHomePageAlert
 };
 
 //checkMerchQuantity
