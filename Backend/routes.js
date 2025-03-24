@@ -83,7 +83,7 @@ function routes(req, res) {
         return actions.getVisitorRecords(req, res);
     }
 
-    if(url.startsWith('/supervisor/ride-maintenance') && method === 'GET'){
+    if(url.startsWith('/supervisor/maintenance/ride-maintenance') && method === 'GET'){
         return actions.rideMaintenanceReport(req,res);
     }
 
