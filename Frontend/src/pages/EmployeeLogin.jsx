@@ -64,6 +64,7 @@ export default function EmployeeLogin() {
       if (supRes.ok && supData.supervisorID) {
         localStorage.setItem('supervisorID', supData.supervisorID);
         localStorage.setItem('role', 'supervisor');
+        localStorage.setItem('department', supData.departmentName)
         navigate('/supervisor-portal');
         return;
       }
