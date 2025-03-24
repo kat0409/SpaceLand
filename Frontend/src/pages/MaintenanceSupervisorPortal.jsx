@@ -7,6 +7,8 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onren
 export default function MaintenanceSupervisorPortal() {
     const [rideMaintenanceReport, setRideMaintenanceReport] = useState([]);
 
+    const supervisorID = localStorage.getItem('supervisorID');
+
     useEffect(() => {
         fetch(`${BACKEND_URL}/supervisor/maintenance/ride-maintenance`)
         .then(res => res.json())

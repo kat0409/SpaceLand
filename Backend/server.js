@@ -22,7 +22,7 @@ const routeMap = {
         '/merchandise-transactions', 
         '/supervisor/employees',
         '/supervisor/maintenance-requests',
-        '/supervisor/low-stock',
+        '/supervisor/merchandise/low-stock',
         '/supervisor/sales-report',
         '/supervisor/ticket-sales',
         '/supervisor/visitors',

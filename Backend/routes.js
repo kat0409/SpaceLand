@@ -67,7 +67,7 @@ function routes(req, res) {
         return actions.updateMaintenanceStatus(req, res);
     }*/
 
-    if (url.startsWith('/supervisor/low-stock') && method === 'GET') {
+    if (url.startsWith('/supervisor/merchandise/low-stock') && method === 'GET') {
         return actions.getLowStockMerchandise(req, res);
     }
 
