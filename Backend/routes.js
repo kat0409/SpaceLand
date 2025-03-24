@@ -130,7 +130,7 @@ function routes(req, res) {
     }
 
     if(url.startsWith('/supervisor/update-employee-info') && method === 'PUT'){
-        return actions.updateMealPlan(req,res);
+        return actions.updateEmployeeInfo(req,res);
     }
 
     if(url.startsWith('/supervisor/delete-employee') && method === 'DELETE'){
