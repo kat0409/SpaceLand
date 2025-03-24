@@ -302,7 +302,9 @@ module.exports = {
     updateOperatingHours,
     addOperatingHours,
     updateVisitorInfo,
-    deleteItem
+    deleteItem,
+    deleteMealPlan,
+    deleteRide
 };
 
 //checkMerchQuantity
