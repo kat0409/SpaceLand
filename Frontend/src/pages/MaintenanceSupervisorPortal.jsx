@@ -19,18 +19,6 @@ export default function MaintenanceSupervisorPortal() {
             <section className="min-h-screen px-6 py-20 text-white bg-gradient-to-b from-black via-gray-900 to-black">
                 <h1 className="text-4xl font-bold mb-8 text-center">🛠 Maintenance Supervisor Portal</h1>
         
-                {/* Maintenance Requests */}
-                <div className="mb-12">
-                <h2 className="text-2xl font-semibold mb-4">Requests</h2>
-                <ul className="bg-white/10 rounded-xl p-4">
-                    {maintenanceRequests.map(req => (
-                    <li key={req.MaintenanceID}>
-                        Ride ID: {req.RideID} — Status: {req.MaintenanceStatus ? 'Completed' : 'Pending'}
-                    </li>
-                    ))}
-                </ul>
-                </div>
-        
                 {/* Ride Maintenance Report */}
                 <div>
                 <h2 className="text-2xl font-semibold mb-4">Ride Maintenance Report</h2>
