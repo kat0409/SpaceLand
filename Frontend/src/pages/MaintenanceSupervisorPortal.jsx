@@ -13,7 +13,7 @@ export default function MaintenanceSupervisorPortal() {
         fetch(`${BACKEND_URL}/supervisor/maintenance/ride-maintenance`)
         .then(res => res.json())
         .then(data => setRideMaintenanceReport(data));
-    })
+    }, []);
 
         return (
             <>
