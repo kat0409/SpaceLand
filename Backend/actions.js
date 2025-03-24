@@ -1049,6 +1049,79 @@ const completedRideMaintenance = (req,res) => {
     });
 };
 
+const updateEmployeeInfo = (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        let parsedBody;
+        try {
+        parsedBody = JSON.parse(body);
+        } catch (error) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ error: "Invalid JSON format" }));
+        }
+
+        const { employeeID, FirstName, LastName, Email, address, username, password } = parsedBody;
+
+        if (!employeeID) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "employeeID is required" }));
+        }
+
+        const fields = [];
+        const values = [];
+    
+        if (FirstName) {
+            fields.push("FirstName = ?");
+            values.push(FirstName);
+        }
+        if (LastName) {
+            fields.push("LastName = ?");
+            values.push(LastName);
+        }
+        if (Email) {
+            fields.push("Email = ?");
+            values.push(Email);
+        }
+        if (address) {
+            fields.push("Address = ?");
+            values.push(address);
+        }
+        if (username) {
+            fields.push("username = ?");
+            values.push(username);
+        }
+        if (password) {
+            fields.push("password = ?");
+            values.push(password);
+        }
+
+        if (fields.length === 0) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "No fields provided to update" }));
+        }
+    
+        const sql = `UPDATE employee SET ${fields.join(", ")} WHERE employeeID = ?`;
+        values.push(employeeID);
+    
+        pool.query(sql, values, (err, result) => {
+            if (err) {
+            console.error("Error updating employee:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Internal server error" }));
+            }
+    
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ message: "Employee info updated successfully." }));
+        });
+    });
+};
+
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -1082,5 +1155,6 @@ module.exports = {
     purchaseGeneralPass,
     sendLowStockNotifications,
     insertRideMaintenance,
-    completedRideMaintenance
+    completedRideMaintenance,
+    updateEmployeeInfo
 };

@@ -235,7 +235,11 @@ const updateEmployeeForDeletion = 'UPDATE employee SET employmentStatus = 0 WHER
 
 const updateEmployeeForRehire = 'UPDATE employee SET employmentStatus = 1 WHERE EmployeeID = ?';
 
-const updateEmployeeInfo = 'UPDATE employee SET FirstName = ?, LastName = ?, Email = ?, Address = ?, username = ?, password = ?';
+const updateEmployeeInfo = `
+    UPDATE employee 
+    SET FirstName = ?, LastName = ?, Email = ?, 
+    Address = ?, username = ?, password = ?
+    WHERE employeeID = ?`;
 
 const updateMealPlan = `
     UPDATE restaurant
