@@ -247,7 +247,10 @@ DELETE FROM restaurant
 WHERE restaurantID = ? AND mealPlanTier = ?;
 `;
 
-
+const deleteRide = `
+DELETE FROM rides
+WHERE RideID = ? AND RideName = ?
+`;
 
 module.exports = {
     getRides,
