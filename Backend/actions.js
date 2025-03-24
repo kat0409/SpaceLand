@@ -949,7 +949,7 @@ const updateMealPlan = (req, res) => {
     
                 console.log("Last name updated successfully");
             });
-            pool.query(queries.updateEmployeeInfo, [Phone], (error, results) => {
+            pool.query(queries.updateVisitorInfo, [Phone], (error, results) => {
                     if (error) {
                         console.error("Error updating phone number:", error);
                         res.writeHead(500, { "Content-Type": "application/json" });
@@ -960,7 +960,7 @@ const updateMealPlan = (req, res) => {
                     console.log("Phone number updated successfully.");
                 });
     
-            pool.query(queries.updateEmployeeInfo, [Address], (error, results) => {
+            pool.query(queries.updateVisitorInfo, [Address], (error, results) => {
                     if (error) {
                         console.error("Error updating address:", error);
                         res.writeHead(500, { "Content-Type": "application/json" });
@@ -971,7 +971,7 @@ const updateMealPlan = (req, res) => {
                     console.log("Address updated successfully.");
                 });
                     
-            pool.query(queries.updateEmployeeInfo, [Email], (error, results) => {
+            pool.query(queries.updateVisitorInfo, [Email], (error, results) => {
                 if (error) {
                     console.error("Error updating Email:", error);
                     res.writeHead(500, { "Content-Type": "application/json" });
@@ -983,7 +983,7 @@ const updateMealPlan = (req, res) => {
     
             });
             
-            pool.query(queries.updateEmployeeInfo, [AccessibilityNeeds], (error, results) => {
+            pool.query(queries.updateVisitorInfo, [AccessibilityNeeds], (error, results) => {
                 if (error) {
                     console.error("Error updating accessibility needs:", error);
                     res.writeHead(500, { "Content-Type": "application/json" });
@@ -995,7 +995,7 @@ const updateMealPlan = (req, res) => {
     
             });
 
-            pool.query(queries.updateEmployeeInfo, [Gender], (error, results) => {
+            pool.query(queries.updateVisitorInfo, [Gender], (error, results) => {
                 if (error) {
                     console.error("Error updating gender:", error);
                     res.writeHead(500, { "Content-Type": "application/json" });
@@ -1007,7 +1007,7 @@ const updateMealPlan = (req, res) => {
     
             });
             
-            pool.query(queries.updateEmployeeInfo, [MilitaryStatus], (error, results) => {
+            pool.query(queries.updateVisitorInfo, [MilitaryStatus], (error, results) => {
                 if (error) {
                     console.error("Error updating military status:", error);
                     res.writeHead(500, { "Content-Type": "application/json" });
