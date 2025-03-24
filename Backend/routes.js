@@ -138,7 +138,7 @@ function routes(req, res) {
     }
 
     if(url.startsWith('/supervisor/delete-meal-plan') && method === 'DELETE'){
-        return actions.updateMealPlan(req,res);
+        return actions.deleteMealPlan(req,res);
     }
 
     if(url.startsWith('/supervisor/update-visitor-info') && method === 'PUT'){
