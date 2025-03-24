@@ -979,15 +979,15 @@ const insertRideMaintenance = (req,res) => {
             return;
         }
 
-        const {rideID, status, reason} = parsedBody;
+        const {rideID, status, reason, MaintenanceEndDate, MaintenanceEmployeeID, MaintenanceStartDate} = parsedBody;
 
-        if (!rideID || !status || !reason) {
+        if (!rideID || !status || !reason || !MaintenanceEndDate || !MaintenanceEmployeeID || !MaintenanceStartDate) {
             res.writeHead(400, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ error: "rideID, status, and reason are required." }));
             return;
         }
 
-        pool.query(queries.insertRideMaintenance, [rideID,status,reason], (error, results) => {
+        pool.query(queries.insertRideMaintenance, [rideID,status,reason, MaintenanceEndDate, MaintenanceEmployeeID, MaintenanceStartDate], (error, results) => {
             if (error) {
                         console.error("Error adding ride maintenance:", error);
                         res.writeHead(500, { "Content-Type": "application/json" });
