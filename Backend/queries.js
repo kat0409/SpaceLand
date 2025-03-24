@@ -59,7 +59,7 @@ const authenticateVisitor = 'SELECT VisitorID FROM visitors WHERE username = ? A
 
 const authenticateEmployee = 'SELECT EmployeeID  FROM employee WHERE username = ? AND password = ?';
 
-const authenticateSupervisor = `SELECT SupervisorID, departmentIDNumber FROM supervisors WHERE username = ? AND password = ?`;
+const authenticateSupervisor = `SELECT SupervisorID, departmentIDNumber, departmentName FROM supervisors WHERE username = ? AND password = ?`;
 
 const sendLowStockNotifications =  `SELECT * FROM lowstocknotifications WHERE supervisorID = ? AND isRead = 0 ORDER BY messsageTime DESC`;
 

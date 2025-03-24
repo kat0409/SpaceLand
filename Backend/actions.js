@@ -317,13 +317,14 @@ const loginSupervisor = (req, res) => {
                 res.writeHead(401, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({ error: "Invalid credentials" }));
             } else {
-                const { SupervisorID, departmentIDNumber } = results[0];
+                const { SupervisorID, departmentIDNumber, departmentName } = results[0];
 
                 res.writeHead(200, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({
                     message: "Login successful",
                     supervisorID: SupervisorID,
-                    departmentIDNumber: departmentIDNumber
+                    departmentIDNumber: departmentIDNumber,
+                    departmentName: departmentName
                 }));
             }
         });
