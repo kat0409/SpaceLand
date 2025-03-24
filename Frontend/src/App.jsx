@@ -13,9 +13,9 @@ import Pricing from "./pages/Pricing";
 import CursorOverlay from "./components/ui/CursorOverlay";
 import SupervisorPortal from "./pages/SupervisorPortal";
 import Purchase from "./pages/Purchase";
-import MerchSupervisor from "./pages/MerchSupervisor";
-import MaintenanceSupervisor from "./pages/MaintenanceSupervisor";
-import HRSupervisor from "./pages/HRSupervisor";
+import MerchandiseSupervisorPortal from "./pages/MerchandiseSupervisorPortal";
+import MaintenanceSupervisorPortal from "./pages/MaintenanceSupervisorPortal";
+
 
 export default function App() {
   return (
@@ -28,9 +28,6 @@ export default function App() {
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <Routes>
-          <Route path="/hr-supervisor" element={<HRSupervisor />} />
-          <Route path="/maintenance-supervisor" element={<MaintenanceSupervisor />} />
-          <Route path="/merch-supervisor" element={<MerchSupervisor />} />
           <Route path="/supervisor-portal" element={<SupervisorPortal />} />
           <Route path="/" element={<Home />} />
           <Route path="/pricing" element={<Pricing />} />
@@ -42,6 +39,8 @@ export default function App() {
           <Route path="/portal" element={<UserPortal />} />
           <Route path="/dining" element={<Dining />} />
           <Route path="/purchase" element={<Purchase />} />
+          <Route path="/supervisor/merchandise" element={<MerchandiseSupervisorPortal />} />
+          <Route path="/supervisor/maintenance" element={<MaintenanceSupervisorPortal />} />
         </Routes>
       </motion.div>
     </Router>
