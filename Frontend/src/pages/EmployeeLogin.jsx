@@ -14,7 +14,7 @@ export default function EmployeeLogin() {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -64,7 +64,19 @@ export default function EmployeeLogin() {
       if (supRes.ok && supData.supervisorID) {
         localStorage.setItem('supervisorID', supData.supervisorID);
         localStorage.setItem('role', 'supervisor');
-        navigate('/supervisor-portal');
+        localStorage.setItem('department', supData.departmentName);
+        
+        const department = supData.departmentName?.toLowerCase()
+
+        if(department === 'merchandise'){
+          navigate('/supervisor/merchandise');
+        }
+        else if (department === 'maintenance'){
+          navigate('/supervisor/maintenance');
+        }
+        else{
+          navigate('/supervisor-portal');
+        }
         return;
       }
   
