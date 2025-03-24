@@ -815,6 +815,7 @@ const updateEmployeeInfo = (req, res) => {
             console.log("Password updated successfully");
 
         });
+        //Updating Department and SupervisorID at the same time since if one changes, the other usually does too
         pool.query(queries.updateEmployeeInfo, [Department, SupervisorID], (error, results) => {
             if (error) {
                 console.error("Error updating Department and Supervisor ID:", error);
@@ -887,7 +888,7 @@ const updateMealPlan = (req, res) => {
             const { EmployeeID, employmentStatus } = parsedBody;
             if (!EmployeeID || !employmentStatus) {
                 res.writeHead(400, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ error: "Employee ID and employment status are required" }));
+                res.end(JSON.stringify({ error: "Employee ID and employment status are required." }));
                 return;
             }
             pool.query(queries.deleteEmployee, [EmployeeID, employmentStatus], (error, results) => {
@@ -919,6 +920,104 @@ const updateMealPlan = (req, res) => {
                 res.end(JSON.stringify({ error: "Invalid JSON format" }));
                 return;
             }});
+
+            // Visitors can't change username, password, height, or age for simplicity
+            const {VisitorID, FirstName, LastName, Phone, Email, Address, AccessibilityNeeds, Gender, Username, Passwrd, MilitaryStatus} = parsedBody;
+            if (!VisitorID || !Username || !Passwrd)  {
+                res.writeHead(400, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Visitor ID, username, and password are required." }));
+                return;
+            }
+            pool.query(queries.updateVisitorInfo, [FirstName], (error, results) => {
+                if (error) {
+                    console.error("Error updating first name:", error);
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ error: "Internal server error" }));
+                    return;
+                }
+
+                console.log("First name updated successfully");
+            });
+
+            pool.query(queries.updateVisitorInfo, [LastName], (error, results) => {
+                if (error) {
+                    console.error("Error updating last name:", error);
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ error: "Internal server error" }));
+                    return;
+                }
+    
+                console.log("Last name updated successfully");
+            });
+            pool.query(queries.updateEmployeeInfo, [Phone], (error, results) => {
+                    if (error) {
+                        console.error("Error updating phone number:", error);
+                        res.writeHead(500, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ error: "Internal server error" }));
+                        return;
+                    }
+        
+                    console.log("Phone number updated successfully.");
+                });
+    
+            pool.query(queries.updateEmployeeInfo, [Address], (error, results) => {
+                    if (error) {
+                        console.error("Error updating address:", error);
+                        res.writeHead(500, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ error: "Internal server error" }));
+                        return;
+                    }
+        
+                    console.log("Address updated successfully.");
+                });
+                    
+            pool.query(queries.updateEmployeeInfo, [Email], (error, results) => {
+                if (error) {
+                    console.error("Error updating Email:", error);
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ error: "Internal server error" }));
+                    return;
+                }
+    
+                console.log("Email updated successfully.");
+    
+            });
+            
+            pool.query(queries.updateEmployeeInfo, [AccessibilityNeeds], (error, results) => {
+                if (error) {
+                    console.error("Error updating accessibility needs:", error);
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ error: "Internal server error" }));
+                    return;
+                }
+    
+                console.log("Accessibility needs updated successfully.");
+    
+            });
+
+            pool.query(queries.updateEmployeeInfo, [Gender], (error, results) => {
+                if (error) {
+                    console.error("Error updating gender:", error);
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ error: "Internal server error" }));
+                    return;
+                }
+    
+                console.log("Gender updated successfully.");
+    
+            });
+            
+            pool.query(queries.updateEmployeeInfo, [MilitaryStatus], (error, results) => {
+                if (error) {
+                    console.error("Error updating military status:", error);
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ error: "Internal server error" }));
+                    return;
+                }
+    
+                console.log("Military status updated successfully.");
+    
+            });
     }    
 
 //Check to see if you need to make a module.exports function here as well
