@@ -39,8 +39,6 @@ function routes(req, res) {
         return;
     }*/
 
-    if(url.startsWith('/'))
-
     if ( url.startsWith('/add-visitor') && method === 'POST') {
         return actions.addVisitor(req, res);
     }
@@ -49,8 +47,12 @@ function routes(req, res) {
         return actions.checkVisitorExists(req, res);
     }
 
-    if(url.startsWith('/purchase-pass') && method === 'POST'){
-        return actions.purchasePass(req,res);
+    if(url.startsWith('/purchase-cosmic-pass') && method === 'POST'){
+        return actions.purchaseCosmicPass(req,res);
+    }
+
+    if(url.startsWith('/purchase-general-pass') && method === 'POST'){
+        return actions.purchaseGeneralPass(req,res);
     }
 
     if (url.startsWith('/supervisor/employees') && method === 'GET') {
@@ -59,13 +61,13 @@ function routes(req, res) {
 
     if (url.startsWith('/supervisor/maintenance-requests') && method === 'GET') {
         return actions.getMaintenanceRequests(req, res);
-    }
+    }//wont work anymore
 
-    if (url.startsWith('/supervisor/update-maintenance-status') && method === 'POST') {
+    /*if (url.startsWith('/supervisor/update-maintenance-status') && method === 'POST') {
         return actions.updateMaintenanceStatus(req, res);
-    }
+    }*/
 
-    if (url.startsWith('/supervisor/low-stock') && method === 'GET') {
+    if (url.startsWith('/supervisor/merchandise/low-stock') && method === 'GET') {
         return actions.getLowStockMerchandise(req, res);
     }
 
@@ -81,7 +83,7 @@ function routes(req, res) {
         return actions.getVisitorRecords(req, res);
     }
 
-    if(url.startsWith('/supervisor/ride-maintenance') && method === 'GET'){
+    if(url.startsWith('/supervisor/maintenance/ride-maintenance') && method === 'GET'){
         return actions.rideMaintenanceReport(req,res);
     }
 
@@ -123,6 +125,18 @@ function routes(req, res) {
 
     if(url.startsWith('/supervisor/update-meal-plan') && method === 'PUT'){
         return actions.updateMealPlan(req,res);
+    }
+
+    if(url.startsWith('/supervisor/notifications') && method == 'GET'){
+        return actions.sendLowStockNotifications(req,res);
+    }//change route
+
+    if(url.startsWith('/supervisor/maintenance/insert-ride-maintenance') && method == 'POST'){
+        return actions.insertRideMaintenance(req,res);
+    }
+
+    if(url.startsWith('/supervisor/maintenance/update-ride-maintenance-status') && method == 'POST'){
+        return actions.completedRideMaintenance(req,res);
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });

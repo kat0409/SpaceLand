@@ -22,16 +22,17 @@ const routeMap = {
         '/merchandise-transactions', 
         '/supervisor/employees',
         '/supervisor/maintenance-requests',
-        '/supervisor/low-stock',
+        '/supervisor/merchandise/low-stock',
         '/supervisor/sales-report',
         '/supervisor/ticket-sales',
         '/supervisor/visitors',
         '/supervisor/visitor-purchases',
-        '/supervisor/ride-maintenance',
+        '/supervisor/maintenance/ride-maintenance',
         '/supervisor/attendance-revenue',
         '/employee/account-info',
         '/supervisor/account-info',
-        '/account-info'
+        '/account-info',
+        '/supervisor/notifications'
     ],
     'POST': [
         '/add-employee', 
@@ -40,12 +41,14 @@ const routeMap = {
         '/login',
         '/add-visitor',
         '/check-visitor',
-        '/purchase-pass',
+        '/purchase-cosmic-pass',
+        '/purchase-general-pass',
         '/supervisor/update-maintenance-status',
         '/supervisor/add-ride',
         '/supervisor/login',
         '/employee-login',
-        '/employee-login',
+        '/supervisor/maintenance/insert-ride-maintenance',
+        '/supervisor/maintenance/update-ride-maintenance-status'
     ],
     'PUT': [
         '/update-employee', 
@@ -96,7 +99,7 @@ const routeMap = {
 
 const server = http.createServer((req, res) => {
     // ✅ Allow CORS manually
-    res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173"); // OR better: "http://localhost:5173"
+    res.setHeader("Access-Control-Allow-Origin", "*"); // OR better: "http://localhost:5173"
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
