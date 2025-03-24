@@ -237,6 +237,13 @@ SET v.FirstName = ?, v.LastName = ?, v.Phone = ?, v.Email = ?, v.Address = ?, v.
 WHERE v.VisitorID = ? AND v.Username = ? AND v.Password = ?;
 `;
 
+const deleteItem = `
+DELETE FROM merchandise
+WHERE merchandiseID = ?;
+`;
+
+
+
 module.exports = {
     getRides,
     getEmployees,
