@@ -242,6 +242,11 @@ DELETE FROM merchandise
 WHERE merchandiseID = ?;
 `;
 
+const deleteMealPlan = `
+DELETE FROM restaurant
+WHERE restaurantID = ? AND mealPlanTier = ?;
+`;
+
 
 
 module.exports = {
