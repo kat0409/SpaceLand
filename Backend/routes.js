@@ -142,7 +142,7 @@ function routes(req, res) {
     }
 
     if(url.startsWith('/supervisor/update-visitor-info') && method === 'PUT'){
-        return actions.updateMealPlan(req,res);
+        return actions.updateVisitorInfo(req,res);
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
