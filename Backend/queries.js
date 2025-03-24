@@ -26,12 +26,6 @@ const getSupervisors = 'SELECT * FROM supervisors';
 
 const getSupervisorIDbyDept = 'SELECT SupervisorID FROM supervisors WHERE departmentName = ?';
 
-const updateEmployeeForDeletion = 'UPDATE employee SET employmentStatus = 0 WHERE EmployeeID = ?';
-
-const updateEmployeeForRehire = 'UPDATE employee SET employmentStatus = 1 WHERE EmployeeID = ?';
-
-const updateEmployeeInfo = 'UPDATE employee SET FirstName = ?, LastName = ?, Email = ?, Address = ?, SupervisorID = ?, username = ?, password = ?, Department = ?, employmentStatus = ?, dateOfBirth = ?';
-
 const getEmployeeInfo = 'SELECT * FROM employee WHERE EmployeeID = ?';
 
 //const addVisitor = 'INSERT INTO visitors (VisitorID,FirstName,LastName,Phone,Email,Address,DateOfBirth,AccessibilityNeeds,Gender,Username,Password,Height,Age,MilitaryStatus) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
@@ -237,10 +231,31 @@ const getSupervisorAccountInfo = `
     WHERE s.username = ? AND s.password = ?;
 `;
 
+const updateEmployeeForDeletion = 'UPDATE employee SET employmentStatus = 0 WHERE EmployeeID = ?';
+
+const updateEmployeeForRehire = 'UPDATE employee SET employmentStatus = 1 WHERE EmployeeID = ?';
+
+const updateEmployeeInfo = 'UPDATE employee SET FirstName = ?, LastName = ?, Email = ?, Address = ?, username = ?, password = ?';
+
 const updateMealPlan = `
     UPDATE restaurant
     SET mealPlanTier = ?, price = ?
-    WHERE restaurantID = ?
+    WHERE restaurantID = ?;
+`;
+const deleteEmployee = `
+    DELETE FROM employee WHERE employmentStatus == 0 AND EmployeeID = ?;
+`;
+
+const updateOperatingHours = `
+    UPDATE operating_hours
+    SET dateOH = ?, openingTime = ?, closingTime = ?
+    WHERE operatingHoursID = ?;
+`;
+
+const updateVisitorInfo = `
+    UPDATE vistors as v
+    SET v.FirstName = ?, v.LastName = ?, v.Phone = ?, v.Email = ?, v.Address = ?, v.AccessibilityNeeds = ?, v.Gender = ?, v.MilitaryStatus = ?
+    WHERE v.VisitorID = ? AND v.Username = ? AND v.Password = ?;
 `;
 
 module.exports = {
@@ -289,7 +304,11 @@ module.exports = {
     sendLowStockNotifications,
     insertRideMaintenance,
     completedRideMaintenance,
-    removeHomePageAlert
+    removeHomePageAlert,
+    deleteEmployee,
+    updateMealPlan,
+    updateOperatingHours,
+    updateVisitorInfo
 };
 
 //checkMerchQuantity
