@@ -72,7 +72,7 @@ export default function EmployeeLogin() {
           navigate('/supervisor/merchandise');
         }
         else if (department === 'maintenance'){
-          nativate('/supervisor/maintenance');
+          navigate('/supervisor/maintenance');
         }
         else{
           navigate('/supervisor-portal');
