@@ -63,10 +63,35 @@ export default function HRSupervisorPortal() {
                 <p className="text-gray-300">Visitor data will be displayed here once implemented.</p>
                 </div>
         
-                {/* Placeholder for Attendance and Revenue Report */}
-                <div className="mb-12">
-                <h2 className="text-2xl font-semibold mb-4">Attendance & Revenue Report (Coming Soon)</h2>
-                <p className="text-gray-300">This section will show reports on attendance and earnings.</p>
+                {/* Attendance and Revenue Report */}
+                <div>
+                    <h2 className="text-2xl font-semibold mb-4">📊 Attendance & Revenue Report</h2>
+                    <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
+                    {attendanceAndRevenueReport.length > 0 ? (
+                        <table className="w-full text-sm">
+                        <thead className="text-left text-purple-300">
+                            <tr>
+                            <th>Operating Date</th>
+                            <th>Tickets Sold</th>
+                            <th>Total Ticket Revenue</th>
+                            <th>Weather Condition</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {attendanceAndRevenueReport.map((entry, idx) => (
+                            <tr key={idx} className="border-t border-white/10">
+                                <td>{new Date(entry.Operating_Date).toLocaleDateString()}</td>
+                                <td>{entry.Tickets_Sold}</td>
+                                <td>${(parseFloat(entry.Total_Ticket_Revenue) || 0).toFixed(2)}</td>
+                                <td>{entry.Weather_Condition}</td>
+                            </tr>
+                            ))}
+                        </tbody>
+                        </table>
+                    ) : (
+                        <p>No attendance or revenue data available.</p>
+                    )}
+                    </div>
                 </div>
             </section>
             <Footer />
