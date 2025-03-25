@@ -9,7 +9,7 @@ function routes(req, res) {
         return actions.getRides(req, res);
     }
 
-    if (url.startsWith('/employees') && method === 'GET') {
+    if (url.startsWith('/supervisor/HR/employees') && method === 'GET') {
         return actions.getEmployees(req, res);
     }
 
