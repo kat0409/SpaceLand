@@ -129,25 +129,7 @@ function routes(req, res) {
         return actions.updateMealPlan(req,res);
     }
 
-    if(url.startsWith('/supervisor/update-employee-info') && method === 'PUT'){
-        return actions.updateEmployeeInfo(req,res);
-    }
-
-    if(url.startsWith('/supervisor/delete-employee') && method === 'DELETE'){
-        return actions.deleteEmployee(req,res);
-    }
-
-    if(url.startsWith('/supervisor/delete-meal-plan') && method === 'DELETE'){
-        return actions.deleteMealPlan(req,res);
-    }
-
-    if(url.startsWith('/supervisor/update-visitor-info') && method === 'PUT'){
-        return actions.updateVisitorInfo(req,res);
-    }
-
-    if(url.startsWith('/supervisor/delete-item') && method === 'DELETE'){
-        return actions.deleteItem(req,res);   
-    } 
+    
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
