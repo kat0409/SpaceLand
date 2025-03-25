@@ -127,7 +127,7 @@ function routes(req, res) {
         return actions.updateMealPlan(req,res);
     }
 
-    if(url.startsWith('/supervisor/notifications') && method == 'GET'){
+    if(url.startsWith('/supervisor/merchandise/notifications') && method == 'GET'){
         return actions.sendLowStockNotifications(req,res);
     }//change route
 

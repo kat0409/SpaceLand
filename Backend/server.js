@@ -32,7 +32,7 @@ const routeMap = {
         '/employee/account-info',
         '/supervisor/account-info',
         '/account-info',
-        '/supervisor/notifications'
+        '/supervisor/merchandise/notifications'
     ],
     'POST': [
         '/add-employee', 
