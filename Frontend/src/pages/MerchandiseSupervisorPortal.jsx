@@ -8,7 +8,7 @@ export default function SupervisorPortal() {
     const [lowStock, setLowStock] = useState([]);
     const [ticketSales, setTicketSales] = useState([]);
     const [visitorPurchasesReport, setVisitorPurchasesReport] = useState([]);
-    //const [lowStockNotification, ]
+    const [lowStockItems, setLowStockItems] = useState([]);
 
     useEffect(() => {
         fetch(`${BACKEND_URL}/supervisor/merchandise/low-stock`)
@@ -23,7 +23,7 @@ export default function SupervisorPortal() {
             .then(res => res.json())
             .then(data => setVisitorPurchasesReport(data))
             .catch(err => console.error('Visitor Purchases Report Error:', err));
-        fetch(`${BACKEND_URL}/supervisor/merchandise/notifications?supervisorID=12`)
+        fetch(`${BACKEND_URL}/supervisor/merchandise/notifications?SupervisorID=12`)
             .then(res => res.json())
             .then(data => setLowStockItems(data))
             .catch(err => console.error('Error fetching low stock notifications:', err));
