@@ -23,6 +23,7 @@ export default function Purchase() {
     if (!ticketType || !mealPlan) return alert('Please select both ticket and meal plan.');
     alert(`✅ Purchase complete! Ticket: ${ticketType}, Meal Plan: ${mealPlan}`);
   };
+  
 
   return (
     <>

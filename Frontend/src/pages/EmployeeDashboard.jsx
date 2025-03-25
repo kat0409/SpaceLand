@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 export default function EmployeeDashboard() {
   const [employee, setEmployee] = useState(null);
   const [error, setError] = useState('');
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
   const employeeID = localStorage.getItem('employeeID');
 
@@ -21,8 +21,8 @@ export default function EmployeeDashboard() {
         const res = await fetch(`${BACKEND_URL}/employee/account-info?employeeID=${employeeID}`);
         const data = await res.json();
 
-        if (res.ok && data.length > 0) {
-          setEmployee(data[0]);
+        if (res.ok && data && data.EmployeeID) {
+          setEmployee(data);
         } else {
           setError('Unable to fetch employee info.');
         }
@@ -52,7 +52,6 @@ export default function EmployeeDashboard() {
               <p><strong>Supervisor ID:</strong> {employee.SupervisorID}</p>
               <p><strong>Address:</strong> {employee.Address}</p>
               <p><strong>Employment Status:</strong> {employee.employmentStatus === 1 ? 'Active' : 'Inactive'}</p>
-              <p><strong>Date of Birth:</strong> {new Date(employee.dateOfBirth).toLocaleDateString()}</p>
               <p><strong>Username:</strong> {employee.username}</p>
             </div>
           ) : !error && (

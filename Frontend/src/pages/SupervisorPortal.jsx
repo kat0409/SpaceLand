@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
 export default function SupervisorPortal() {
   const [employees, setEmployees] = useState([]);
@@ -11,6 +11,12 @@ export default function SupervisorPortal() {
   const [lowStock, setLowStock] = useState([]);
   const [ticketSales, setTicketSales] = useState([]);
   const [visitorRecords, setVisitorRecords] = useState([]);
+
+  //maybe
+  const [attendanceAndRevenueReport, setAttendanceAndRevenueReport] = useState([]);
+  const [rideMaintenanceReport, setRideMaintenanceReport] = useState([]);
+  const [visitorPurchasesReport, setVisitorPurchasesReport] = useState([]);
+
 
   const supervisorID = localStorage.getItem('supervisorID');
 
@@ -39,6 +45,21 @@ export default function SupervisorPortal() {
       .then(res => res.json())
       .then(data => setVisitorRecords(data))
       .catch(err => console.error('Visitor Records Error:', err));
+
+    fetch(`${BACKEND_URL}/supervisor/attendance-revenue`)
+      .then(res => res.json())
+      .then(data => setAttendanceAndRevenueReport(data))
+      .catch(err => console.error('Attendance and Revenue Report Error:', err));
+  
+    fetch(`${BACKEND_URL}/supervisor/ride-maintenance`)
+      .then(res => res.json())
+      .then(data => setRideMaintenanceReport(data))
+      .catch(err => console.error('Ride Maintenance Report Error:', err));
+  
+    fetch(`${BACKEND_URL}/supervisor/visitor-purchases`)
+      .then(res => res.json())
+      .then(data => setVisitorPurchasesReport(data))
+      .catch(err => console.error('Visitor Purchases Report Error:', err));
   }, []);
 
   return (
@@ -125,6 +146,107 @@ export default function SupervisorPortal() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          {/* Attendance and Revenue Report */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">📊 Attendance & Revenue Report</h2>
+            <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
+              {attendanceAndRevenueReport.length > 0 ? (
+                <table className="w-full text-sm">
+                  <thead className="text-left text-purple-300">
+                    <tr>
+                      <th>Operating Date</th>
+                      <th>Tickets Sold</th>
+                      <th>Total Ticket Revenue</th>
+                      <th>Weather Condition</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {attendanceAndRevenueReport.map((entry, idx) => (
+                      <tr key={idx} className="border-t border-white/10">
+                        <td>{new Date(entry.Operating_Date).toLocaleDateString()}</td>
+                        <td>{entry.Tickets_Sold}</td>
+                        <td>${(parseFloat(entry.Total_Ticket_Revenue) || 0).toFixed(2)}</td>
+                        <td>{entry.Weather_Condition}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p>No attendance or revenue data available.</p>
+              )}
+            </div>
+          </div>
+
+          {/* Ride Maintenance Report */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">🛠 Ride Maintenance Report</h2>
+            <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
+              {rideMaintenanceReport.length > 0 ? (
+                <table className="w-full text-sm">
+                  <thead className="text-left text-purple-300">
+                    <tr>
+                      <th>Ride</th>
+                      <th>Start Date</th>
+                      <th>End Date</th>
+                      <th>Maintenance Employee</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rideMaintenanceReport.map((item, idx) => (
+                      <tr key={idx} className="border-t border-white/10">
+                        <td>{item.Ride}</td>
+                        <td>{new Date(item.Start_Date).toLocaleDateString()}</td>
+                        <td>{new Date(item.End_Date).toLocaleDateString()}</td>
+                        <td>{item.Maintenance_Employee}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p>No maintenance records found.</p>
+              )}
+            </div>
+          </div>
+
+          {/* Visitor Purchases Report */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">💳 Visitor Purchases Report</h2>
+            <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
+              {visitorPurchasesReport.length > 0 ? (
+                <table className="w-full text-sm">
+                  <thead className="text-left text-purple-300">
+                    <tr>
+                      <th>Visitor ID</th>
+                      <th>Visitor Name</th>
+                      <th>Ticket Type</th>
+                      <th>Ticket Quantity</th>
+                      <th>Ticket Total Spent</th>
+                      <th>Merchandise Bought</th>
+                      <th>Merchandise Quantity</th>
+                      <th>Merchandise Total Spent</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {visitorPurchasesReport.map((item, idx) => (
+                      <tr key={idx} className="border-t border-white/10">
+                        <td>{item.VisitorID}</td>
+                        <td>{item.Visitor_Name}</td>
+                        <td>{item.Ticket_Type || 'N/A'}</td>
+                        <td>{item.Ticket_Quantity || 'N/A'}</td>
+                        <td>${item.Ticket_Total_Spent || 0}</td>
+                        <td>{item.Merchandise_Bought || 'N/A'}</td>
+                        <td>{item.Merchandise_Quantity || 'N/A'}</td>
+                        <td>${item.Merchandise_Total_Spent || 0}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p>No purchases recorded.</p>
+              )}
             </div>
           </div>
 

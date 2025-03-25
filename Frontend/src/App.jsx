@@ -13,6 +13,9 @@ import Pricing from "./pages/Pricing";
 import CursorOverlay from "./components/ui/CursorOverlay";
 import SupervisorPortal from "./pages/SupervisorPortal";
 import Purchase from "./pages/Purchase";
+import MerchandiseSupervisorPortal from "./pages/MerchandiseSupervisorPortal";
+import MaintenanceSupervisorPortal from "./pages/MaintenanceSupervisorPortal";
+
 
 export default function App() {
   return (
@@ -28,14 +31,16 @@ export default function App() {
           <Route path="/supervisor-portal" element={<SupervisorPortal />} />
           <Route path="/" element={<Home />} />
           <Route path="/pricing" element={<Pricing />} />
-          <Route path="/employee-login" element={<EmployeeLogin />} />
-          <Route path="/employee-portal" element={<EmployeeDashboard />} />
+          <Route path="/employee-login" element={<EmployeeLogin />} /> {/* Employee Login */}
+          <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
           <Route path="/rides" element={<Rides />} />
           <Route path="/events" element={<Events />} />
-          <Route path="/auth" element={<Auth />} />
+          <Route path="/auth" element={<Auth />} /> {/* Visitor Login (Keep this) */}
           <Route path="/portal" element={<UserPortal />} />
           <Route path="/dining" element={<Dining />} />
           <Route path="/purchase" element={<Purchase />} />
+          <Route path="/supervisor/merchandise" element={<MerchandiseSupervisorPortal />} />
+          <Route path="/supervisor/maintenance" element={<MaintenanceSupervisorPortal />} />
         </Routes>
       </motion.div>
     </Router>
