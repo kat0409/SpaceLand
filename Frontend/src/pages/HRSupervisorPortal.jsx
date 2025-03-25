@@ -16,6 +16,11 @@ export default function HRSupervisorPortal() {
             .then(res => res.json())
             .then(data => setEmployees(data))
             .catch(err => console.error('Employees Error:', err));
+        fetch(`${BACKEND_URL}/supervisor/HR/attendance-revenue`)
+            .then(res => res.json())
+            .then(data => setAttendanceAndRevenueReport(data))
+            .catch(err => console.error('Attendance and Revenue Report Error:', err));
+        fetch(`${BACKEND_URL}/supervisor/HR/`)
     }, []);
 
     return (

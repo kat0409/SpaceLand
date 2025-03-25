@@ -95,7 +95,7 @@ function routes(req, res) {
         return actions.visitorPurchasesReport(req,res);
     }
 
-    if(url.startsWith('/supervisor/attendance-revenue') && method === 'GET'){
+    if(url.startsWith('/supervisor/HR/attendance-revenue') && method === 'GET'){
         return actions.attendanceAndRevenueReport(req,res);
     }
 
