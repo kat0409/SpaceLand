@@ -55,7 +55,9 @@ const authenticateEmployee = 'SELECT EmployeeID  FROM employee WHERE username = 
 
 const authenticateSupervisor = `SELECT SupervisorID, departmentIDNumber, departmentName FROM supervisors WHERE username = ? AND password = ?`;
 
-const sendLowStockNotifications =  `SELECT * FROM lowstocknotifications WHERE supervisorID = ? AND isRead = 0 ORDER BY messsageTime DESC`;
+const sendLowStockNotifications =  `SELECT * FROM lowstocknotifications 
+    WHERE supervisorID = ? AND isRead = 0 ORDER BY messsageTime DESC
+`;
 
 const addVisitor = `
     INSERT INTO visitors (FirstName, LastName, Phone, Email, Address, DateOfBirth, 

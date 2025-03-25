@@ -8,6 +8,7 @@ export default function SupervisorPortal() {
     const [lowStock, setLowStock] = useState([]);
     const [ticketSales, setTicketSales] = useState([]);
     const [visitorPurchasesReport, setVisitorPurchasesReport] = useState([]);
+    //const [lowStockNotification, ]
 
     useEffect(() => {
         fetch(`${BACKEND_URL}/supervisor/merchandise/low-stock`)
@@ -22,6 +23,10 @@ export default function SupervisorPortal() {
             .then(res => res.json())
             .then(data => setVisitorPurchasesReport(data))
             .catch(err => console.error('Visitor Purchases Report Error:', err));
+        fetch(`${BACKEND_URL}/supervisor/merchandise/notifications?supervisorID=12`)
+            .then(res => res.json())
+            .then(data => setLowStockItems(data))
+            .catch(err => console.error('Error fetching low stock notifications:', err));
     }, []);
 
         return (
@@ -29,19 +34,6 @@ export default function SupervisorPortal() {
             <Header />
             <section className="min-h-screen px-6 py-20 text-white bg-gradient-to-b from-black via-gray-900 to-black">
                 <h1 className="text-4xl font-bold mb-8 text-center">📦 Merchandise Supervisor Portal</h1>
-
-                {lowStock.length > 0 && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
-                        <strong className="font-bold">Low Stock Alert!</strong>
-                        <ul className="mt-2 list-disc list-inside">
-                        {lowStock.map((item) => (
-                            <li key={item.notificationID}>
-                            {item.itemName}: Only {item.stockLevel} left — {item.message}
-                            </li>
-                        ))}
-                        </ul>
-                    </div>
-                )}
 
                 {/* TICKET SALES */}
                 <div>
