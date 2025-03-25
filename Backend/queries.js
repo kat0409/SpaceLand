@@ -192,7 +192,7 @@ const visitorPurchasesReport = `
 
 const attendanceAndRevenueReport = `
     SELECT 
-        oh.date AS Operating_Date,
+        oh.dateOH AS Operating_Date,
         COUNT(DISTINCT t.ticketID) AS Tickets_Sold,
         COALESCE(SUM(tt.totalAmount), 0) AS Total_Ticket_Revenue,
         oh.weatherCondition AS Weather_Condition
@@ -203,10 +203,9 @@ const attendanceAndRevenueReport = `
     LEFT JOIN 
         tickettransactions tt ON t.transactionID = tt.transactionID 
     GROUP BY 
-        oh.date, oh.weatherCondition
+        oh.dateOH, oh.weatherCondition
     ORDER BY 
-        oh.date DESC;
-
+        oh.dateOH DESC;
 `;
 
 const getVisitorAccountInfo = `
