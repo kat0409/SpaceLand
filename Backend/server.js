@@ -54,7 +54,7 @@ const routeMap = {
         '/update-employee', 
         '/update-merchandise-quantity', 
         '/update-maintenance',
-        '/supervisor/update-meal-plan',//make
+        '/supervisor/update-meal-plan',//make 
         '/supervisor/update-employee-info',//make
         '/supervisor/update-visitor-info',//make
         '/supervisor/update-operating-hours',//make
