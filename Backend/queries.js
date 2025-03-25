@@ -216,41 +216,7 @@ const updateMealPlan = `
     SET mealPlanTier = ?, price = ?
     WHERE restaurantID = ?;
 `;
-const deleteEmployee = `
-    DELETE FROM employee WHERE employmentStatus == 0 AND EmployeeID = ?;
-`;
 
-const updateOperatingHours = `
-    UPDATE operating_hours
-    SET dateOH = ?, openingTime = ?, closingTime = ?
-    WHERE operatingHoursID = ?;
-`;
-
-const addOperatingHours = `
-    INSERT INTO operating_hours (dateOH, openingTime, closingTime, weatherConditions)
-    VALUES (?, ?, ?, ?);
-`;
-
-const updateVisitorInfo = `
-UPDATE vistors as v
-SET v.FirstName = ?, v.LastName = ?, v.Phone = ?, v.Email = ?, v.Address = ?, v.AccessibilityNeeds = ?, v.Gender = ?, v.MilitaryStatus = ?
-WHERE v.VisitorID = ? AND v.Username = ? AND v.Password = ?;
-`;
-
-const deleteItem = `
-DELETE FROM merchandise
-WHERE merchandiseID = ?;
-`;
-
-const deleteMealPlan = `
-DELETE FROM restaurant
-WHERE restaurantID = ? AND mealPlanTier = ?;
-`;
-
-const deleteRide = `
-DELETE FROM rides
-WHERE RideID = ? AND RideName = ?
-`;
 
 module.exports = {
     getRides,
@@ -296,15 +262,7 @@ module.exports = {
     getSupervisorAccountInfo,
     addRide,
     authenticateSupervisor,
-    checkRideExists,
-    deleteEmployee,
-    updateMealPlan,
-    updateOperatingHours,
-    addOperatingHours,
-    updateVisitorInfo,
-    deleteItem,
-    deleteMealPlan,
-    deleteRide
+    checkRideExists
 };
 
 //checkMerchQuantity
