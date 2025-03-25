@@ -74,8 +74,8 @@ export default function EmployeeLogin() {
         else if (department === 'maintenance'){
           navigate('/supervisor/maintenance');
         }
-        else{
-          navigate('/supervisor-portal');
+        else if (department === 'Management'){
+          navigate('/supervisor/HR');
         }
         return;
       }
