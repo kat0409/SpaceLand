@@ -20,7 +20,10 @@ export default function HRSupervisorPortal() {
             .then(res => res.json())
             .then(data => setAttendanceAndRevenueReport(data))
             .catch(err => console.error('Attendance and Revenue Report Error:', err));
-        fetch(`${BACKEND_URL}/supervisor/HR/`)
+        fetch(`${BACKEND_URL}/supervisor/HR/visitors`)
+            .then(res => res.json())
+            .then(data => setVisitorRecords(data))
+            .catch(err => console.error('Visitor Records Error:', err));
     }, []);
 
     return (
@@ -62,12 +65,6 @@ export default function HRSupervisorPortal() {
                 </div>
                 </div>
         
-                {/* Placeholder for Visitor Records */}
-                <div className="mb-12">
-                <h2 className="text-2xl font-semibold mb-4">Visitor Records (Coming Soon)</h2>
-                <p className="text-gray-300">Visitor data will be displayed here once implemented.</p>
-                </div>
-        
                 {/* Attendance and Revenue Report */}
                 <div>
                     <h2 className="text-2xl font-semibold mb-4">📊 Attendance & Revenue Report</h2>
@@ -96,6 +93,33 @@ export default function HRSupervisorPortal() {
                     ) : (
                         <p>No attendance or revenue data available.</p>
                     )}
+                    </div>
+                </div>
+
+                {/* VISITOR RECORDS */}
+                <div>
+                    <h2 className="text-2xl font-semibold mb-4">📋 Visitor Records</h2>
+                    <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead className="text-left text-purple-300">
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Username</th>
+                            <th>Military</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {visitorRecords.map(visitor => (
+                            <tr key={visitor.VisitorID} className="border-t border-white/10">
+                            <td>{visitor.FirstName} {visitor.LastName}</td>
+                            <td>{visitor.Email}</td>
+                            <td>{visitor.Username}</td>
+                            <td>{visitor.MilitaryStatus ? 'Yes' : 'No'}</td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
                     </div>
                 </div>
             </section>
