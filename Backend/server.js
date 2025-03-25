@@ -28,7 +28,7 @@ const routeMap = {
         '/supervisor/visitors',
         '/supervisor/merchandise/visitor-purchases',
         '/supervisor/maintenance/ride-maintenance',
-        '/supervisor/attendance-revenue',
+        '/supervisor/HR/attendance-revenue',
         '/employee/account-info',
         '/supervisor/account-info',
         '/account-info',
