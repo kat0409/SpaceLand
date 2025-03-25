@@ -35,6 +35,19 @@ export default function SupervisorPortal() {
             <section className="min-h-screen px-6 py-20 text-white bg-gradient-to-b from-black via-gray-900 to-black">
                 <h1 className="text-4xl font-bold mb-8 text-center">📦 Merchandise Supervisor Portal</h1>
 
+                {lowStockItems.length > 0 && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+                        <strong className="font-bold">Low Stock Alert!</strong>
+                        <ul className="mt-2 list-disc list-inside">
+                        {lowStockItems.map((item) => (
+                            <li key={item.notificationID}>
+                            {item.itemName}: Only {item.stockLevel} left — {item.message}
+                            </li>
+                        ))}
+                        </ul>
+                    </div>
+                )}
+
                 {/* TICKET SALES */}
                 <div>
                     <h2 className="text-2xl font-semibold mb-4">🎟 Ticket Sales</h2>
