@@ -79,7 +79,7 @@ function routes(req, res) {
         return actions.getTicketSales(req, res);
     }
 
-    if (url.startsWith('/supervisor/visitors') && method === 'GET') {
+    if (url.startsWith('/supervisor/HR/visitors') && method === 'GET') {
         return actions.getVisitorRecords(req, res);
     }
 
