@@ -16,7 +16,7 @@ const corsMiddleWare = cors();
 const routeMap = {
     'GET': [
         '/rides', 
-        '/employees', 
+        '/supervisor/HR/employees', 
         '/merchandise', 
         '/maintenance', 
         '/merchandise-transactions', 
