@@ -186,8 +186,8 @@ const visitorPurchasesReport = `
     LEFT JOIN 
         merchandisetransactions mt ON v.VisitorID = mt.VisitorID
     LEFT JOIN 
-        merchandise m ON mt.merchandiseID = m.merchandiseID;
-    WHERE 1=1 
+        merchandise m ON mt.merchandiseID = m.merchandiseID
+    WHERE 1=1; 
 `;
 //check the WHERE 1=1 during debugging
 
