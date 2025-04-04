@@ -9,6 +9,24 @@ export default function SupervisorPortal() {
     const [ticketSales, setTicketSales] = useState([]);
     const [visitorPurchasesReport, setVisitorPurchasesReport] = useState([]);
     const [lowStockItems, setLowStockItems] = useState([]);
+    const [filters, setFilters] = useState({
+        startDate: '',
+        endDate: '',
+        ticketType: '',
+        visitorName:'',
+        minSpent: '',
+        maxSpent: '',
+        purchaseType: '',
+        merchandiseItem: ''
+    });
+
+    const fetchFilteredReport = () => {
+        const params = new URLSearchParams(filters);
+        fetch(`${BACKEND_URL}/supervisor/merchandise/visitor-purchases?${params.toString()}`)
+            .then(res => res.json())
+            .then(data => setVisitorPurchasesReport(data))
+            .catch(err => console.error('Filtered report error:'. err));
+    };
 
     useEffect(() => {
         fetch(`${BACKEND_URL}/supervisor/merchandise/low-stock`)
@@ -27,6 +45,7 @@ export default function SupervisorPortal() {
             .then(res => res.json())
             .then(data => setLowStockItems(data))
             .catch(err => console.error('Error fetching low stock notifications:', err));
+        fetchFilteredReport();
     }, []);
 
         return (
@@ -85,6 +104,39 @@ export default function SupervisorPortal() {
                     </li>
                     ))}
                 </ul>
+                </div>
+                
+                <div className="bg-white/10 p-4 rounded-xl mb-8">
+                <h2 className="text-lg mb-2 font-semibold">Filter Report</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <input type="date" placeholder="Start Date" value={filters.startDate}
+                    onChange={(e) => setFilters({ ...filters, startDate: e.target.value })} />
+                    <input type="date" placeholder="End Date" value={filters.endDate}
+                    onChange={(e) => setFilters({ ...filters, endDate: e.target.value })} />
+                    <select value={filters.ticketType}
+                    onChange={(e) => setFilters({ ...filters, ticketType: e.target.value })}>
+                    <option value="">All Ticket Types</option>
+                    <option value="General">General</option>
+                    <option value="Cosmic">Cosmic</option>
+                    </select>
+                    <input type="text" placeholder="Visitor Name" value={filters.visitorName}
+                    onChange={(e) => setFilters({ ...filters, visitorName: e.target.value })} />
+                    <input type="number" placeholder="Min Total Spent" value={filters.minSpent}
+                    onChange={(e) => setFilters({ ...filters, minSpent: e.target.value })} />
+                    <input type="number" placeholder="Max Total Spent" value={filters.maxSpent}
+                    onChange={(e) => setFilters({ ...filters, maxSpent: e.target.value })} />
+                    <select value={filters.purchaseType}
+                    onChange={(e) => setFilters({ ...filters, purchaseType: e.target.value })}>
+                    <option value="">All Purchases</option>
+                    <option value="tickets">Tickets Only</option>
+                    <option value="merchandise">Merchandise Only</option>
+                    <option value="both">Both</option>
+                    </select>
+                    <input type="text" placeholder="Merchandise Item" value={filters.merchandiseItem}
+                    onChange={(e) => setFilters({ ...filters, merchandiseItem: e.target.value })} />
+                </div>
+                <button className="mt-4 px-4 py-2 bg-purple-600 rounded"
+                    onClick={fetchFilteredReport}>Apply Filters</button>
                 </div>
         
                 {/* Visitor Purchases */}
