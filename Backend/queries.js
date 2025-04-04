@@ -203,10 +203,11 @@ const attendanceAndRevenueReport = `
         tickets t ON oh.ticketID = t.ticketID 
     LEFT JOIN 
         tickettransactions tt ON t.transactionID = tt.transactionID 
+    WHERE 1=1
     GROUP BY 
         oh.dateOH, oh.weatherCondition
     ORDER BY 
-        oh.dateOH DESC;
+        oh.dateOH DESC
 `;
 
 const getVisitorAccountInfo = `
