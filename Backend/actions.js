@@ -803,7 +803,38 @@ const visitorPurchasesReport = (req,res) => {
 };
 
 const attendanceAndRevenueReport = (req,res) => {
-    pool.query(queries.attendanceAndRevenueReport, (error, results) => {
+    const parsedUrl = require('url').parse(req.url, true);
+    const {
+        startDate, //only choose to make optional parameters for attributes that can be modified in the report, we do not need revenue in here because it is necessary in the report
+        endDate,
+        weatherCondition
+    } = parsedUrl.query;
+
+    let query = queries.attendanceAndRevenueReport;
+    const params = [];
+    const conditions = [];
+
+    if(startDate){
+        conditions.push(`oh.dateOH >= ?`);
+        params.push(startDate);
+    }
+
+    if(endDate){
+        conditions.push(`oh.dateOH <= ?`);
+        params.push(endDate);
+    }
+
+    if(weatherCondition){
+        conditions.push(`oh.weatherCondition = ?`);
+        params.push(weatherCondition);
+    }
+
+    if(conditions.length > 0){
+        query += " And " + conditions.join(" And ");
+    }
+
+    query += ` GROUP BY oh.dateOH, oh.weatherCondition ORDER BY oh.dateOH DESC`; //remember to add this to the end of the query so we can use the aggregate functions
+    pool.query(query, params, (error, results) => {
         if (error) {
             console.error("Error fetching attendance and revenue report:", error);
             res.writeHead(500, { "Content-Type": "application/json" });
