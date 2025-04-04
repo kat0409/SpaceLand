@@ -787,7 +787,7 @@ const visitorPurchasesReport = (req,res) => {
     }
 
     if (conditions.length > 0){
-        query += `AND` + conditions.join(" AND ");
+        query += ` AND ` + conditions.join(" AND ");
     }
 
     pool.query(query, params, (error, results) => {
