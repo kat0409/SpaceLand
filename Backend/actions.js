@@ -727,14 +727,77 @@ const rideMaintenanceReport = (req,res) => {
 };
 
 const visitorPurchasesReport = (req,res) => {
-    pool.query(queries.visitorPurchasesReport, (error, results) => {
-        if (error) {
-            console.error("Error fetching visitor purchases report:", error);
-            res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Internal server error" }));
+    const parsedUrl = require('url'). parse(req.url, true);
+    const {
+        startDate,
+        endDate,
+        ticketType,
+        visitorName,
+        minSpent,
+        maxSpent,
+        purchaseType,
+        merchandiseItem
+    } = parsedUrl.query;
+
+    let query = queries.visitorPurchasesReport
+    const conditions = [];
+    const params = [];
+    
+    if (ticketType){
+        conditions.push(`tt.ticketType = ?`);
+        params.push(ticketType);
+    }
+
+    if(visitorName){
+        conditions.push(`CONCAT(v.FirstName, ' ', v.LastName) LIKE ?`);
+        params.push(`%${visitorName}`);
+    }
+
+    if(startDate){
+        conditions.push(`(tt.transactionDate >= ? OR mt.transactionDate >= ?)`);
+        params.push(startDate, startDate);
+    }
+
+    if (endDate){
+        conditions.push(`(tt.transactionDate <= ? OR mt.transactionDate <= ?)`);
+        params.push(endDate, endDate);
+    }
+
+    if(minSpent){
+        conditions.push(`(COALESCE(tt.totalAmount, 0) + COALESCE(mt.totalAmount, 0) >= ?)`);
+        params.push(minSpent);
+    }
+
+    if (maxSpent){
+        conditions.push(`(COALESCE(tt.totalAmount, 0) + COALESCE(mt.totalAmount, 0)) <= ?`);
+        params.push(maxSpent);
+    }
+
+    if(purchaseType === "tickets"){
+        conditions.push(`tt.ticketType IS NOT NULL`);
+    }else if(purchaseType === "merchandise"){
+        conditions.push(`mt.merchandiseID IS NOT NULL`);
+    }else if(purchaseType === "both"){
+        conditions.push(`tt.ticketType IS NOT NULL AND mt.merchandiseID IS NOT NULL`);
+    }
+
+    if(merchandiseItem){
+        conditions.push(`m.itemName LIKE ?`);
+        params.push(`%${merchandiseItem}`);
+    }
+
+    if (conditions.length > 0){
+        query += `AND` + conditions.join(" AND ");
+    }
+
+    pool.query(query, params, (error, results) => {
+        if(error){
+            console.error("Error filtering visitor purchases:", error);
+            res.writeHead(500, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({error: "Internal server error"}));
             return;
         }
-        res.writeHead(200, { "Content-Type": "application/json" });
+        res.writeHead(200, {"Content-Type": "application/json"});
         res.end(JSON.stringify(results));
     });
 };
