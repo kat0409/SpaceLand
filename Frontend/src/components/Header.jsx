@@ -27,7 +27,7 @@ export default function Header() {
       const dept = localStorage.getItem('department')?.toLowerCase();
       if(dept === 'maintenance') navigate('/supervisor/maintenance');
       else if(dept === 'merchandise') navigate('/supervisor/merchandise');
-      else navigate('/supervisor/HR');
+      else if (dept === 'management') navigate('/supervisor/HR');
     }
     else{//visitors
       navigate('/portal')
