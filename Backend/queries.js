@@ -272,6 +272,10 @@ const updateVisitorInfo = `
     WHERE v.VisitorID = ? AND v.Username = ? AND v.Password = ?;
 `;
 
+const getMerchList = `
+    SELECT merchandiseID, itemName FROM merchandise ORDER BY itemName;
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -323,7 +327,8 @@ module.exports = {
     updateMealPlan,
     updateOperatingHours,
     updateVisitorInfo,
-    reorderMerchandise
+    reorderMerchandise,
+    getMerchList
 };
 
 //checkMerchQuantity
