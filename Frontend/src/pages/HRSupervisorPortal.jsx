@@ -86,6 +86,38 @@ export default function HRSupervisorPortal() {
                     </table>
                 </div>
                 </div>
+
+                <div className="mb-4 space-x-4">
+                    <input
+                        type="date"
+                        name="startDate"
+                        value={filters.startDate}
+                        onChange={handleFilterChange}
+                        className="bg-white/20 text-white p-2 rounded"
+                    />
+                    <input
+                        type="date"
+                        name="endDate"
+                        value={filters.endDate}
+                        onChange={handleFilterChange}
+                        className="bg-white/20 text-white p-2 rounded"
+                    />
+                    <select
+                        name="weatherCondition"
+                        value={filters.weatherCondition}
+                        onChange={handleFilterChange}
+                        className="bg-white/20 text-white p-2 rounded"
+                    >
+                        <option value="">All Weather</option>
+                        <option value="Sunny">Sunny</option>
+                        <option value="Cloudy">Cloudy</option>
+                        <option value="Rainy">Rainy</option>
+                        <option value="Stormy">Stormy</option>
+                    </select>
+                    <button onClick={fetchFilteredReport} className="bg-purple-600 text-white p-2 rounded">
+                        Apply Filters
+                    </button>
+                </div>
         
                 {/* Attendance and Revenue Report */}
                 <div>
