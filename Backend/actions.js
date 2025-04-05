@@ -1235,13 +1235,16 @@ const reorderMerchandise = (req,res) => {
 
         const {merchandiseID, quantityOrdered, expectedArrivalDate, status, notes} = parsedBody;
 
-        if (!merchandiseID || !quantityOrdered || !expectedArrivalDate || !status || !notes) {
+        const statToInsert = status || 'pending';
+        const notesToInsert = notes || 'No notes';
+
+        if (!merchandiseID || !quantityOrdered || !expectedArrivalDate || !statToInsert || !notesToInsert) {
             res.writeHead(400, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ error: "merchandiseID, quantityOrdered, expectedArrivalDate, status, and notes are required." }));
             return;
         }
 
-        pool.query(queries.reorderMerchandise, [merchandiseID, quantityOrdered, expectedArrivalDate, status, notes], (error, results) => {
+        pool.query(queries.reorderMerchandise, [merchandiseID, quantityOrdered, expectedArrivalDate, statToInsert, notesToInsert], (error, results) => {
             if (error) {
                         console.error("Error adding merchandise re-order:", error);
                         res.writeHead(500, { "Content-Type": "application/json" });
