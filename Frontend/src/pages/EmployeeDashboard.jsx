@@ -1,5 +1,5 @@
 // src/pages/EmployeeDashboard.jsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { AuthContext } from "../components/AuthProvider";
