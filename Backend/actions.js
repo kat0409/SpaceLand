@@ -1247,6 +1247,21 @@ const updateMealPlan = (req, res) => {
     }    
 
 
+    const getMaintenanceEmployees = (res) => {
+        pool.query(queries.getMaintenanceEmployees, (error, results) => {
+            if (error){
+                console.error("Error fetching maintenance employees:", error);
+                res.writeHead(500, {"Content-Type": "application/json"});
+                res.end(JSON.stringify({error: "Internal server error"}));
+                return;
+            }
+            res.writeHead(200, {"Content-Type": "application/json"});
+            res.end(JSON.stringify(results));
+        });
+    };
+
+
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -1283,6 +1298,7 @@ module.exports = {
     completedRideMaintenance,
     updateMealPlan,
     deleteEmployee,
-    updateVisitorInfo
+    updateVisitorInfo,
+    getMaintenanceEmployees
 
 };
