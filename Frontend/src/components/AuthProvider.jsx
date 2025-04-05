@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }) => {
     const logout = () => {
         localStorage.clear();
         setAuth({
+            token: null,
             role: null,
             userID: null,
             isAuthenticated: false,

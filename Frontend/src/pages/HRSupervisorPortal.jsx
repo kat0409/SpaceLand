@@ -1,10 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { AuthContext } from '../components/AuthProvider';
+import { useNavigate } from 'react-router-dom';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
 export default function HRSupervisorPortal() {
+    const { auth } = useContext(AuthContext)
+    const navigate = useNavigate();
+
     const [employees, setEmployees] = useState([]);
     const [visitorRecords, setVisitorRecords] = useState([]);
     const [attendanceAndRevenueReport, setAttendanceAndRevenueReport] = useState([]);
@@ -13,6 +18,12 @@ export default function HRSupervisorPortal() {
         endDate: '',
         weatherCondition: ''
     });
+
+    useEffect(() => {
+        if(!auth.isAuthenticated || auth.role !== "supervisor"){
+            navigate('/employee-login');
+        }
+    }, [auth, navigate]);
 
     const handleFilterChange = (e) => {
         setFilters({ ...filters, [e.target.name]: e.target.value });
