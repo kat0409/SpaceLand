@@ -11,7 +11,7 @@ export default function StockArrivalForm(){
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
     useEffect(() => {
-        fetch(`${BACKEND_URL}/supervisor/merchandise/items`)
+        fetch(`${BACKEND_URL}/supervisor/merchandise/reorders`)
         .then((res) => res.json())
         .then((data) => {
             if(Array.isArray(data)){ 
