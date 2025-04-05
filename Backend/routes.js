@@ -143,6 +143,10 @@ function routes(req, res) {
         return actions.updateEmployeeInfo(req,res);
     }
 
+    if(url.startsWith('/supervisor/merchandise/reorders') && method === 'POST'){
+        return actions.reorderMerchandise(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
