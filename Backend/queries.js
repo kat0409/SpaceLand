@@ -285,6 +285,9 @@ DELETE FROM rides
 WHERE RideID = ? AND RideName = ?
 `;
 
+const getMerchandiseTable = `
+SELECT * FROM merchandise
+`;
 
 
 module.exports = {
@@ -341,7 +344,8 @@ module.exports = {
     updateVisitorInfo,
     deleteItem,
     deleteMealPlan,
-    deleteRide
+    deleteRide,
+    getMerchandiseTable
 
 };
 
