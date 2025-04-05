@@ -148,6 +148,12 @@ const removeHomePageAlert = `
     WHERE rideID = ? AND isResolved = 0;
 `;
 
+const reorderMerchandise = `
+    INSERT INTO merchandiseReorders (merchandiseID,quantityOrdered,
+    expectedArrivalDate,status,notes)
+    VALUES (?,?,?,?,?)
+`;
+
 //Reports
 const rideMaintenanceReport = `
     SELECT 
