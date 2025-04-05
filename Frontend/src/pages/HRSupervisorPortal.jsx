@@ -8,6 +8,27 @@ export default function HRSupervisorPortal() {
     const [employees, setEmployees] = useState([]);
     const [visitorRecords, setVisitorRecords] = useState([]);
     const [attendanceAndRevenueReport, setAttendanceAndRevenueReport] = useState([]);
+    const [filters, setFilters] = useState({
+        startDate: '',
+        endDate: '',
+        weatherCondition: ''
+    });
+
+    const handleFilterChange = (e) => {
+        setFilters({ ...filters, [e.target.name]: e.target.value });
+    };
+
+    const fetchFilteredReport = () => {
+        const params = new URLSearchParams();
+        if (filters.startDate) params.append('startDate', filters.startDate);
+        if (filters.endDate) params.append('endDate', filters.endDate);
+        if (filters.weatherCondition) params.append('weatherCondition', filters.weatherCondition);
+
+        fetch(`${BACKEND_URL}/supervisor/HR/attendance-revenue${params.toString()}`)
+            .then(res => res.json())
+            .then(data => setAttendanceAndRevenueReport(data))
+            .catch(err => console.error('Attendance and Revenue Report error: ', err));
+    };
 
     const supervisorID = localStorage.getItem('supervisorID');
 
@@ -24,6 +45,7 @@ export default function HRSupervisorPortal() {
             .then(res => res.json())
             .then(data => setVisitorRecords(data))
             .catch(err => console.error('Visitor Records Error:', err));
+        fetchFilteredReport();
     }, []);
 
     return (
