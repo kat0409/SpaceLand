@@ -150,10 +150,15 @@ function routes(req, res) {
     if(url.startsWith('/supervisor/merchandise/items') && method === 'GET'){
         return actions.getMerchList(req,res);
     }
-if(url.startsWith('/supervisor/merchandise/stock-arrivals') && method === 'POST'){
-    return actions.markStockArrivals(req,res);
-}
+    
+    if(url.startsWith('/supervisor/merchandise/stock-arrivals') && method === 'POST'){
+        return actions.markStockArrivals(req,res);
+    }
 
+
+    if(url.startsWith('/supervisor/merchandise/pending-orders') && method === 'GET'){
+        return actions.markStockArrivals(req,res);
+    }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
