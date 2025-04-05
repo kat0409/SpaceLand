@@ -165,10 +165,10 @@ const markStockArrivals = `
 `;
 
 const getPendingOrders = `
-    SELECT r.reorderID, r.quantityOrdered, r.expectedArrivalDate, m.itemName
+    SELECT r.reorderID, r.merchandiseID, r.quantityOrdered, r.expectedArrivalDate, m.itemName
     FROM merchandisereorders r
     JOIN merchandise m ON r.merchandiseID = m.merchandiseID
-    WHERE r.status = 'pending';
+    WHERE r.status = 'pending'
 `;
 
 //Reports
