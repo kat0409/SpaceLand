@@ -17,14 +17,6 @@ import Purchase from "./pages/Purchase";
 import MerchandiseSupervisorPortal from './pages/MerchandiseSupervisorPortal';
 import MaintenanceSupervisorPortal from './pages/MaintenanceSupervisorPortal';
 import HRSupervisorPortal from './pages/HRSupervisorPortal';
-import { AuthProvider } from "./components/AuthProvider";
-
-<React.StrictMode>
-  <AuthProvider>
-    <App/>
-  </AuthProvider>
-</React.StrictMode>
-
 
 export default function App() {
   return (
