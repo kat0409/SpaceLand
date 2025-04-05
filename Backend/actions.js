@@ -1241,7 +1241,7 @@ const reorderMerchandise = (req,res) => {
             return;
         }
 
-        pool.query(queries.insertRideMaintenance, [rideID,status,reason, MaintenanceEndDate, MaintenanceEmployeeID, MaintenanceStartDate], (error, results) => {
+        pool.query(queries.reorderMerchandise, [merchandiseID, quantityOrdered, expectedArrivalDate, status, notes], (error, results) => {
             if (error) {
                         console.error("Error adding merchandise re-order:", error);
                         res.writeHead(500, { "Content-Type": "application/json" });
@@ -1250,7 +1250,7 @@ const reorderMerchandise = (req,res) => {
                     }
 
                     res.writeHead(201, { "Content-Type": "application/json" });
-                    res.end(JSON.stringify({ message: "Merchandise ordered successfully", maintenanceID: results.insertId}));
+                    res.end(JSON.stringify({ message: "Merchandise ordered successfully", reorderID: results.insertId}));
         });
     });
 };
