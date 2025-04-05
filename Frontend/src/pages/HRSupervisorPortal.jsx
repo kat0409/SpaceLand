@@ -24,7 +24,7 @@ export default function HRSupervisorPortal() {
         if (filters.endDate) params.append('endDate', filters.endDate);
         if (filters.weatherCondition) params.append('weatherCondition', filters.weatherCondition);
 
-        fetch(`${BACKEND_URL}/supervisor/HR/attendance-revenue${params.toString()}`)
+        fetch(`${BACKEND_URL}/supervisor/HR/attendance-revenue?${params.toString()}`)
             .then(res => res.json())
             .then(data => setAttendanceAndRevenueReport(data))
             .catch(err => console.error('Attendance and Revenue Report error: ', err));
