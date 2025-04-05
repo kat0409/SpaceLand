@@ -1272,6 +1272,48 @@ const getMerchList = (req,res) => {
     });
 };
 
+const markStockArrivals = (req,res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', () => {
+        let parsedBody;
+
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (error) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const {merchandiseID,quantityAdded,arrivalDate,notes,reorderID} = parsedBody;
+
+        const notesToInsert = notes || 'No notes';
+
+        if (!merchandiseID || !quantityAdded || !arrivalDate || !notesToInsert || !reorderID) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "merchandiseID, quantityOrdered, expectedArrivalDate, status, and notes are required." }));
+            return;
+        }
+
+        pool.query(queries.markStockArrivals, [merchandiseID,quantityAdded,arrivalDate,notes,reorderID], (error, results) => {
+            if (error) {
+                        console.error("Error adding stock arrival:", error);
+                        res.writeHead(500, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ error: "Internal server error" }));
+                        return;
+                    }
+
+                    res.writeHead(201, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ message: "New stock marked as arrived successfully", arrivalID: results.insertId}));
+        });
+    });
+};
+
 
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
@@ -1309,5 +1351,6 @@ module.exports = {
     completedRideMaintenance,
     updateEmployeeInfo,
     reorderMerchandise,
-    getMerchList
+    getMerchList,
+    markStockArrivals
 };
