@@ -295,6 +295,12 @@ FROM employee
 WHERE Department = 'Merchandise';
 `;
 
+const getMaintenanceEmployees = `
+SELECT EmployeeID, FirstName, LastName, Email, Address, SupervisorID, username, password, employmentStatus, dateOfBirth
+FROM employee 
+WHERE Department = 'Maintenance';
+`;
+
 
 
 
@@ -354,7 +360,8 @@ module.exports = {
     deleteMealPlan,
     deleteRide,
     getMerchandiseTable,
-    getMerchandiseEmployees
+    getMerchandiseEmployees,
+    getMaintenanceEmployees
 
 };
 
