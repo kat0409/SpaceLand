@@ -11,7 +11,7 @@ export default function StockArrivalForm(){
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
     useEffect(() => {
-        fetch(`${BACKEND_URL}/supervisor/merchandise/reorders`)
+        fetch(`${BACKEND_URL}/supervisor/merchandise/pending-orders`)
         .then((res) => res.json())
         .then((data) => {
             if(Array.isArray(data)){ 
@@ -32,6 +32,7 @@ export default function StockArrivalForm(){
         e.preventDefault();
 
         const reorder = reorders.find(r => r.reorderID === parseInt(selectedReorder));
+        const merchandiseID = reorder?.merchandiseID;
         if(!reorder){
             return setMessage("Invalid reorder selected");
         }
@@ -40,10 +41,10 @@ export default function StockArrivalForm(){
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                merchandiseID: reorder.merchandiseID,
+                reorderID: reorder.reorderID,
+                merchandiseID: merchandiseID,
                 quantityAdded: quantity,
                 arrivalDate: arrivalDate,
-                reorderID: reorder.reorderID,
                 notes
             }),
         });
@@ -68,14 +69,15 @@ export default function StockArrivalForm(){
                 onChange={(e) => setSelectedReorder(e.target.value)}
                 required
                 className="w-full p-2 rounded bg-black text-white"
-            >
+                >
                 <option value="">Select Reorder</option>
-                {reorders.map((r) => (
-                <option key={r.reorderID} value={r.reorderID}>
-                    {r.itemName} – Qty: {r.quantityOrdered}
-                </option>
+                {reorders.map((reorder) => (
+                    <option key={reorder.reorderID} value={reorder.reorderID}>
+                    {reorder.itemName} – Qty: {reorder.quantityOrdered}
+                    </option>
                 ))}
             </select>
+
         
             <input
                 type="number"

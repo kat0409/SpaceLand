@@ -157,7 +157,7 @@ function routes(req, res) {
 
 
     if(url.startsWith('/supervisor/merchandise/pending-orders') && method === 'GET'){
-        return actions.markStockArrivals(req,res);
+        return actions.getPendingOrders(req,res);
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
