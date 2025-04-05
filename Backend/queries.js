@@ -164,6 +164,13 @@ const markStockArrivals = `
     VALUES (?,?,?,?,?)
 `;
 
+const getPendingOrders = `
+    SELECT reorderID, itemName, quantityOrdered
+    FROM merchandiseorders
+    JOIN merchandise ON merchandiseorders.merchandiseID = merchandise.merchandiseID
+    WHERE status = 'pending'
+`;
+
 //Reports
 const rideMaintenanceReport = `
     SELECT 
