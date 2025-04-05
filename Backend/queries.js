@@ -343,7 +343,8 @@ module.exports = {
     updateVisitorInfo,
     reorderMerchandise,
     getMerchList,
-    markStockArrivals
+    markStockArrivals,
+    getPendingOrders
 };
 
 //checkMerchQuantity
