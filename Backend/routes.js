@@ -147,6 +147,11 @@ function routes(req, res) {
         return actions.reorderMerchandise(req,res);
     }
 
+    if(url.startsWith('/supervisor/merchandise/items') && method === 'GET'){
+        return actions.getMerchList(req,res);
+    }
+
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }

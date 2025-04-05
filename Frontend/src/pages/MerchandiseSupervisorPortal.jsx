@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import ReorderForm from './ReorderForm';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
@@ -137,6 +138,11 @@ export default function SupervisorPortal() {
                 </div>
                 <button className="mt-4 px-4 py-2 bg-purple-600 rounded"
                     onClick={fetchFilteredReport}>Apply Filters</button>
+                </div>
+
+                <div className="p-6">
+                    {/* ...other components */}
+                    <ReorderForm />
                 </div>
         
                 {/* Visitor Purchases */}

@@ -1255,6 +1255,20 @@ const reorderMerchandise = (req,res) => {
     });
 };
 
+const getMerchList = (req,res) => {
+    pool.query(queries.getMerchList, (err,results) => {
+        if(err){
+            console.error("Error fetching merchandise:", err);
+            res.writeHead(500, {'Content-Type': 'application/json'});
+            res.end(JSON.stringify({error: 'Failed to fetch merchandise'}));
+        }
+        else{
+            res.writeHead(200, {'Content-Type': 'application/json'});
+            res.end(JSON.stringify(results));
+        }
+    });
+};
+
 
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
@@ -1291,5 +1305,6 @@ module.exports = {
     insertRideMaintenance,
     completedRideMaintenance,
     updateEmployeeInfo,
-    reorderMerchandise
+    reorderMerchandise,
+    getMerchList
 };
