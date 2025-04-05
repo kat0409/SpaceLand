@@ -1290,5 +1290,6 @@ module.exports = {
     sendLowStockNotifications,
     insertRideMaintenance,
     completedRideMaintenance,
-    updateEmployeeInfo
+    updateEmployeeInfo,
+    reorderMerchandise
 };
