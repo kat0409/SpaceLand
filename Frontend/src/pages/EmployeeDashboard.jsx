@@ -1,12 +1,13 @@
 // src/pages/EmployeeDashboard.jsx
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useCallback } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { AuthContext } from "../components/AuthProvider";
 import { useNavigate } from 'react-router-dom';
 
 export default function EmployeeDashboard() {
-  const { auth, logout } = useContext(AuthContext);
+  const { auth } = useContext(AuthContext)
+  //const { auth, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [employee, setEmployee] = useState(null);
