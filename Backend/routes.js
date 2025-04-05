@@ -155,7 +155,6 @@ function routes(req, res) {
         return actions.markStockArrivals(req,res);
     }
 
-
     if(url.startsWith('/supervisor/merchandise/pending-orders') && method === 'GET'){
         return actions.getPendingOrders(req,res);
     }
