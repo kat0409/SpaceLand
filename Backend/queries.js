@@ -204,11 +204,12 @@ const attendanceAndRevenueReport = `
     LEFT JOIN 
         tickettransactions tt ON t.transactionID = tt.transactionID 
     WHERE 1=1
-    GROUP BY 
-        oh.dateOH, oh.weatherCondition
-    ORDER BY 
-        oh.dateOH DESC
 `;
+
+/*GROUP BY 
+oh.dateOH, oh.weatherCondition
+ORDER BY 
+oh.dateOH DESC*/
 
 const getVisitorAccountInfo = `
     SELECT v.FirstName, v.LastName, v.Phone,
