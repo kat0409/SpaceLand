@@ -14,7 +14,7 @@ export default function ReorderForm() {
         fetch(`${BACKEND_URL}/supervisor/merchandise/items`)
         .then((res) => res.json())
         .then((data) => {
-            if(Array.isArray(data)){
+            if(Array.isArray(data)){ 
                 setItems(data);
             }
             else{
