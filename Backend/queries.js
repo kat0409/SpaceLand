@@ -154,6 +154,16 @@ const reorderMerchandise = `
     VALUES (?,?,?,?,?)
 `;
 
+const getMerchList = `
+    SELECT merchandiseID, itemName FROM merchandise ORDER BY itemName;
+`;
+
+const markStockArrivals = `
+    INSERT INTO stockArrivals (merchandiseID,quantityAdded,arrivalDate,
+    notes,reorderID)
+    VALUES (?,?,?,?,?)
+`;
+
 //Reports
 const rideMaintenanceReport = `
     SELECT 
@@ -272,9 +282,6 @@ const updateVisitorInfo = `
     WHERE v.VisitorID = ? AND v.Username = ? AND v.Password = ?;
 `;
 
-const getMerchList = `
-    SELECT merchandiseID, itemName FROM merchandise ORDER BY itemName;
-`;
 
 module.exports = {
     getRides,
@@ -328,7 +335,8 @@ module.exports = {
     updateOperatingHours,
     updateVisitorInfo,
     reorderMerchandise,
-    getMerchList
+    getMerchList,
+    markStockArrivals
 };
 
 //checkMerchQuantity
