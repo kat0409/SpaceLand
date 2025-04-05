@@ -33,7 +33,9 @@ const routeMap = {
         '/supervisor/account-info',
         '/account-info',
         '/supervisor/merchandise/notifications',
-        '/supervisor/merchandise/items'
+        '/supervisor/merchandise/items',
+        '/supervisor/merchandise/pending-orders',
+        '/supervisor/merchandise/merch'
     ],
     'POST': [
         '/add-employee', 
@@ -52,7 +54,6 @@ const routeMap = {
         '/supervisor/maintenance/update-ride-maintenance-status',
         '/supervisor/merchandise/reorders',
         '/supervisor/merchandise/stock-arrivals',
-        '/supervisor/merchandise/pending-orders'
     ],
     'PUT': [
         '/update-employee', 

@@ -171,6 +171,10 @@ const getPendingOrders = `
     WHERE r.status = 'pending'
 `;
 
+const getMerchandiseTable = `
+    SELECT * FROM merchandise
+`;
+
 //Reports
 const rideMaintenanceReport = `
     SELECT 
@@ -344,7 +348,8 @@ module.exports = {
     reorderMerchandise,
     getMerchList,
     markStockArrivals,
-    getPendingOrders
+    getPendingOrders,
+    getMerchandiseTable
 };
 
 //checkMerchQuantity
