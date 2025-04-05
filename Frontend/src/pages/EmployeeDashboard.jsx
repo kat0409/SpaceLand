@@ -2,11 +2,22 @@
 import { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { AuthContext } from "../components/AuthProvider";
+import { useNavigate } from 'react-router-dom';
 
 export default function EmployeeDashboard() {
+  const { auth, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
   const [employee, setEmployee] = useState(null);
   const [error, setError] = useState('');
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
+
+  useEffect(() => {
+    if(!auth.isAuthenticated || auth.role !== "employee"){
+      navigate("/employee-login")
+    }
+  }, [auth, navigate]);
 
   const employeeID = localStorage.getItem('employeeID');
 
