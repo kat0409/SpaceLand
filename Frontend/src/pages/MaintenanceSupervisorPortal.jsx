@@ -1,11 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { AuthContext } from '../components/AuthProvider';
+import { useNavigate } from 'react-router-dom';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
 export default function MaintenanceSupervisorPortal() {
     const [rideMaintenanceReport, setRideMaintenanceReport] = useState([]);
+    const { auth } = useContext(AuthContext)
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if(!auth.isAuthenticated || auth.role !== 'supervisor'){
+            navigate('/employee-login');
+        }
+    }, [auth, navigate]);
 
     const supervisorID = localStorage.getItem('supervisorID');
 
