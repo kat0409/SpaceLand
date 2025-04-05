@@ -289,11 +289,13 @@ const getMerchandiseTable = `
 SELECT * FROM merchandise
 `;
 
-const GetMerchandiseEmployees = `
+const getMerchandiseEmployees = `
 SELECT EmployeeID, FirstName, LastName, Email, Address, SupervisorID, username, password, employmentStatus, dateOfBirth
 FROM employee 
 WHERE Department = 'Merchandise';
 `;
+
+
 
 
 module.exports = {
