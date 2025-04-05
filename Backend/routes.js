@@ -150,6 +150,9 @@ function routes(req, res) {
     if(url.startsWith('/supervisor/merchandise/items') && method === 'GET'){
         return actions.getMerchList(req,res);
     }
+if(url.startsWith('/supervisor/merchandise/stock-arrivals') && method === 'POST'){
+    return actions.markStockArrivals(req,res);
+}
 
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
