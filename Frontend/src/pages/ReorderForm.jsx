@@ -11,11 +11,20 @@ export default function ReorderForm() {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
     useEffect(() => {
-        fetch(`${BACKEND_URL}/supervisor/merchandise`)
+        fetch(`${BACKEND_URL}/supervisor/merchandise/items`)
         .then((res) => res.json())
-        .then(setItems)
+        .then((data) => {
+            if(Array.isArray(data)){
+                setItems(data);
+            }
+            else{
+                console.error("Unexpected response:", data);
+                setItems([]);
+            }
+        })
         .catch((err) => {
             console.error('Error fetching merchandise:', err);
+            setItems([]);
         });
     }, []);
 
@@ -31,17 +40,18 @@ export default function ReorderForm() {
             expectedArrivalDate: expectedDate,
             notes
         }),
-        });
+    });
 
         const data = await res.json();
         if (res.ok) {
-        setMessage('Reorder placed');
-        setSelectedItem('');
-        setQuantity('');
-        setExpectedDate('');
-        setNotes('');
-        } else {
-        setMessage(`${data.error || 'Failed to reorder.'}`);
+            setMessage('Reorder placed');
+            setSelectedItem('');
+            setQuantity('');
+            setExpectedDate('');
+            setNotes('');
+        } 
+        else {
+            setMessage(`${data.error || 'Failed to reorder.'}`);
         }
     };
 
