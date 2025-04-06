@@ -167,6 +167,10 @@ function routes(req, res) {
         return actions.getMerchandiseReordersTable(req,res);
     }
 
+    if(url.startsWith('/supervisor/merchandise/add-merch') && method === 'POST'){
+        return actions.addMerchandiseTransaction(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
