@@ -163,6 +163,10 @@ function routes(req, res) {
         return actions.getMerchandiseTable(req,res);
     }
 
+    if(url.startsWith('/supervisor/merchandise/orders') && method === "GET"){
+        return actions.getMerchandiseReordersTable(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }

@@ -35,7 +35,8 @@ const routeMap = {
         '/supervisor/merchandise/notifications',
         '/supervisor/merchandise/items',
         '/supervisor/merchandise/pending-orders',
-        '/supervisor/merchandise/merch'
+        '/supervisor/merchandise/merch',
+        '/supervisor/merchandise/orders'
     ],
     'POST': [
         '/add-employee', 
