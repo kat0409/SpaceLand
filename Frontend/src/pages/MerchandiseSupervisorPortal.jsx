@@ -12,6 +12,7 @@ export default function SupervisorPortal() {
     const [visitorPurchasesReport, setVisitorPurchasesReport] = useState([]);
     const [lowStockItems, setLowStockItems] = useState([]);
     const [merchandise, setMerchandise] = useState([]);
+    const [merchReorders, setMerchReorders] = useState([]);
     const [filters, setFilters] = useState({
         startDate: '',
         endDate: '',
@@ -48,7 +49,7 @@ export default function SupervisorPortal() {
             .then(res => res.json())
             .then(data => setLowStockItems(data))
             .catch(err => console.error('Error fetching low stock notifications:', err));
-            fetch(`${BACKEND_URL}/supervisor/merchandise/merch`)
+        fetch(`${BACKEND_URL}/supervisor/merchandise/merch`)
             .then((res) => res.json())
             .then((data) => {
                 if (Array.isArray(data)) {
@@ -59,6 +60,18 @@ export default function SupervisorPortal() {
             })
             .catch((err) => {
                 console.error("Error fetching merchandise:", err);
+            });
+        fetch(`${BACKEND_URL}/supervisor/merchandise/orders`)
+            .then((res) => res.json())
+            .then((data) => {
+                if (Array.isArray(data)) {
+                setMerchReorders(data);
+                } else {
+                console.error("Unexpected order data:", data);
+                }
+            })
+            .catch((err) => {
+                console.error("Error fetching merchandise orders:", err);
             });
         fetchFilteredReport();
     }, []);
@@ -207,6 +220,34 @@ export default function SupervisorPortal() {
                         <td>{item.itemName}</td>
                         <td>{item.quantity}</td>
                         <td>${parseFloat(item.price).toFixed(2)}</td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+                </div>
+                {/* Merchandise Re-Orders Table */}
+                <div>
+                <h2 className="text-2xl font-semibold mb-4">📦 Merchandise Re-Orders</h2>
+                <table className="w-full text-sm bg-white/10 rounded-xl p-4">
+                    <thead className="text-purple-300">
+                    <tr>
+                        <th>Reorder ID</th>
+                        <th>Item Name</th>
+                        <th>Quantity Ordered</th>
+                        <th>Expected Arrival</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {merchReorders.map((order) => (
+                        <tr key={order.reorderID}>
+                        <td>{order.reorderID}</td>
+                        <td>{order.itemName}</td>
+                        <td>{order.quantityOrdered}</td>
+                        <td>{order.expectedArrivalDate ? new Date(order.expectedArrivalDate).toLocaleDateString() : 'N/A'}</td>
+                        <td>{order.status}</td>
+                        <td>{order.notes || '—'}</td>
                         </tr>
                     ))}
                     </tbody>
