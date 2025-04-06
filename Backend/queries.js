@@ -176,7 +176,9 @@ const getMerchandiseTable = `
 `;
 
 const getMerchandiseReordersTable =`
-    SELECT * FROM merchandisereorders
+    SELECT r.reorderID, r.quantityOrdered, r.expectedArrivalDate, r.status, r.notes, m.itemName
+    FROM merchandisereorders r
+    JOIN merchandise m ON r.merchandiseID = m.merchandiseID
 `;
 
 //Reports
