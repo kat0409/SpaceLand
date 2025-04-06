@@ -8,7 +8,6 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onren
 
 export default function MaintenanceSupervisorPortal() {
     const [rideMaintenanceReport, setRideMaintenanceReport] = useState([]);
-    const [merchandise, setMerchandise] = useState([]);
     const { auth } = useContext(AuthContext)
     const navigate = useNavigate();
 
@@ -24,21 +23,6 @@ export default function MaintenanceSupervisorPortal() {
         fetch(`${BACKEND_URL}/supervisor/maintenance/ride-maintenance`)
         .then(res => res.json())
         .then(data => setRideMaintenanceReport(data));
-    }, []);
-
-    useEffect(() => {
-        fetch(`${BACKEND_URL}/supervisor/merchandise/merch`)
-            .then((res) => res.json())
-            .then((data) => {
-                if (Array.isArray(data)) {
-                setMerchandise(data);
-                } else {
-                console.error("Unexpected merchandise data:", data);
-                }
-            })
-            .catch((err) => {
-                console.error("Error fetching merchandise:", err);
-        });
     }, []);
 
     return (
@@ -66,31 +50,6 @@ export default function MaintenanceSupervisorPortal() {
                         <td>{new Date(item.Start_Date).toLocaleDateString()}</td>
                         <td>{new Date(item.End_Date).toLocaleDateString()}</td>
                         <td>{item.Maintenance_Employee}</td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-                </div>
-        
-                {/* Merchandise Table */}
-                <div>
-                <h2 className="text-2xl font-semibold mb-4">🛍️ Merchandise Inventory</h2>
-                <table className="w-full text-sm bg-white/10 rounded-xl p-4">
-                    <thead className="text-purple-300">
-                    <tr>
-                        <th>ID</th>
-                        <th>Item Name</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {merchandise.map((item) => (
-                        <tr key={item.merchandiseID}>
-                        <td>{item.merchandiseID}</td>
-                        <td>{item.itemName}</td>
-                        <td>{item.quantity}</td>
-                        <td>${parseFloat(item.price).toFixed(2)}</td>
                         </tr>
                     ))}
                     </tbody>

@@ -11,6 +11,7 @@ export default function SupervisorPortal() {
     const [ticketSales, setTicketSales] = useState([]);
     const [visitorPurchasesReport, setVisitorPurchasesReport] = useState([]);
     const [lowStockItems, setLowStockItems] = useState([]);
+    const [merchandise, setMerchandise] = useState([]);
     const [filters, setFilters] = useState({
         startDate: '',
         endDate: '',
@@ -47,6 +48,18 @@ export default function SupervisorPortal() {
             .then(res => res.json())
             .then(data => setLowStockItems(data))
             .catch(err => console.error('Error fetching low stock notifications:', err));
+            fetch(`${BACKEND_URL}/supervisor/merchandise/merch`)
+            .then((res) => res.json())
+            .then((data) => {
+                if (Array.isArray(data)) {
+                setMerchandise(data);
+                } else {
+                console.error("Unexpected merchandise data:", data);
+                }
+            })
+            .catch((err) => {
+                console.error("Error fetching merchandise:", err);
+            });
         fetchFilteredReport();
     }, []);
 
@@ -170,6 +183,30 @@ export default function SupervisorPortal() {
                         <td>{v.Ticket_Type || 'N/A'}</td>
                         <td>{v.Merchandise_Bought || 'N/A'}</td>
                         <td>${(v.Merchandise_Total_Spent || 0)}</td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+                </div>
+                {/* Merchandise Table */}
+                <div>
+                <h2 className="text-2xl font-semibold mb-4">🛍️ Merchandise Inventory</h2>
+                <table className="w-full text-sm bg-white/10 rounded-xl p-4">
+                    <thead className="text-purple-300">
+                    <tr>
+                        <th>ID</th>
+                        <th>Item Name</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {merchandise.map((item) => (
+                        <tr key={item.merchandiseID}>
+                        <td>{item.merchandiseID}</td>
+                        <td>{item.itemName}</td>
+                        <td>{item.quantity}</td>
+                        <td>${parseFloat(item.price).toFixed(2)}</td>
                         </tr>
                     ))}
                     </tbody>
