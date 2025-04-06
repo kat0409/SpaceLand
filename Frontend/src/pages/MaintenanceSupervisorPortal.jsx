@@ -41,14 +41,14 @@ export default function MaintenanceSupervisorPortal() {
         });
     }, []);
 
-        return (
-            <>
+    return (
+        <>
             <Header />
             <section className="min-h-screen px-6 py-20 text-white bg-gradient-to-b from-black via-gray-900 to-black">
                 <h1 className="text-4xl font-bold mb-8 text-center">🛠 Maintenance Supervisor Portal</h1>
         
                 {/* Ride Maintenance Report */}
-                <div>
+                <div className="mb-16">
                 <h2 className="text-2xl font-semibold mb-4">Ride Maintenance Report</h2>
                 <table className="w-full text-sm bg-white/10 rounded-xl p-4">
                     <thead className="text-purple-300">
@@ -71,34 +71,34 @@ export default function MaintenanceSupervisorPortal() {
                     </tbody>
                 </table>
                 </div>
-
+        
                 {/* Merchandise Table */}
                 <div>
-                    <h2 className="text-2xl font-semibold mb-4">🛍️ Merchandise Inventory</h2>
-                    <table className="w-full text-sm bg-white/10 rounded-xl p-4">
+                <h2 className="text-2xl font-semibold mb-4">🛍️ Merchandise Inventory</h2>
+                <table className="w-full text-sm bg-white/10 rounded-xl p-4">
                     <thead className="text-purple-300">
-                        <tr>
+                    <tr>
                         <th>ID</th>
                         <th>Item Name</th>
                         <th>Quantity</th>
                         <th>Price</th>
-                        </tr>
+                    </tr>
                     </thead>
                     <tbody>
-                        {merchandise.map((item) => (
+                    {merchandise.map((item) => (
                         <tr key={item.merchandiseID}>
-                            <td>{item.merchandiseID}</td>
-                            <td>{item.itemName}</td>
-                            <td>{item.quantity}</td>
-                            <td>${parseFloat(item.price).toFixed(2)}</td>
+                        <td>{item.merchandiseID}</td>
+                        <td>{item.itemName}</td>
+                        <td>{item.quantity}</td>
+                        <td>${parseFloat(item.price).toFixed(2)}</td>
                         </tr>
-                        ))}
+                    ))}
                     </tbody>
-                    </table>
+                </table>
                 </div>
             </section>
             <Footer />
-            </>
-        );
+        </>
+    );
 }
 
