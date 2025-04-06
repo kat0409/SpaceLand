@@ -181,6 +181,11 @@ const getMerchandiseReordersTable =`
     JOIN merchandise m ON r.merchandiseID = m.merchandiseID
 `;
 
+const addMerchandise = `
+    INSERT INTO merchandise (giftShopName, itemName, price, quantity, departmentNumber)
+    Values (?,?,?,?,?)
+`;
+
 //Reports
 const rideMaintenanceReport = `
     SELECT 
@@ -356,7 +361,8 @@ module.exports = {
     markStockArrivals,
     getPendingOrders,
     getMerchandiseTable,
-    getMerchandiseReordersTable
+    getMerchandiseReordersTable,
+    addMerchandise
 };
 
 //checkMerchQuantity
