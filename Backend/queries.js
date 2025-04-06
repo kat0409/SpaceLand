@@ -175,6 +175,10 @@ const getMerchandiseTable = `
     SELECT * FROM merchandise
 `;
 
+const getMerchandiseReordersTable =`
+    SELECT * FROM merchandisereorders
+`;
+
 //Reports
 const rideMaintenanceReport = `
     SELECT 
@@ -349,7 +353,8 @@ module.exports = {
     getMerchList,
     markStockArrivals,
     getPendingOrders,
-    getMerchandiseTable
+    getMerchandiseTable,
+    getMerchandiseReordersTable
 };
 
 //checkMerchQuantity
