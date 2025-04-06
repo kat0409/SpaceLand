@@ -1328,7 +1328,7 @@ const getPendingOrders = (req, res) => {
     });
 };
 
-const getMerchandiseTable = (res) => {
+const getMerchandiseTable = (req, res) => {
     pool.query(queries.getMerchandiseTable, (error, results) => {
         if (error){
             console.error("Error fetching maintenance employees:", error);
