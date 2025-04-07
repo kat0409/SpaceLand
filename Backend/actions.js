@@ -1474,7 +1474,7 @@ const completeMaintenanceRequest = (req, res) => {
 };
 
 const getPendingMaintenance = (req,res) => {
-    pool.query(queries.getPendingMaintenance, (err,results) => {
+    pool.query(queries.getPendingMaintenance, (error,results) => {
         if(error){
             console.error("Error fetching pending maintenance requests:", error);
             res.writeHead(500, {"Content-Type": "application/json"});
