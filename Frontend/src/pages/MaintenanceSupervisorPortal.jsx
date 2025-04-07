@@ -4,7 +4,7 @@ import Footer from '../components/Footer';
 import { AuthContext } from '../components/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import MaintenanceRequestForm from './MaintenanceRequestForm';
-
+import MarkMaintenanceCompletionForm from './MarkMaintenanceCompletionForm';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
 export default function MaintenanceSupervisorPortal() {
@@ -58,6 +58,9 @@ export default function MaintenanceSupervisorPortal() {
                 </div>
                 <div className="p-6">
                     <MaintenanceRequestForm />
+                </div>
+                <div className="p-6">
+                    <MarkMaintenanceCompletionForm />
                 </div>
             </section>
             <Footer />
