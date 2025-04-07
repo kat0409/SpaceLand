@@ -1385,15 +1385,15 @@ const addMaintenanceRequest = (req,res) => {
             return;
         }
 
-        const {RideID,MaintenanceStartDate,MaintenanceEndDate,MaintenanceEmployeeID} = parsedBody;
+        const {RideID,status,reason,MaintenanceEndDate,MaintenanceEmployeeID,MaintenanceStartDate} = parsedBody;
 
-        if (!RideID || !MaintenanceStartDate || !MaintenanceEndDate || !MaintenanceEmployeeID) {
+        if (!RideID || !status || !reason || !MaintenanceStartDate || !MaintenanceEndDate || !MaintenanceEmployeeID) {
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Ride ID number, start date, expected end date, and employee ID number  are required." }));
+            res.end(JSON.stringify({ error: "Ride ID number, status, reason, start date, expected end date, and employee ID number  are required." }));
             return;
         }
 
-        pool.query(queries.addMaintenanceRequest, [RideID,MaintenanceStartDate,MaintenanceEndDate,MaintenanceEmployeeID], (error, results) => {
+        pool.query(queries.addMaintenanceRequest, [RideID,status,reason,MaintenanceEndDate,MaintenanceEmployeeID,MaintenanceStartDate], (error, results) => {
             if (error) {
                 console.error("Error making a maintenance request:", error);
                 res.writeHead(500, { "Content-Type": "application/json" });

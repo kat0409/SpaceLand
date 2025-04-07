@@ -7,6 +7,7 @@ export default function MaintenanceRequestForm(){
     const [selectedEmployee, setSelectedEmployee] = useState('');
     const [MaintenanceStartDate, setMaintenanceStartDate] = useState('');
     const [MaintenanceEndData, setMaintenanceEndDate] = useState('');
+    const [reason, setReason] = useState('');
     const [message, setMessage] = useState('');
 
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
@@ -30,6 +31,8 @@ export default function MaintenanceRequestForm(){
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
                 RideID: selectedRide,
+                status: "pending",
+                reason,
                 MaintenanceStartDate: MaintenanceStartDate,
                 MaintenanceEndDate: MaintenanceEndData,
                 MaintenanceEmployeeID: selectedEmployee
@@ -40,6 +43,7 @@ export default function MaintenanceRequestForm(){
         if(res.ok){
             setMessage("Maintenance request successfully submitted");
             setSelectedRide('');
+            setReason(''),
             setSelectedEmployee('');
             setMaintenanceStartDate('');
             setMaintenanceEndDate('');
@@ -92,6 +96,14 @@ export default function MaintenanceRequestForm(){
                 type="date"
                 value={MaintenanceEndData}
                 onChange={(e) => setMaintenanceEndDate(e.target.value)}
+                required
+                className="w-full p-2 rounded bg-black text-white"
+            />
+
+            <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Reason for maintenance"
                 required
                 className="w-full p-2 rounded bg-black text-white"
             />
