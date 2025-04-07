@@ -183,6 +183,10 @@ function routes(req, res) {
         return actions.getEmployeesForMaintenanceRequest(req,res);
     }
 
+    if(url.startsWith('/supervisor/maintenance/complete-request') && method === "PUT"){
+        return actions.completeMaintenanceRequest(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
