@@ -1433,6 +1433,46 @@ const getEmployeesForMaintenanceRequest = (req,res) => {
     });
 }
 
+const completeMaintenanceRequest = (req, res) => {
+    let body = "";
+
+    req.on("data", chunk => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        let parsedBody;
+
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (err) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON" }));
+            return;
+        }
+
+        const { maintenanceID, MaintenanceEndDate } = parsedBody;
+
+        if (!maintenanceID || !MaintenanceEndDate) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "maintenanceID and MaintenanceEndDate are required." }));
+            return;
+        }
+
+        pool.query(queries.completeMaintenanceRequest, [MaintenanceEndDate, maintenanceID], (err, results) => {
+            if (err) {
+            console.error("Error completing maintenance request:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Database error" }));
+            return;
+            }
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Maintenance marked as completed" }));
+        });
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -1476,5 +1516,6 @@ module.exports = {
     addMerchandise,
     addMaintenanceRequest,
     getRidesForMaintenanceRequest,
-    getEmployeesForMaintenanceRequest
+    getEmployeesForMaintenanceRequest,
+    completeMaintenanceRequest
 };  
