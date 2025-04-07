@@ -13,6 +13,7 @@ export default function HRSupervisorPortal() {
     const [employees, setEmployees] = useState([]);
     const [visitorRecords, setVisitorRecords] = useState([]);
     const [attendanceAndRevenueReport, setAttendanceAndRevenueReport] = useState([]);
+    const {logout} = useContext(AuthContext);
     const [filters, setFilters] = useState({
         startDate: '',
         endDate: '',
@@ -187,6 +188,15 @@ export default function HRSupervisorPortal() {
                     </table>
                     </div>
                 </div>
+                <button
+                    onClick={() => {
+                        logout();
+                        window.location.href = "/employee-login"
+                    }}
+                    className="mt-6 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-semibold"
+                >
+                    Logout
+                </button>
             </section>
             <Footer />
             </>
