@@ -28,6 +28,7 @@ export default function UserPortal() {
       .then(res => res.json())
       .then(data => setPurchases(data));
       //.catch(err => console.error("Error fetching purchase history:", err));
+    fetch()
   }, []);
 
   return (
