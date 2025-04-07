@@ -1,8 +1,16 @@
 // src/pages/UserPortal.jsx
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import {useEffect, useState, useContext} from "react";
+import { AuthContext } from '../components/AuthProvider';
 
 export default function UserPortal() {
+  const {auth} = useContext(AuthContext);
+  const [userData, setUserData] = useState([]);
+  const [tickets, setTickets] = useState([]);
+  const [purchases, setPurchases] = useState([]);
+  const [events, setEvents] = useState([]);
+
   return (
     <>
       <Header />
