@@ -562,19 +562,6 @@ const getEmployeesByDept = (req, res) => {
     });
 };
 
-const getMaintenanceRequests = (req, res) => {
-    pool.query(queries.getMaintenanceRequests, (error, results) => {
-        if (error) {
-            console.error("Error fetching maintenance requests:", error);
-            res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Internal server error" }));
-            return;
-        }
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(results));
-    });
-};
-
 const updateMaintenanceStatus = (req, res) => {
     let body = "";
 
@@ -1486,6 +1473,19 @@ const getPendingMaintenance = (req,res) => {
     });
 };
 
+const getMaintenanceRequests = (req,res) => {
+    pool.query(queries.getMaintenanceRequests, (error, results) => {
+        if(error){
+            console.error("Error fetching ride maintenance requests:", error);
+            res.writeHead(500, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({error: "Internal server error"}));
+            return;
+        }
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.end(JSON.stringify(results));
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -1497,7 +1497,6 @@ module.exports = {
     addVisitor,
     checkVisitorExists,
     getEmployeesByDept,
-    getMaintenanceRequests,
     updateMaintenanceStatus,
     getLowStockMerchandise,
     getSalesReport,
@@ -1531,5 +1530,6 @@ module.exports = {
     getRidesForMaintenanceRequest,
     getEmployeesForMaintenanceRequest,
     completeMaintenanceRequest,
-    getPendingMaintenance
+    getPendingMaintenance,
+    getMaintenanceRequests
 };  
