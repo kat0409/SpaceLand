@@ -167,20 +167,6 @@ export default function SupervisorPortal() {
                 <button className="mt-4 px-4 py-2 bg-purple-600 rounded"
                     onClick={fetchFilteredReport}>Apply Filters</button>
                 </div>
-
-                <div className="p-6">
-                    {/* ...other components */}
-                    <ReorderForm />
-                </div>
-
-                <div className="p-6">
-                    {/* ...other components */}
-                    <StockArrivalForm />
-                </div>
-
-                <div className="p-6">
-                    <AddMerchandiseForm />
-                </div>
         
                 {/* Visitor Purchases */}
                 <div>
@@ -257,6 +243,19 @@ export default function SupervisorPortal() {
                     ))}
                     </tbody>
                 </table>
+                </div>
+                <div className="p-6">
+                    {/* ...other components */}
+                    <ReorderForm />
+                </div>
+
+                <div className="p-6">
+                    {/* ...other components */}
+                    <StockArrivalForm />
+                </div>
+
+                <div className="p-6">
+                    <AddMerchandiseForm />
                 </div>
             </section>
             <Footer />
