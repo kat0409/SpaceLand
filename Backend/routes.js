@@ -168,7 +168,7 @@ function routes(req, res) {
     }
 
     if(url.startsWith('/supervisor/merchandise/add-merch') && method === 'POST'){
-        return actions.addMerchandiseTransaction(req,res);
+        return actions.addMerchandise(req,res);
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
