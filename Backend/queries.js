@@ -184,11 +184,6 @@ const addMerchandise = `
     Values (?,?,?,?,?)
 `;
 
-const getRidesForMaintenanceRequest = `
-    SELECT RideID, RideName
-    FROM Rides
-`;
-
 
 //Reports
 const rideMaintenanceReport = `
@@ -309,14 +304,19 @@ const updateVisitorInfo = `
 `;
 
 const addMaintenanceRequest = `
-    INSERT INTO maintenance (RideID, MaintenanceStartDate, MaintenanceEndDate, MaintenanceEmployeeID)
-    VALUES (?,?,?,?)
+    INSERT INTO ridemaintenance (rideID, status, reason, MaintenanceEndDate, MaintenanceEmployeeID, MaintenanceStartDate)
+    VALUES (?,?,?,?,?,?)
 `;
 
 const getMaintenanceEmployeesForMR = `
     SELECT EmployeeID, FirstName, LastName
     FROM employee
     WHERE Department = 'Maintenance' AND employmentStatus = 1
+`;
+
+const getRidesForMaintenanceRequest = `
+    SELECT RideID, RideName
+    FROM Rides
 `;
 
 module.exports = {
