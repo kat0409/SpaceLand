@@ -3,6 +3,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ReorderForm from './ReorderForm';
 import StockArrivalForm from './StockArrival';
+import AddMerchandiseForm from './AddMerchandiseForm';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
@@ -175,6 +176,10 @@ export default function SupervisorPortal() {
                 <div className="p-6">
                     {/* ...other components */}
                     <StockArrivalForm />
+                </div>
+
+                <div className="p-6">
+                    <AddMerchandiseForm />
                 </div>
         
                 {/* Visitor Purchases */}
