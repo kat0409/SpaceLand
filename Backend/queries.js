@@ -252,6 +252,19 @@ const getVisitorAccountInfo = `
     WHERE v.Username = ? AND v.Password = ?;
 `;
 
+const getVisitorMerchPurchases = `
+    SELECT
+        mt.transactionDate,
+        mt.itemName,
+        m.giftShopName,
+        mt.quantity,
+        m.price,
+        mt.totalAmount
+    FROM merchandisetransactions mt
+    JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+    WHERE mt.VisitorID = ?
+`;
+
 const getEmployeeAccountInfo = `
     SELECT e.FirstName, e.LastName, e.EmployeeID, e.Email,
     e.Address, e.SupervisorID, e.Department,
@@ -397,7 +410,8 @@ module.exports = {
     getRidesForMaintenanceRequest,
     getMaintenanceEmployeesForMR,
     completeMaintenanceRequest,
-    getPendingMaintenance
+    getPendingMaintenance,
+    getVisitorMerchPurchases
 };
 
 //checkMerchQuantity
