@@ -1487,9 +1487,17 @@ const getMaintenanceRequests = (req,res) => {
 };
 
 const getVisitorMerchPurchases = (req,res) => {
-    pool.query(queries.getVisitorMerchPurchases, (error, results) => {
+    const parsedUrl = url.parse(req.url, true);//use when: redirected from another page -> we need to pass info we received in the page we redirected from (the url contains the visitorID)
+    const visitorID = parsedUrl.query.visitorID;
+
+    if(!visitorID){
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Missing visitorID" }));
+        return;
+    }
+    pool.query(queries.getVisitorMerchPurchases, [visitorID], (error, results) => {
         if(error){
-            console.error("Error fetching ride maintenance requests:", error);
+            console.error("Error fetching purchase history:", error);
             res.writeHead(500, {"Content-Type": "application/json"});
             res.end(JSON.stringify({error: "Internal server error"}));
             return;

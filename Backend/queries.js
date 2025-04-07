@@ -255,7 +255,7 @@ const getVisitorAccountInfo = `
 const getVisitorMerchPurchases = `
     SELECT
         mt.transactionDate,
-        mt.itemName,
+        m.itemName,
         m.giftShopName,
         mt.quantity,
         m.price,
