@@ -8,8 +8,6 @@ const addEmployee = 'INSERT INTO employee (FirstName, LastName, Email, Address, 
 
 const getRidesNeedingMaintenance = 'SELECT * FROM rides WHERE MaintenanceNeed = 1';
 
-const addMaintenance = 'INSERT INTO maintenance (RideID, MaintenanceStartDate, MaintenanceEndDate, MaintenanceEmployeeID, eventID) VALUES (?,?,?,?,?,)';
-
 const getMerchandiseTransactions = 'SELECT * FROM merchandiseTransactions';
 
 const addMerchandiseTransaction = 'INSERT INTO merchandiseTransactions (merchandiseID, VisitorID, transactionDate, quantity, totalAmount) VALUES (?,?,?,?,?)';
@@ -186,6 +184,8 @@ const addMerchandise = `
     Values (?,?,?,?,?)
 `;
 
+
+
 //Reports
 const rideMaintenanceReport = `
     SELECT 
@@ -304,13 +304,16 @@ const updateVisitorInfo = `
     WHERE v.VisitorID = ? AND v.Username = ? AND v.Password = ?;
 `;
 
+const addMaintenanceRequest = `
+    INSERT INTO maintenance (RideID, MaintenanceStartDate, MaintenanceEndDate, MaintenanceEmployeeID)
+    VALUES (?,?,?,?)
+`;
 
 module.exports = {
     getRides,
     getEmployees,
     addEmployee,
     getRidesNeedingMaintenance,
-    addMaintenance,
     getMerchandiseTransactions,
     addMerchandiseTransaction,
     addRestaurant,
@@ -362,7 +365,8 @@ module.exports = {
     getPendingOrders,
     getMerchandiseTable,
     getMerchandiseReordersTable,
-    addMerchandise
+    addMerchandise,
+    addMaintenanceRequest
 };
 
 //checkMerchQuantity
