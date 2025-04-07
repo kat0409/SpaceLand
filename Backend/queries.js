@@ -184,6 +184,10 @@ const addMerchandise = `
     Values (?,?,?,?,?)
 `;
 
+const getRidesForMaintenanceRequest = `
+    SELECT RideID, RideName
+    FROM Rides
+`;
 
 
 //Reports
@@ -366,7 +370,8 @@ module.exports = {
     getMerchandiseTable,
     getMerchandiseReordersTable,
     addMerchandise,
-    addMaintenanceRequest
+    addMaintenanceRequest,
+    getRidesForMaintenanceRequest
 };
 
 //checkMerchQuantity
