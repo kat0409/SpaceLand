@@ -5,13 +5,13 @@ import { AuthContext } from '../components/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import MaintenanceRequestForm from './MaintenanceRequestForm';
 import MarkMaintenanceCompletionForm from './MarkMaintenanceCompletionForm';
-//import { getMaintenanceRequests } from '../../../Backend/queries';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
 export default function MaintenanceSupervisorPortal() {
     const [rideMaintenanceReport, setRideMaintenanceReport] = useState([]);
     const [maintenanceRequests, setMaintenanceRequests] = useState([]);
-    const { auth } = useContext(AuthContext)
+    const { auth } = useContext(AuthContext);
+    const {logout} = useContext(AuthContext);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -98,6 +98,15 @@ export default function MaintenanceSupervisorPortal() {
                 <div className="p-6">
                     <MarkMaintenanceCompletionForm />
                 </div>
+                <button
+                    onClick={() => {
+                        logout();
+                        window.location.href = "/employee-login"
+                    }}
+                    className="mt-6 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-semibold"
+                >
+                    Logout
+                </button>
             </section>
             <Footer />
         </>

@@ -1,5 +1,3 @@
-// ✅ FRONTEND: Auth.jsx — Cleaned & Mapped Signup/Login POST Requests
-
 import { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -82,7 +80,7 @@ export default function Auth() {
     setSuccessMessage('');
 
     try {
-      const res = await fetch(`${BACKEND_URL}/login`, {
+      const res = await fetch(`${BACKEND_URL}/login-visitor`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(loginData),
