@@ -90,6 +90,8 @@ export default function Auth() {
 
       if (res.ok && data.visitorID) {
         localStorage.setItem("visitorID", data.visitorID);
+        localStorage.setItem("role", "visitor");
+        localStorage.setItem("userID", data.visitorID);
         setSuccessMessage("Login successful!");
         setTimeout(() => (window.location.href = "/portal"), 1000);
       } else {
