@@ -265,6 +265,17 @@ const getVisitorMerchPurchases = `
     WHERE mt.VisitorID = ?
 `;
 
+const getVisitorTicketTransactions = `
+    SELECT
+        tt.transactionID,
+        tt.transactionDate,
+        tt.ticketType,
+        tt.quantity,
+        tt.totalAmount
+    FROM tickettransactions tt
+    WHERE tt.VisitorID = ?;
+`;
+
 const getEmployeeAccountInfo = `
     SELECT e.FirstName, e.LastName, e.EmployeeID, e.Email,
     e.Address, e.SupervisorID, e.Department,
