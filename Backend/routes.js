@@ -176,7 +176,7 @@ function routes(req, res) {
     }
 
     if(url.startsWith('/supervisor/maintenance/rides') && method === "GET"){
-        actions.getRides(req,res);
+        actions.getRidesForMaintenanceRequest(req,res);
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
