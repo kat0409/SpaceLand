@@ -325,6 +325,15 @@ const completeMaintenanceRequest = `
     WHERE maintenanceID = ?
 `;
 
+const getPendingMaintenance = `
+    SELECT r.maintenanceID, r.rideID, rd.RideName, r.status, r.reason, r.MaintenanceStartDate, r.MaintenanceEndDate,
+        r.MaintenanceEmployeeID, e.FirstName, e.LastName
+    FROM ridemaintenance r
+    JOIN rides rd ON r.rideID = rd.RideID
+    LEFT JOIN employee e ON r.MaintenanceEmployeeID = e.EmployeeID
+    WHERE r.status IN ('pending');
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -385,7 +394,8 @@ module.exports = {
     addMaintenanceRequest,
     getRidesForMaintenanceRequest,
     getMaintenanceEmployeesForMR,
-    completeMaintenanceRequest
+    completeMaintenanceRequest,
+    getPendingMaintenance
 };
 
 //checkMerchQuantity
