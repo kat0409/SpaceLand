@@ -31,7 +31,7 @@ export default function MaintenanceRequestForm(){
             body: JSON.stringify({
                 RideID: selectedRide,
                 MaintenanceStartDate: MaintenanceStartDate,
-                MaintenanceEndData: MaintenanceEndData,
+                MaintenanceEndDate: MaintenanceEndData,
                 MaintenanceEmployeeID: selectedEmployee
             })
         });
@@ -82,16 +82,16 @@ export default function MaintenanceRequestForm(){
 
             <input
                 type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                value={MaintenanceStartDate}
+                onChange={(e) => setMaintenanceStartDate(e.target.value)}
                 required
                 className="w-full p-2 rounded bg-black text-white"
             />
 
             <input
                 type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                value={MaintenanceEndData}
+                onChange={(e) => setMaintenanceEndDate(e.target.value)}
                 required
                 className="w-full p-2 rounded bg-black text-white"
             />
