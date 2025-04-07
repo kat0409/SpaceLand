@@ -319,6 +319,12 @@ const getRidesForMaintenanceRequest = `
     FROM Rides
 `;
 
+const completeMaintenanceRequest = `
+    UPDATE rideMaintenance
+    SET status = 'completed', MaintenanceEndDate = ?
+    WHERE maintenanceID = ?
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -378,7 +384,8 @@ module.exports = {
     addMerchandise,
     addMaintenanceRequest,
     getRidesForMaintenanceRequest,
-    getMaintenanceEmployeesForMR
+    getMaintenanceEmployeesForMR,
+    completeMaintenanceRequest
 };
 
 //checkMerchQuantity
