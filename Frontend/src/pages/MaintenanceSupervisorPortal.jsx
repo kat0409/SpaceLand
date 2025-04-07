@@ -5,7 +5,7 @@ import { AuthContext } from '../components/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import MaintenanceRequestForm from './MaintenanceRequestForm';
 import MarkMaintenanceCompletionForm from './MarkMaintenanceCompletionForm';
-import { getMaintenanceRequests } from '../../../Backend/queries';
+//import { getMaintenanceRequests } from '../../../Backend/queries';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
 export default function MaintenanceSupervisorPortal() {
@@ -51,14 +51,14 @@ export default function MaintenanceSupervisorPortal() {
                     </tr>
                     </thead>
                     <tbody>
-                    {rideMaintenanceReport.map((item, idx) => (
-                        <tr key={idx}>
-                        <td>{item.Ride}</td>
-                        <td>{new Date(item.Start_Date).toLocaleDateString()}</td>
-                        <td>{new Date(item.End_Date).toLocaleDateString()}</td>
-                        <td>{item.Maintenance_Employee}</td>
-                        </tr>
-                    ))}
+                        {rideMaintenanceReport.map((item, idx) => (
+                            <tr key={idx}>
+                            <td>{item.Ride}</td>
+                            <td>{new Date(item.Start_Date).toLocaleDateString()}</td>
+                            <td>{new Date(item.End_Date).toLocaleDateString()}</td>
+                            <td>{item.Maintenance_Employee}</td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
                 </div>
@@ -78,17 +78,17 @@ export default function MaintenanceSupervisorPortal() {
                     </tr>
                     </thead>
                     <tbody>
-                    {getMaintenanceRequests.map((item, idx) => (
-                        <tr key={idx}>
-                        <td>{item.RideName}</td>
-                        <td>{item.rideID}</td>
-                        <td>{item.status}</td>
-                        <td>{item.reason}</td>
-                        <td>{item.MaintenanceStartDate ? new Date(item.MaintenanceStartDate).toLocaleDateString() : '—'}</td>
-                        <td>{item.MaintenanceEndDate ? new Date(item.MaintenanceEndDate).toLocaleDateString() : '—'}</td>
-                        <td>{item.MaintenanceEmployeeID || 'Unassigned'}</td>
-                        </tr>
-                    ))}
+                        {maintenanceRequests.map((item, idx) => (
+                            <tr key={idx}>
+                            <td>{item.RideName}</td>
+                            <td>{item.rideID}</td>
+                            <td>{item.status}</td>
+                            <td>{item.reason}</td>
+                            <td>{item.MaintenanceStartDate ? new Date(item.MaintenanceStartDate).toLocaleDateString() : '—'}</td>
+                            <td>{item.MaintenanceEndDate ? new Date(item.MaintenanceEndDate).toLocaleDateString() : '—'}</td>
+                            <td>{item.MaintenanceEmployeeID || 'Unassigned'}</td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
                 </div>
