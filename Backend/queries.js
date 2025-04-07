@@ -182,7 +182,7 @@ const getMerchandiseReordersTable =`
 `;
 
 const addMerchandise = `
-    INSERT INTO merchandise (giftShopName, itemName, price, quantity, departmentNumber)
+    INSERT INTO merchandise (itemName, price, quantity, giftShopName, departmentNumber)
     Values (?,?,?,?,?)
 `;
 
