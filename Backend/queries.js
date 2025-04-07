@@ -422,7 +422,8 @@ module.exports = {
     getMaintenanceEmployeesForMR,
     completeMaintenanceRequest,
     getPendingMaintenance,
-    getVisitorMerchPurchases
+    getVisitorMerchPurchases,
+    getVisitorTicketTransactions
 };
 
 //checkMerchQuantity
