@@ -85,10 +85,6 @@ const getEmployeesByDepartment = `
     SELECT * FROM employee WHERE Department = ?
 `;
 
-const getMaintenanceRequests = `
-    SELECT * FROM rides WHERE MaintenanceNeed = 1
-`;
-
 /*const updateRideMaintenanceStatus = `
     UPDATE rides 
     SET MaintenanceStatus = ? 
@@ -332,6 +328,10 @@ const getPendingMaintenance = `
     JOIN rides rd ON r.rideID = rd.RideID
     LEFT JOIN employee e ON r.MaintenanceEmployeeID = e.EmployeeID
     WHERE r.status IN ('pending');
+`;
+
+const getMaintenanceRequests = `
+    SELECT * FROM rideMaintenance
 `;
 
 module.exports = {
