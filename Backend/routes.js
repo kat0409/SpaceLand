@@ -191,6 +191,10 @@ function routes(req, res) {
         return actions.getPendingMaintenance(req,res);
     }
 
+    if(url.startsWith('/supervisor/maintenance/get-maintenance-requests') && method === "GET"){
+        return actions.getMaintenanceRequests(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
