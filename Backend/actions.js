@@ -1420,7 +1420,7 @@ const getRidesForMaintenanceRequest = (req,res) => {
     });
 };
 
-const getMaintenanceEmployeesForMR = (req,res) => {
+const getEmployeesForMaintenanceRequest = (req,res) => {
     pool.query(queries.getMaintenanceEmployeesForMR, (error, results) => {
         if (error){
             console.log("Error fetching maintenance employee info:", error);
@@ -1476,5 +1476,5 @@ module.exports = {
     addMerchandise,
     addMaintenanceRequest,
     getRidesForMaintenanceRequest,
-    getMaintenanceEmployeesForMR
+    getEmployeesForMaintenanceRequest
 };  
