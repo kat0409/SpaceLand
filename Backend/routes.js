@@ -187,6 +187,10 @@ function routes(req, res) {
         return actions.completeMaintenanceRequest(req,res);
     }
 
+    if(url.startsWith('/supervisor/maintenance/ridemaintenance-pending') && method === "GET"){
+        return actions.getPendingMaintenance(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
