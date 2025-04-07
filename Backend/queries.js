@@ -313,6 +313,12 @@ const addMaintenanceRequest = `
     VALUES (?,?,?,?)
 `;
 
+const getMaintenanceEmployeesForMR = `
+    SELECT EmployeeID, FirstName, LastName
+    FROM employee
+    WHERE Department = 'Maintenance' AND employmentStatus = 1
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -371,7 +377,8 @@ module.exports = {
     getMerchandiseReordersTable,
     addMerchandise,
     addMaintenanceRequest,
-    getRidesForMaintenanceRequest
+    getRidesForMaintenanceRequest,
+    getMaintenanceEmployeesForMR
 };
 
 //checkMerchQuantity
