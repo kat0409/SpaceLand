@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ReorderForm from './ReorderForm';
 import StockArrivalForm from './StockArrival';
 import AddMerchandiseForm from './AddMerchForm';
+import { AuthContext } from '../components/AuthProvider';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
@@ -14,6 +15,7 @@ export default function SupervisorPortal() {
     const [lowStockItems, setLowStockItems] = useState([]);
     const [merchandise, setMerchandise] = useState([]);
     const [merchReorders, setMerchReorders] = useState([]);
+    const {logout} = useContext(AuthContext);
     const [filters, setFilters] = useState({
         startDate: '',
         endDate: '',
@@ -257,6 +259,15 @@ export default function SupervisorPortal() {
                 <div className="p-6">
                     <AddMerchandiseForm />
                 </div>
+                <button
+                    onClick={() => {
+                        logout();
+                        window.location.href = "/employee-login"
+                    }}
+                    className="mt-6 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-semibold"
+                >
+                    Logout
+                </button>
             </section>
             <Footer />
             </>
