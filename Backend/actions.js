@@ -331,11 +331,11 @@ const addVisitor = (req, res) => {
         }
 
         // Ensure optional fields have defaults
-        const phone = Phone || null;
-        const address = Address || null;
-        const gender = Gender || null;
-        const height = Height || null;
-        const age = Age || null;
+        const phone = Phone || 'N/A';
+        const address = Address || 'N/A';
+        const gender = Gender || 'U';
+        const height = Height || 0;
+        const age = Age || 0;
 
         // Set checkboxes as 1 (true) if checked, else 0 (false)
         const accessibilityNeeds = AccessibilityNeeds ? 1 : 0;
