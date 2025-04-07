@@ -52,7 +52,7 @@ export default function MarkMaintenanceCompletionForm(){
                 <option value="">Select Pending Request</option>
                 {requests.map(req => (
                 <option key={req.maintenanceID} value={req.maintenanceID}>
-                    {req.rideName} - ID {req.maintenanceID}
+                    {req.RideName} - ID {req.maintenanceID}
                 </option>
                 ))}
             </select>

@@ -331,7 +331,9 @@ const getPendingMaintenance = `
 `;
 
 const getMaintenanceRequests = `
-    SELECT * FROM rideMaintenance
+    SELECT r.RideName, rm.rideID, rm.status, rm.reason, rm.MaintenanceStartDate, rm.MaintenanceEndDate, rm.MaintenanceEmployeeID
+    FROM rideMaintenance rm
+    JOIN rides r ON r.RideID = rm.rideID
 `;
 
 module.exports = {

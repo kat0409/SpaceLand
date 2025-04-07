@@ -56,6 +56,30 @@ export default function MaintenanceSupervisorPortal() {
                     </tbody>
                 </table>
                 </div>
+
+                <div className="mb-16">
+                <h2 className="text-2xl font-semibold mb-4">Ride Maintenance Report</h2>
+                <table className="w-full text-sm bg-white/10 rounded-xl p-4">
+                    <thead className="text-purple-300">
+                    <tr>
+                        <th>RideID</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Employee</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {rideMaintenanceReport.map((item, idx) => (
+                        <tr key={idx}>
+                        <td>{item.Ride}</td>
+                        <td>{new Date(item.Start_Date).toLocaleDateString()}</td>
+                        <td>{new Date(item.End_Date).toLocaleDateString()}</td>
+                        <td>{item.Maintenance_Employee}</td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+                </div>
                 <div className="p-6">
                     <MaintenanceRequestForm />
                 </div>
