@@ -249,7 +249,7 @@ const getVisitorAccountInfo = `
     v.Email, v.Address, v.DateOfBirth, v.AccessibilityNeeds,
     v.Gender, v.Height, v.Age, v.MilitaryStatus
     FROM visitors v
-    WHERE v.Username = ? AND v.Password = ?;
+    WHERE v.VisitorID = ?;
 `;
 
 const getVisitorMerchPurchases = `

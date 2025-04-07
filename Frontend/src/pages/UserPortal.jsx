@@ -19,7 +19,11 @@ export default function UserPortal() {
     if(!visitorID){
       return;
     } 
-
+    console.log(visitorID);
+    fetch(`${BACKEND_URL}/account-info?visitorID=${visitorID}`)
+      .then(res => res.json())
+      .then(data => setUserData(data[0]))
+      .catch(err => console.error("Error fetching account info:", err));
     fetch(`${BACKEND_URL}/purchase-history?visitorID=${visitorID}`)
       .then(res => res.json())
       .then(data => setPurchases(data));
@@ -33,6 +37,27 @@ export default function UserPortal() {
         <h2 className="text-4xl font-bold mb-6">🌌 Welcome to Your Portal</h2>
         <p className="text-gray-400 mb-10">View your passes, perks, and cosmic stats here.</p>
         <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-8 rounded-2xl max-w-xl mx-auto">
+          {/* Account Info */}
+          <div className="bg-white/10 p-6 rounded-2xl border border-white/10">
+            <h2 className="text-3xl font-bold mb-2">Account Info</h2>
+            {userData ? (
+              <p className="text-gray-300">
+                <strong>First Name:</strong> {userData.FirstName} <br />
+                <strong>Last Name:</strong> {userData.LastName} <br />
+                <strong>Phone:</strong> {userData.Phone} <br />
+                <strong>Email:</strong> {userData.Email} <br />
+                <strong>Address:</strong> {userData.Address} <br />
+                <strong>Date of Birth:</strong> {userData.DateOfBirth} <br />
+                <strong>Gender:</strong> {userData.Gender} <br />
+                <strong>Height:</strong> {userData.Height} <br />
+                <strong>Age:</strong> {userData.Age} <br />
+                <strong>Military Status:</strong> {userData.MilitaryStatus ? 'Yes' : 'No'} <br />
+                <strong>Accessibility Needs:</strong> {userData.AccessibilityNeeds ? 'Yes' : 'No'}
+              </p>
+            ) : (
+              <p className="text-gray-400">Loading account info...</p>
+            )}
+          </div>
           {/*Purchases*/}
           <div className="bg-white/10 p-6 rounded-2xl border border-white/10">
             <h3 className="text-2xl font-semibold mb-4">📦 Merchandise Transactions</h3>
