@@ -42,7 +42,8 @@ const routeMap = {
         '/supervisor/maintenance/ridemaintenance-pending',
         '/supervisor/maintenance/get-maintenance-requests',
         '/purchase-history',
-        '/ticket-history'
+        '/ticket-history',
+        '/alerts'
     ],
     'POST': [
         '/add-employee', 

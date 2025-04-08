@@ -203,6 +203,10 @@ function routes(req, res) {
         return actions.getVisitorTicketTransactions(req,res);
     }
 
+    if(url.startsWith('/alerts') && method === "GET"){
+        return actions.getHomePageAlerts(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
