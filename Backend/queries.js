@@ -274,11 +274,6 @@ WHERE merchandiseID = ?;
 `;
 
 
-const deleteRide = `
-DELETE FROM rides
-WHERE RideID = ? AND RideName = ?
-`;
-
 const getMerchandiseTable = `
 SELECT * FROM merchandise
 `;
@@ -351,7 +346,6 @@ module.exports = {
     addOperatingHours,
     updateVisitorInfo,
     deleteItem,
-    deleteRide,
     getMerchandiseTable,
     getMerchandiseEmployees,
     getMaintenanceEmployees
