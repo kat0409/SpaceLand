@@ -240,8 +240,62 @@ const getSupervisorAccountInfo = `
 const updateMealPlan = `
     UPDATE restaurant
     SET mealPlanTier = ?, price = ?
-    WHERE restaurantID = ?
+    WHERE restaurantID = ?;
 `;
+
+const deleteMerchandiseEmployee = `
+    DELETE FROM employee WHERE employmentStatus == 0 AND EmployeeID = ? AND Department = 'Merchandise';
+`;
+
+
+const updateOperatingHours = `
+    UPDATE operating_hours
+    SET dateOH = ?, openingTime = ?, closingTime = ?
+    WHERE operatingHoursID = ?;
+`;
+
+
+const addOperatingHours = `
+    INSERT INTO operating_hours (dateOH, openingTime, closingTime, weatherConditions)
+    VALUES (?, ?, ?, ?);
+`;
+
+
+const updateVisitorInfo = `
+UPDATE vistors as v
+SET v.FirstName = ?, v.LastName = ?, v.Phone = ?, v.Email = ?, v.Address = ?, v.AccessibilityNeeds = ?, v.Gender = ?, v.MilitaryStatus = ?
+WHERE v.VisitorID = ? AND v.Username = ? AND v.Password = ?;
+`;
+
+
+const deleteMerchandiseItem = `
+DELETE FROM merchandise
+WHERE merchandiseID = ?;
+`;
+
+
+const getMerchandiseTable = `
+SELECT * FROM merchandise
+`;
+
+const getMerchandiseEmployees = `
+SELECT EmployeeID, FirstName, LastName, Email, Address, SupervisorID, username, password, employmentStatus, dateOfBirth
+FROM employee 
+WHERE Department = 'Merchandise';
+`;
+
+const getMaintenanceEmployees = `
+SELECT EmployeeID, FirstName, LastName, Email, Address, SupervisorID, username, password, employmentStatus, dateOfBirth
+FROM employee 
+WHERE Department = 'Maintenance';
+`;
+
+const deleteMaintenanceEmployee = `
+    DELETE FROM employee WHERE employmentStatus == 0 AND EmployeeID = ? AND Department = 'Maintenance';
+`;
+
+
+
 
 module.exports = {
     getRides,
@@ -289,7 +343,18 @@ module.exports = {
     sendLowStockNotifications,
     insertRideMaintenance,
     completedRideMaintenance,
-    removeHomePageAlert
+    removeHomePageAlert,
+    deleteMerchandiseEmployee,
+    updateMealPlan,
+    updateOperatingHours,
+    addOperatingHours,
+    updateVisitorInfo,
+    deleteMerchandiseItem,
+    getMerchandiseTable,
+    getMerchandiseEmployees,
+    getMaintenanceEmployees,
+    deleteMaintenanceEmployee
+
 };
 
 //checkMerchQuantity
