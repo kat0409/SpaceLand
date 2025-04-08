@@ -149,10 +149,6 @@ function routes(req, res) {
     }
 
 
-    if(url.startsWith('/supervisor/delete-meal-plan') && method === 'DELETE'){
-        return actions.deleteMealPlan(req,res);
-    }
-
 
     if(url.startsWith('/supervisor/update-visitor-info') && method === 'PUT'){
         return actions.updateVisitorInfo(req,res);
