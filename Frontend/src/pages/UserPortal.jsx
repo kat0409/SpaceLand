@@ -28,7 +28,10 @@ export default function UserPortal() {
       .then(res => res.json())
       .then(data => setPurchases(data));
       //.catch(err => console.error("Error fetching purchase history:", err));
-    fetch()
+    fetch(`${BACKEND_URL}/ticket-history?visitorID=${visitorID}`)
+      .then(res => res.json())
+      .then(data => setTickets(data[0]))
+      .catch(err => console.error("Error fetching ticket history:", err))
   }, []);
 
   return (
@@ -57,6 +60,20 @@ export default function UserPortal() {
               </p>
             ) : (
               <p className="text-gray-400">Loading account info...</p>
+            )}
+          </div>
+          {/* Ticket History */}
+          <div className="bg-white/10 p-6 rounded-2xl border border-white/10">
+            <h2 className="text-3xl font-bold mb-2">Ticket History</h2>
+            {tickets ? (
+              <p className="text-gray-300">
+                <strong>Transaction Date:</strong> {tickets.transactionDate} <br />
+                <strong>Ticket Type:</strong> {tickets.ticketType} <br />
+                <strong>Quantity:</strong> {tickets.quantity} <br />
+                <strong>Total Amount:</strong> {tickets.totalAmount} <br />
+              </p>
+            ) : (
+              <p className="text-gray-400">Loading ticket history...</p>
             )}
           </div>
           {/*Purchases*/}

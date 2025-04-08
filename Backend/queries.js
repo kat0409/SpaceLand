@@ -267,7 +267,6 @@ const getVisitorMerchPurchases = `
 
 const getVisitorTicketTransactions = `
     SELECT
-        tt.transactionID,
         tt.transactionDate,
         tt.ticketType,
         tt.quantity,
@@ -360,6 +359,14 @@ const getMaintenanceRequests = `
     JOIN rides r ON r.RideID = rm.rideID
 `;
 
+const getHomePageAlerts = `
+    SELECT a.alertID, a.alertMessage, a.timestamp, r.RideName
+    FROM homepagealerts a
+    JOIN rides r ON a.rideID = r.RideID
+    WHERE a.isResolved = 0
+    ORDER BY a.timestamp DESC
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -423,7 +430,8 @@ module.exports = {
     completeMaintenanceRequest,
     getPendingMaintenance,
     getVisitorMerchPurchases,
-    getVisitorTicketTransactions
+    getVisitorTicketTransactions,
+    getHomePageAlerts
 };
 
 //checkMerchQuantity
