@@ -243,8 +243,8 @@ const updateMealPlan = `
     WHERE restaurantID = ?;
 `;
 
-const deleteEmployee = `
-    DELETE FROM employee WHERE employmentStatus == 0 AND EmployeeID = ?;
+const deleteMerchandiseEmployee = `
+    DELETE FROM employee WHERE employmentStatus == 0 AND EmployeeID = ? AND Department = 'Merchandise';
 `;
 
 
@@ -340,7 +340,7 @@ module.exports = {
     insertRideMaintenance,
     completedRideMaintenance,
     removeHomePageAlert,
-    deleteEmployee,
+    deleteMerchandiseEmployee,
     updateMealPlan,
     updateOperatingHours,
     addOperatingHours,
