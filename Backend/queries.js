@@ -274,12 +274,6 @@ WHERE merchandiseID = ?;
 `;
 
 
-const deleteMealPlan = `
-DELETE FROM restaurant
-WHERE restaurantID = ? AND mealPlanTier = ?;
-`;
-
-
 const deleteRide = `
 DELETE FROM rides
 WHERE RideID = ? AND RideName = ?
@@ -357,7 +351,6 @@ module.exports = {
     addOperatingHours,
     updateVisitorInfo,
     deleteItem,
-    deleteMealPlan,
     deleteRide,
     getMerchandiseTable,
     getMerchandiseEmployees,
