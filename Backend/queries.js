@@ -268,7 +268,7 @@ WHERE v.VisitorID = ? AND v.Username = ? AND v.Password = ?;
 `;
 
 
-const deleteItem = `
+const deleteMerchandiseItem = `
 DELETE FROM merchandise
 WHERE merchandiseID = ?;
 `;
@@ -349,7 +349,7 @@ module.exports = {
     updateOperatingHours,
     addOperatingHours,
     updateVisitorInfo,
-    deleteItem,
+    deleteMerchandiseItem,
     getMerchandiseTable,
     getMerchandiseEmployees,
     getMaintenanceEmployees,
