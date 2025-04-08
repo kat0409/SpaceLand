@@ -1529,7 +1529,7 @@ const getVisitorTicketTransactions = (req,res) => {
 };
 
 const getHomePageAlerts = (req,res) => {
-    pool.query(queries.getHomePageAlerts, (err, results) => {
+    pool.query(queries.getHomePageAlerts, (error, results) => {
         if (error) {
             console.error("Error fetching homepage alerts:", err);
             res.writeHead(500, { "Content-Type": "application/json" });
