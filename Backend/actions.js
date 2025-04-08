@@ -1090,7 +1090,7 @@ const updateMealPlan = (req, res) => {
     }
 
 
-    const deleteEmployee = (req, res) => {
+    const deleteMerchandiseEmployee = (req, res) => {
         let body = "";
    
         req.on("data", (chunk) => {
@@ -1106,22 +1106,22 @@ const updateMealPlan = (req, res) => {
                 res.end(JSON.stringify({ error: "Invalid JSON format" }));
                 return;
             }});
-            const { EmployeeID, employmentStatus } = parsedBody;
-            if (!EmployeeID || !employmentStatus) {
+            const { EmployeeID, employmentStatus, Department } = parsedBody;
+            if (!EmployeeID || !employmentStatus || !Department) {
                 res.writeHead(400, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ error: "Employee ID and employment status are required." }));
+                res.end(JSON.stringify({ error: "Employee ID, employment status, and department are required." }));
                 return;
             }
-            pool.query(queries.deleteEmployee, [EmployeeID, employmentStatus], (error, results) => {
+            pool.query(queries.deleteMerchandsiseEmployee, [EmployeeID, employmentStatus, Department], (error, res) => {
                 if (error) {
-                    console.error("Error deleting employee:", error);
+                    console.error("Error deleting merchandise employee:", error);
                     res.writeHead(500, { "Content-Type": "application/json" });
                     res.end(JSON.stringify({ error: "Internal server error" }));
                     return;
                 }
    
              
-                  console.log("Employee deleted successfully");
+                  console.log("Merchandise employee deleted successfully");
     })
     };      
 
@@ -1325,7 +1325,7 @@ module.exports = {
     insertRideMaintenance,
     completedRideMaintenance,
     updateMealPlan,
-    deleteEmployee,
+    deleteMerchandiseEmployee,
     updateVisitorInfo,
     getMaintenanceEmployees,
     getMerchandiseEmployees,
