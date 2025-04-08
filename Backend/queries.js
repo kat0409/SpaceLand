@@ -290,6 +290,10 @@ FROM employee
 WHERE Department = 'Maintenance';
 `;
 
+const deleteMaintenanceEmployee = `
+    DELETE FROM employee WHERE employmentStatus == 0 AND EmployeeID = ? AND Department = 'Maintenance';
+`;
+
 
 
 
@@ -348,7 +352,8 @@ module.exports = {
     deleteItem,
     getMerchandiseTable,
     getMerchandiseEmployees,
-    getMaintenanceEmployees
+    getMaintenanceEmployees,
+    deleteMaintenanceEmployee
 
 };
 
