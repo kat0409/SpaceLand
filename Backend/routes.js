@@ -207,6 +207,10 @@ function routes(req, res) {
         return actions.getHomePageAlerts(req,res);
     }
 
+    if(url.startsWith('/supervisors/HR/get-supervisors') && method === "GET"){
+        return actions.getSupervisors(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }

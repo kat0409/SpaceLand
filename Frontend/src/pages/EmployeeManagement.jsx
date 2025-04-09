@@ -15,8 +15,12 @@ export default function EmployeeManagement(){
         employmentStatus: true,
         dateOfBirth: "",
     });
-
+    const [supervisorNames, setSupervisorNames] = useEffect([]);
     const [message, setMessage] = useState('');
+
+    useEffect(() => {
+        fetch(`${BACKEND_URL}/su`)
+    })
 
     const handleChange = (e) => {
         const {name, value, type, checked } = e.target;
