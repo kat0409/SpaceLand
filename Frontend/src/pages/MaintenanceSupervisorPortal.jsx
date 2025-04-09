@@ -64,7 +64,7 @@ export default function MaintenanceSupervisorPortal() {
                 </div>
 
                 <div className="mb-16">
-                <h2 className="text-2xl font-semibold mb-4">Ride Maintenance Report</h2>
+                <h2 className="text-2xl font-semibold mb-4">Maintenance Requests</h2>
                 <table className="w-full text-sm bg-white/10 rounded-xl p-4">
                     <thead className="text-purple-300">
                     <tr>
