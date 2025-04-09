@@ -367,6 +367,12 @@ const getHomePageAlerts = `
     ORDER BY a.timestamp DESC
 `;
 
+const getSupervisorNames = `
+    SELECT s.FistName, s.LastName
+    FROM supervisors s
+    WHERE s.SupervisorID = ?
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -431,7 +437,8 @@ module.exports = {
     getPendingMaintenance,
     getVisitorMerchPurchases,
     getVisitorTicketTransactions,
-    getHomePageAlerts
+    getHomePageAlerts,
+    getSupervisorNames
 };
 
 //checkMerchQuantity
