@@ -382,6 +382,12 @@ const addMealPlanTransaction = `
     VALUES(?,?,?,?)
 `;
 
+const getMealPlanPrice = `
+    SELECT price
+    FROM mealPLans
+    WHERE mealPlanID = ?
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -449,7 +455,8 @@ module.exports = {
     getHomePageAlerts,
     getSupervisorNames,
     getDepartmentNames,
-    addMealPlanTransaction
+    addMealPlanTransaction,
+    getMealPlanPrice
 };
 
 //checkMerchQuantity
