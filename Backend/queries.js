@@ -372,6 +372,11 @@ const getSupervisorNames = `
     FROM supervisors s
 `;
 
+const getDepartmentNames = `
+    SELECT s.DepartmentName
+    From supervisors s
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -437,7 +442,8 @@ module.exports = {
     getVisitorMerchPurchases,
     getVisitorTicketTransactions,
     getHomePageAlerts,
-    getSupervisorNames
+    getSupervisorNames,
+    getDepartmentNames
 };
 
 //checkMerchQuantity
