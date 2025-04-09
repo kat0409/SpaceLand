@@ -43,7 +43,8 @@ const routeMap = {
         '/supervisor/maintenance/get-maintenance-requests',
         '/purchase-history',
         '/ticket-history',
-        '/alerts'
+        '/alerts',
+        '/supervisor/HR/get-supervisors'
     ],
     'POST': [
         '/supervisor/HR/add-employee', 
