@@ -1,5 +1,6 @@
 // src/components/PricingSection.jsx
 import { motion } from 'framer-motion';
+import {Link} from "react-router-dom";
 
 export default function PricingSection() {
   const passes = [
@@ -50,9 +51,11 @@ export default function PricingSection() {
                   <li key={i}>✓ {perk}</li>
                 ))}
               </ul>
-              <button className="bg-white text-black font-semibold px-6 py-2 rounded-lg hover:bg-gray-200 transition">
-                Select Pass
-              </button>
+              <Link to="/purchase" state={{ticketType: pass.title.includes('General') ? 'General' : 'Cosmic'}}>
+                <button className="bg-white text-black font-semibold px-6 py-2 rounded-lg hover:bg-gray-200 transition">
+                  Select Pass
+                </button>
+              </Link>
             </motion.div>
           ))}
         </div>
@@ -60,3 +63,9 @@ export default function PricingSection() {
     </section>
   );
 }
+
+//replaced code
+/*<button className="bg-white text-black font-semibold px-6 py-2 rounded-lg hover:bg-gray-200 transition">
+  Select Pass
+</button>*/
+//used to be on lines 54-56

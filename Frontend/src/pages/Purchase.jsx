@@ -3,11 +3,16 @@ import { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PricingSection from '../components/PricingSection';
+import Pricing from './Pricing';
+import {useLocation} from "react-router-dom";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
 export default function Purchase() {
-  const [ticketType, setTicketType] = useState('');
+  const location = useLocation();
+  const defaultTicket = location.state?.ticketType || 'General';
+
+  const [ticketType, setTicketType] = useState(defaultTicket);
   const [mealPlan, setMealPlan] = useState('');
   const [ticketQuantity, setTicketQuantity] = useState(1);
 
