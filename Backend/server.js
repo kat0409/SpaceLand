@@ -46,7 +46,7 @@ const routeMap = {
         '/alerts'
     ],
     'POST': [
-        '/add-employee', 
+        '/supervisor/HR/add-employee', 
         '/add-merchandise-transaction',
         '/login',
         '/add-visitor',
