@@ -373,7 +373,7 @@ const getSupervisorNames = `
 `;
 
 const getDepartmentNames = `
-    SELECT s.DepartmentName
+    SELECT DISTINCT s.departmentIDNumber, s.DepartmentName
     From supervisors s
 `;
 
