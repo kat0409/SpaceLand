@@ -377,6 +377,11 @@ const getDepartmentNames = `
     From supervisors s
 `;
 
+const addMealPlanTransaction = `
+    INSERT INTO mealPlanTransactions(mealPlanID, VisitorID,transactionDate,price)
+    VALUES(?,?,?,?)
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -443,7 +448,8 @@ module.exports = {
     getVisitorTicketTransactions,
     getHomePageAlerts,
     getSupervisorNames,
-    getDepartmentNames
+    getDepartmentNames,
+    addMealPlanTransaction
 };
 
 //checkMerchQuantity
