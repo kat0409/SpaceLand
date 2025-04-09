@@ -1561,15 +1561,59 @@ const getDepartmentNames = (req,res) => {
 };
 
 const addMealPlanTransaction = (req,res) => {
-    const parsedUrl = url.parse(req.url, true);
-    const {mealPlanID, VisitorID} = parsedUrl.query;
+    let body = '';
 
-    if(!mealPlanID || !VisitorID){
-        res.writeHead(400, {"Content-Type":"application/json"});
-        res.end(JSON.stringify({error: "VisitorID and mealPlanID are required"}));
-    }
-    
-    pool.query()
+    req.on('data', (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', () => {
+        let parsedBody;
+        try{
+            parsedBody = JSON.parse(body);
+        }
+        catch{
+            res.writeHead(400, {"Content-Type":"application/json"});
+            res.end(JSON.stringify({error: "Invalid JSON format"}));
+            return;
+        }
+
+        const {VisitorID, mealPlanID} = parsedBody;
+        if(!VisitorID || !mealPlanID){
+            res.writeHead(400, {"Content-Type":"application/json"});
+            res.end(JSON.stringify({error: "Visitor ID and meal plan ID are required."}));
+            return;
+        }
+        
+        pool.query(queries.getMealPlanPrice, [mealPlanID], (error,res) => {
+            if(error){
+                console.log("Error fetching meal plan price:", error);
+                res.writeHead(500, {"Content-Type":"application/json"});
+                res.end(JSON.stringify({error: "Internal server error"}));
+                return;
+            }
+            
+            if(results.length === 0){
+                res.writeHead(404, {"Content-Type":"application/json"});
+                res.end(JSON.stringify("Meal plan not found in the system."));
+                return;
+            }
+
+            const price = results[0].price;
+
+            pool.query(queries.addMealPlanTransaction, [VisitorID, mealPlanID, price], (error, results) => {
+                if(error){
+                    console.log("Error making meal plan transaction:", error);
+                    res.writeHead(500, {"Content-Type":"application/json"});
+                    res.end(JSON.stringify("Internal server error"));
+                    return;
+                }
+                const transactionID = results.insertId;
+                res.writeHead(200, {"Content-Type":"application/json"});
+                res.end(JSON.stringify({message: "Meal plan purchases successfully", transactionID}));
+            });
+        });
+    })
 };
 
 //Check to see if you need to make a module.exports function here as well
