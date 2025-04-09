@@ -66,11 +66,47 @@ export default function Purchase() {
       alert("Internal server error");
     }
   };
-
-  const handleMealPlanPurchase = async() => {
-
-  };
   
+  const handleMealPlanPurchase =  async() => {
+    const VisitorID = localStorage.getItem("VisitorID");
+    const mealPlanName = mealPlan;
+    const mealPlanPricing = {
+      'General': 49.99,
+      'Cosmic': 89.99
+    }
+
+    const price = mealPlanPricing[mealPlanName];
+
+    if(!VisitorID || !mealPlanName || !price){
+      return alert("Please select a valid meal plan");
+    }
+
+    try{
+      const mealPlanID = mealPlanName === 'General' ? 1 : 2;
+
+      const res = await fetch(`${BACKEND_URL}/meal-plan-purchase`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          VisitorID,
+          mealPlanID
+        }),
+      });
+
+      const data = await res.json();
+
+      if(res.ok){
+        alert(`Meal plan purchased successfully! Transaction ID: ${data.transactionID}`);
+      }
+      else{
+        alert(`Meal plan purchase failed: ${data.error}`);
+      }
+    }
+    catch(error){
+      console.error("Error occurred while purchasing meal plan:", error);
+      alert("Internal server error");
+    }
+  };
 
   return (
     <>
@@ -143,7 +179,10 @@ export default function Purchase() {
           {ticketType && mealPlan && (
             <div className="text-center">
               <button
-                onClick={handleTicketPurchase}
+                onClick={async() => {
+                  await handleTicketPurchase();
+                  await handleMealPlanPurchase();
+                }}
                 className="mt-6 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-500 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-indigo-600 transition"
               >
                 Confirm Purchase
