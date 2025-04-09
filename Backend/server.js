@@ -64,7 +64,8 @@ const routeMap = {
         '/supervisor/merchandise/reorders',
         '/supervisor/merchandise/stock-arrivals',
         '/supervisor/merchandise/add-merch',
-        '/supervisor/maintenance/maintenance-request'
+        '/supervisor/maintenance/maintenance-request',
+        '/meal-plan-purchase'
     ],
     'PUT': [
         '/update-employee', 

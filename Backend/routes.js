@@ -215,6 +215,10 @@ function routes(req, res) {
         return actions.getDepartmentNames(req,res);
     }
 
+    if(url.startsWith('/meal-plan-purchase') && method === "POST"){
+        return actions.addMealPlanTransaction(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }

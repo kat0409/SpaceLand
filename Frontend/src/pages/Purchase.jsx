@@ -28,7 +28,7 @@ export default function Purchase() {
     setMealPlan(plan);
   };
 
-  const handlePurchase = async() => {
+  const handleTicketPurchase = async() => {
     const VisitorID = localStorage.getItem("VisitorID");
     const quantity = parseInt(ticketQuantity);
     const priceMap = {
@@ -65,6 +65,10 @@ export default function Purchase() {
       console.log("Error making transaction:",error);
       alert("Internal server error");
     }
+  };
+
+  const handleMealPlanPurchase = async() => {
+
   };
   
 
@@ -139,7 +143,7 @@ export default function Purchase() {
           {ticketType && mealPlan && (
             <div className="text-center">
               <button
-                onClick={handlePurchase}
+                onClick={handleTicketPurchase}
                 className="mt-6 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-500 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-indigo-600 transition"
               >
                 Confirm Purchase
