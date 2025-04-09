@@ -368,9 +368,8 @@ const getHomePageAlerts = `
 `;
 
 const getSupervisorNames = `
-    SELECT s.FirstName, s.LastName
+    SELECT s.SupervisorID, s.FirstName, s.LastName
     FROM supervisors s
-    WHERE s.SupervisorID = ?;
 `;
 
 module.exports = {
