@@ -13,7 +13,7 @@ function routes(req, res) {
         return actions.getEmployees(req, res);
     }
 
-    if (url.startsWith('/add-employee') && method === 'POST') {
+    if (url.startsWith('/supervisor/HR/add-employee') && method === 'POST') {
         return actions.addEmployee(req, res);
     }
 

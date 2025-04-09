@@ -49,10 +49,8 @@ const addEmployee = (request, response) => {
             return;
         }
 
-        // Get employee details from request body
         const { FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth } = parsedBody;
 
-        // Validate required fields
         if (!FirstName || !LastName || !Email || !Address || !SupervisorID || !username || !password || !Department || !employmentStatus || !dateOfBirth) {
             response.writeHead(400, { "Content-Type": "application/json" });
             response.end(JSON.stringify({ error: "All fields are required" }));
@@ -61,7 +59,6 @@ const addEmployee = (request, response) => {
 
         console.log("Checking if SupervisorID exists:", SupervisorID);
 
-        // Check if the provided SupervisorID exists in `supervisors`
         pool.query('SELECT * FROM supervisors WHERE SupervisorID = ?', [SupervisorID], (error, results) => {
             if (error) {
                 console.error("Error verifying SupervisorID:", error);
@@ -77,7 +74,6 @@ const addEmployee = (request, response) => {
                 return;
             }
 
-            // Insert the new employee into the database
             pool.query(
                 'INSERT INTO employee (FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth) VALUES (?,?,?,?,?,?,?,?,?,?)',
                 [FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth],
