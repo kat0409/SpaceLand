@@ -2,10 +2,14 @@
 import { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import PricingSection from '../components/PricingSection';
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
 export default function Purchase() {
   const [ticketType, setTicketType] = useState('');
   const [mealPlan, setMealPlan] = useState('');
+  const [ticketQuantity, setTicketQuantity] = useState(1);
 
   const generalRestaurants = ['Galactic Grub', 'Rocket Bites', 'Nebula Noms'];
   const cosmicRestaurants = [...generalRestaurants, 'Stellar Snacks', 'Astro Appetites', 'Orbit Eats'];
@@ -19,9 +23,43 @@ export default function Purchase() {
     setMealPlan(plan);
   };
 
-  const handlePurchase = () => {
-    if (!ticketType || !mealPlan) return alert('Please select both ticket and meal plan.');
+  const handlePurchase = async() => {
+    const VisitorID = localStorage.getItem("VisitorID");
+    const quantity = parseInt(ticketQuantity);
+    const priceMap = {
+      "General": 49.99,
+      "Cosmic": 89.99
+    };
+
+    if (!VisitorID || !ticketType || !quantity || !priceMap[ticketType] || !mealPlan) return alert('Please select both ticket and meal plan.');
     alert(`✅ Purchase complete! Ticket: ${ticketType}, Meal Plan: ${mealPlan}`);
+
+    const route = ticketType === "General" ? `${BACKEND_URL}/purchase-general-pass` : `${BACKEND_URL}/purchase-cosmic-pass`;
+
+    try {
+      const res = await fetch(route, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          VisitorID: VisitorID,
+          quantity,
+          price: priceMap[ticketType],
+        }),
+      });
+
+      const data = await res.json();
+
+      if(res.ok){
+        alert(`Purchase successful! Transaction ID: ${data.transactionID}`);
+      }
+      else{
+        alert(`Purchase was unsuccessful. Error:${data.error}`);
+      }
+    }
+    catch (error){
+      console.log("Error making transaction:",error);
+      alert("Internal server error");
+    }
   };
   
 
@@ -48,6 +86,16 @@ export default function Purchase() {
               >
                 Cosmic Admission
               </button>
+            </div>
+            <div className="flex items-center gap-4">
+              <label className="text-white font-medium">Quantity:</label>
+              <input
+                type="number"
+                min="1"
+                value={ticketQuantity}
+                onChange={(e) => setTicketQuantity((Number(e.target.value)))}
+                className="w-24 px-2 py-1 rounded-md text-white"
+              />
             </div>
           </div>
 
