@@ -442,7 +442,6 @@ const purchaseCosmicPass = (req, res) => {
         const totalAmount = quantity * price;
         const ticketType = "Cosmic";
 
-        // Insert into `tickettransactions`
         pool.query(queries.createTransaction, [VisitorID, quantity, totalAmount, ticketType], (err, transactionResult) => {
             if (err) {
                 console.error('Error creating transaction:', err);
@@ -453,7 +452,6 @@ const purchaseCosmicPass = (req, res) => {
 
             const transactionID = transactionResult.insertId;
 
-            // Insert tickets
             const ticketValues = [];
             for (let i = 0; i < quantity; i++) {
                 ticketValues.push([price, new Date(), transactionID, ticketType]);  // Removed detailID
@@ -502,7 +500,6 @@ const purchaseGeneralPass = (req, res) => {
         const totalAmount = quantity * price;
         const ticketType = "General";
 
-        // Insert into `tickettransactions`
         pool.query(queries.createTransaction, [VisitorID, quantity, totalAmount, ticketType], (err, transactionResult) => {
             if (err) {
                 console.error('Error creating transaction:', err);
@@ -513,7 +510,6 @@ const purchaseGeneralPass = (req, res) => {
 
             const transactionID = transactionResult.insertId;
 
-            // Insert tickets
             const ticketValues = [];
             for (let i = 0; i < quantity; i++) {
                 ticketValues.push([price, new Date(), transactionID, ticketType]);  // Removed detailID
