@@ -10,16 +10,17 @@ export default function EmployeeManagement(){
         Address: "",
         SupervisorID: "",
         username: "",
-        passord: "",
+        password: "",
         Department: "",
         employmentStatus: true,
         dateOfBirth: "",
     });
     const [supervisorNames, setSupervisorNames] = useState([]);
+    const [departmentNames, setDepartmentNames] = useState([]);
     const [message, setMessage] = useState('');
 
     useEffect(() => {
-        fetch(`${BACKEND_URL}/supervisors/HR/get-supervisors`)
+        fetch(`${BACKEND_URL}/supervisor/HR/get-supervisors`)
             .then(res => res.json())
             .then(data => setSupervisorNames(data))
             .catch(error => console.error('Failed to fetch supervisor names:', error));

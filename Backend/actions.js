@@ -1539,20 +1539,11 @@ const getHomePageAlerts = (req,res) => {
 };
 
 const getSupervisorNames = (req,res) => {
-    const parsedUrl = url.parse(req.url, true);
-    const SupervisorID = parsedUrl.query.SupervisorID;
-
-    if(!SupervisorID){
-        res.writeHead(400, {"Content-Type":"application/json"});
-        res.end(JSON.stringify({error: "SupervisorID is required."}));
-        return;
-    }
-
-    pool.query(queries.getSupervisorNames, [SupervisorID], (error, results) => {
+    pool.query(queries.getSupervisorNames, (error, results) => {
         if(error) {
             console.error("Error fetching supervisor names:", error);
-            response.writeHead(500, {"Content-Type": "application/json"});
-            response.end(JSON.stringify({error: "Internal server error"}));
+            res.writeHead(500, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({error: "Internal server error"}));
             return;
         }
         res.writeHead(200, {"Content-Type": "application/json"});
