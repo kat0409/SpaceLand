@@ -207,8 +207,8 @@ function routes(req, res) {
         return actions.getHomePageAlerts(req,res);
     }
 
-    if(url.startsWith('/supervisors/HR/get-supervisors') && method === "GET"){
-        return actions.getSupervisors(req,res);
+    if(url.startsWith('/supervisor/HR/get-supervisors') && method === "GET"){
+        return actions.getSupervisorNames(req,res);
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
