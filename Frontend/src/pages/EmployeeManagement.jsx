@@ -15,18 +15,26 @@ export default function EmployeeManagement(){
         employmentStatus: true,
         dateOfBirth: "",
     });
-    const [supervisorNames, setSupervisorNames] = useEffect([]);
+    const [supervisorNames, setSupervisorNames] = useState([]);
     const [message, setMessage] = useState('');
 
     useEffect(() => {
-        fetch(`${BACKEND_URL}/su`)
-    })
+        fetch(`${BACKEND_URL}/supervisors/HR/get-supervisors`)
+            .then(res => res.json())
+            .then(data => setSupervisorNames(data))
+            .catch(error => console.error('Failed to fetch supervisor names:', error));
+    }, []);
 
     const handleChange = (e) => {
         const {name, value, type, checked } = e.target;
         const updatedValue = type === 'checkbox' ? checked : value;
         setEmployeeData((prev) => ({...prev, [name]: updatedValue}));
     };
+
+    const handleSupervisorEntry = (e) => {
+        const selectedSupID = e.target.value;
+        setEmployeeData(prev => ({...prev, SupervisorID: selectedSupID}));
+    }
 
     const handleSubmit = async(e) => {
         e.preventDefault();
@@ -60,7 +68,16 @@ export default function EmployeeManagement(){
             <input name="LastName" value={employeeData.LastName} onChange={handleChange} placeholder="Last Name" className="input" required />
             <input name="Email" value={employeeData.Email} onChange={handleChange} placeholder="Email" type="email" className="input" required />
             <input name="Address" value={employeeData.Address} onChange={handleChange} placeholder="Address" className="input" />
-            <input name="SupervisorID" value={employeeData.SupervisorID} onChange={handleChange} placeholder="Supervisor ID" type="number" className="input" required />
+            
+            <select name="SupervisorID" value={employeeData.SupervisorID} onChange={handleSupervisorEntry} className="input" required>
+                <option value="">Select Supervisor</option>
+                {supervisorNames.map(s => (
+                    <option key={s.SupervisorID} value={s.SupervisorID}>
+                        {s.FirstName} {s.LastName}
+                    </option>
+                ))}
+            </select>
+
             <input name="username" value={employeeData.username} onChange={handleChange} placeholder="Username" className="input" required />
             <input name="password" value={employeeData.password} onChange={handleChange} placeholder="Password" type="password" className="input" required />
             <input name="Department" value={employeeData.Department} onChange={handleChange} placeholder="Department" className="input" required />
