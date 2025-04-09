@@ -1551,6 +1551,19 @@ const getSupervisorNames = (req,res) => {
     });
 };
 
+const getDepartmentNames = (req,res) => {
+    pool.query(queries.getDepartmentNames, (error, results) => {
+        if(error) {
+            console.error("Error fetching department names:", error);
+            res.writeHead(500, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({error: "Internal server error"}));
+            return;
+        }
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.end(JSON.stringify(results));
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -1600,5 +1613,6 @@ module.exports = {
     getVisitorMerchPurchases,
     getVisitorTicketTransactions,
     getHomePageAlerts,
-    getSupervisorNames
+    getSupervisorNames,
+    getDepartmentNames
 };  
