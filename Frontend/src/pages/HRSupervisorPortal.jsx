@@ -3,6 +3,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { AuthContext } from '../components/AuthProvider';
 import { useNavigate } from 'react-router-dom';
+import EmployeeManagement from './EmployeeManagement';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
@@ -98,7 +99,9 @@ export default function HRSupervisorPortal() {
                     </table>
                 </div>
                 </div>
-
+                <div className="p-6">
+                    <EmployeeManagement />
+                </div>
                 <div className="mb-4 space-x-4">
                     <input
                         type="date"
