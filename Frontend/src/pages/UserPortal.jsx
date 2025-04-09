@@ -73,7 +73,7 @@ export default function UserPortal() {
                 <strong>Total Amount:</strong> {tickets.totalAmount} <br />
               </p>
             ) : (
-              <p className="text-gray-400">Loading ticket history...</p>
+              <p className="text-gray-400">No Ticket History</p>
             )}
           </div>
           {/*Purchases*/}
