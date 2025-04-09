@@ -24,6 +24,10 @@ export default function EmployeeManagement(){
             .then(res => res.json())
             .then(data => setSupervisorNames(data))
             .catch(error => console.error('Failed to fetch supervisor names:', error));
+        fetch(`${BACKEND_URL}/supervisor/HR/get-departments`)
+            .then(res => res.json())
+            .then(data => setDepartmentNames(data))
+            .catch(error => console.error('Failed to retrieve department names:', error));
     }, []);
 
     const handleChange = (e) => {
@@ -35,6 +39,11 @@ export default function EmployeeManagement(){
     const handleSupervisorEntry = (e) => {
         const selectedSupID = e.target.value;
         setEmployeeData(prev => ({...prev, SupervisorID: selectedSupID}));
+    }
+
+    const handleDepartmentEntry = (e) => {
+        const selectedDeptName = e.target.value;
+        setEmployeeData(prev => ({...prev, Department: selectedDeptName}));
     }
 
     const handleSubmit = async(e) => {
@@ -81,7 +90,16 @@ export default function EmployeeManagement(){
 
             <input name="username" value={employeeData.username} onChange={handleChange} placeholder="Username" className="input" required />
             <input name="password" value={employeeData.password} onChange={handleChange} placeholder="Password" type="password" className="input" required />
-            <input name="Department" value={employeeData.Department} onChange={handleChange} placeholder="Department" className="input" required />
+
+            <select name="Department" value={employeeData.Department} onChange={handleDepartmentEntry} className="input" required>
+                <option value="">Select Department</option>
+                {departmentNames.map(d => (
+                    <option key={d.departmentIDNumber} value={d.DepartmentName}>
+                        {d.DepartmentName}
+                    </option>
+                ))}
+            </select>
+
             <input name="dateOfBirth" value={employeeData.dateOfBirth} onChange={handleChange} type="date" className="input" required />
 
             <label className="flex items-center gap-2 text-sm">
