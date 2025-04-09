@@ -1560,6 +1560,18 @@ const getDepartmentNames = (req,res) => {
     });
 };
 
+const addMealPlanTransaction = (req,res) => {
+    const parsedUrl = url.parse(req.url, true);
+    const {mealPlanID, VisitorID} = parsedUrl.query;
+
+    if(!mealPlanID || !VisitorID){
+        res.writeHead(400, {"Content-Type":"application/json"});
+        res.end(JSON.stringify({error: "VisitorID and mealPlanID are required"}));
+    }
+    
+    pool.query()
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -1610,5 +1622,6 @@ module.exports = {
     getVisitorTicketTransactions,
     getHomePageAlerts,
     getSupervisorNames,
-    getDepartmentNames
+    getDepartmentNames,
+    addMealPlanTransaction
 };  
