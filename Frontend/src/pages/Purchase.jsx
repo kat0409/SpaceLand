@@ -174,7 +174,7 @@ export default function Purchase() {
         
         // Redirect to user portal after successful purchase
         setTimeout(() => {
-          navigate('/portal');
+          navigate('/userportal');
         }, 1500);
       } catch (fetchError) {
         console.error('API request failed:', fetchError);
