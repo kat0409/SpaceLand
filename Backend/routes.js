@@ -171,6 +171,18 @@ function routes(req, res) {
         return actions.addMerchandise(req,res);
     }
 
+    if(url.startsWith('/supervisor/merchandise/delete-item/') && method === 'DELETE'){
+        return actions.deleteMerchandise(req,res);
+    }
+
+    if(url.startsWith('/supervisor/merchandise/update-item') && method === 'PUT'){
+        return actions.updateMerchandise(req,res);
+    }
+
+    if(url.startsWith('/supervisor/merchandise/sales-data') && method === 'GET'){
+        return actions.getMerchandiseSalesData(req,res);
+    }
+
     if(url.startsWith('/supervisor/maintenance/maintenance-request') && method === "POST"){
         return actions.addMaintenanceRequest(req,res);
     }
