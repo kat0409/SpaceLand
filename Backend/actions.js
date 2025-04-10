@@ -1596,6 +1596,28 @@ const addMealPlanTransaction = (req,res) => {
     })
 };
 
+const getVisitorAccountInfo = (req, res) => {
+    const parsedUrl = url.parse(req.url, true); 
+    const { visitorID } = parsedUrl.query; 
+
+    if (!visitorID) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Missing 'VisitorID' query parameter" }));
+        return;
+    }
+
+    pool.query(queries.getVisitorAccountInfo, [visitorID], (error, results) => {
+        if (error) {
+            console.error("Error visitor account information:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
