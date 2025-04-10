@@ -384,7 +384,7 @@ const addMealPlanTransaction = `
 
 const getMealPlanPrice = `
     SELECT price
-    FROM mealPLans
+    FROM mealPlans
     WHERE mealPlanID = ?
 `;
 

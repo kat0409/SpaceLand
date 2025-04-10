@@ -62,7 +62,9 @@ export default function Auth() {
       console.log("Signup Response:", data);
 
       if (res.ok) {
-        localStorage.setItem("visitorID", data.VisitorID || data.visitorID);
+        localStorage.setItem("VisitorID", data.VisitorID || data.visitorID);
+        localStorage.setItem("role", "visitor");
+        localStorage.setItem("userID", data.VisitorID || data.visitorID);
         setSuccessMessage("Signup successful!");
         setTimeout(() => (window.location.href = "/portal"), 1500);
       } else {
@@ -80,7 +82,7 @@ export default function Auth() {
     setSuccessMessage('');
 
     try {
-      const res = await fetch(`${BACKEND_URL}/login-visitor`, {
+      const res = await fetch(`${BACKEND_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(loginData),
@@ -89,7 +91,7 @@ export default function Auth() {
       const data = await res.json();
 
       if (res.ok && data.visitorID) {
-        localStorage.setItem("visitorID", data.visitorID);
+        localStorage.setItem("VisitorID", data.visitorID);
         localStorage.setItem("role", "visitor");
         localStorage.setItem("userID", data.visitorID);
         setSuccessMessage("Login successful!");
