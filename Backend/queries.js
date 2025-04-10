@@ -225,18 +225,18 @@ const visitorPurchasesReport = `
 //check the WHERE 1=1 during debugging
 
 const attendanceAndRevenueReport = `
-    SELECT 
-        oh.dateOH AS Operating_Date,
-        COUNT(DISTINCT t.ticketID) AS Tickets_Sold,
-        COALESCE(SUM(tt.totalAmount), 0) AS Total_Ticket_Revenue,
-        oh.weatherCondition AS Weather_Condition
-    FROM 
-        operating_hours oh
-    LEFT JOIN 
-        tickets t ON oh.ticketID = t.ticketID 
-    LEFT JOIN 
-        tickettransactions tt ON t.transactionID = tt.transactionID 
-    WHERE 1=1
+    SELECT  
+        oh.dateOH,
+        COALESCE(SUM(tt.totalAmount), 0) AS TicketRevenue,
+        COALESCE(SUM(mt.price), 0) AS MealPlanRevenue,
+        COALESCE(SUM(rt.amount), 0) AS FoodRevenue,
+        (COALESCE(SUM(tt.totalAmount), 0) + COALESCE(SUM(mt.price), 0) + COALESCE(SUM(rt.amount), 0)) AS TotalRevenue,
+        oh.weatherCondition
+    FROM operating_hours oh
+    LEFT JOIN tickettransactions tt ON DATE(tt.transactionDate) = oh.dateOH
+    LEFT JOIN mealplantransactions mt ON DATE(mt.transactionDate) = oh.dateOH
+    LEFT JOIN restauranttransactions rt ON DATE(rt.transactionDate) = oh.dateOH
+    WHERE 1 = 1
 `;
 
 /*GROUP BY 
