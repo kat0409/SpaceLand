@@ -184,20 +184,26 @@ const addMerchandise = `
 //Reports
 const rideMaintenanceReport = `
     SELECT 
-        r.RideName AS Ride,
-        m.MaintenanceStartDate AS Start_Date,
-        m.MaintenanceEndDate AS End_Date,
-        CONCAT(e.FirstName, ' ', e.LastName) AS Maintenance_Employee,
-        m.status AS Status,
-        m.reason AS Reason
-    FROM 
-        ridemaintenance m
-    JOIN 
-        rides r ON m.rideID = r.RideID
-    LEFT JOIN 
-        employee e ON m.MaintenanceEmployeeID = e.EmployeeID
-    ORDER BY 
-        m.MaintenanceStartDate DESC;
+        rm.maintenanceID,
+        r.RideName,
+        CONCAT(e.FirstName, ' ', e.LastName) AS AssignedEmployee,
+        rm.status,
+        rm.reason,
+        DATE(rm.MaintenanceStartDate) AS StartDate,
+        DATE(rm.MaintenanceEndDate) AS EndDate,
+
+        IFNULL(TIMESTAMPDIFF(DAY, rm.MaintenanceStartDate, rm.MaintenanceEndDate), 0) AS DaysTaken,
+
+        IFNULL((
+            SELECT AVG(TIMESTAMPDIFF(DAY, rm2.MaintenanceStartDate, rm2.MaintenanceEndDate))
+            FROM ridemaintenance rm2
+            WHERE rm2.rideID = rm.rideID AND rm2.status = 'completed'
+        ), 0) AS AvgFixTimeForRide
+
+    FROM ridemaintenance rm
+    JOIN rides r ON rm.rideID = r.RideID
+    LEFT JOIN employee e ON rm.MaintenanceEmployeeID = e.EmployeeID
+    ORDER BY rm.MaintenanceStartDate DESC;
 `;
 
 const visitorPurchasesReport = `
