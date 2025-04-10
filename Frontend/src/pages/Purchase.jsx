@@ -9,10 +9,7 @@ import {useLocation} from "react-router-dom";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
 export default function Purchase() {
-  const location = useLocation();
-  const defaultTicket = location.state?.ticketType || 'General';
-
-  const [ticketType, setTicketType] = useState(defaultTicket);
+  const [ticketType, setTicketType] = useState("General");
   const [mealPlan, setMealPlan] = useState('');
   const [ticketQuantity, setTicketQuantity] = useState(1);
 
@@ -36,8 +33,8 @@ export default function Purchase() {
       "Cosmic": 89.99
     };
 
-    if (!VisitorID || !ticketType || !quantity || !priceMap[ticketType] || !mealPlan) return alert('Please select both ticket and meal plan.');
-    alert(`✅ Purchase complete! Ticket: ${ticketType}, Meal Plan: ${mealPlan}`);
+    if (!VisitorID || !ticketType || !quantity || !priceMap[ticketType]) return alert('Please select ticket.');
+    alert(`✅ Purchase complete! Ticket: ${ticketType}`);
 
     const route = ticketType === "General" ? `${BACKEND_URL}/purchase-general-pass` : `${BACKEND_URL}/purchase-cosmic-pass`;
 
@@ -71,18 +68,21 @@ export default function Purchase() {
     const VisitorID = localStorage.getItem("VisitorID");
     const mealPlanName = mealPlan;
     const mealPlanPricing = {
-      'General': 49.99,
-      'Cosmic': 89.99
+      'General Meal Plan': 49.99,
+      'Cosmic Meal Plan': 89.99
     }
+
+    console.log(mealPlanName);
+    console.log(mealPlan);
 
     const price = mealPlanPricing[mealPlanName];
 
-    if(!VisitorID || !mealPlanName || !price){
+    if(!VisitorID || !mealPlanName || price === undefined){
       return alert("Please select a valid meal plan");
     }
 
     try{
-      const mealPlanID = mealPlanName === 'General' ? 1 : 2;
+      const mealPlanID = mealPlanName === 'General Meal Plan' ? 1 : 2;
 
       const res = await fetch(`${BACKEND_URL}/meal-plan-purchase`, {
         method: "POST",
@@ -123,13 +123,13 @@ export default function Purchase() {
                 onClick={() => handleTicketSelect('General')}
                 className={`flex-1 py-3 rounded-lg text-white font-semibold border ${ticketType === 'General' ? 'bg-purple-600 border-purple-500' : 'bg-gray-800 border-white/10'} transition`}
               >
-                General Admission
+                General
               </button>
               <button
                 onClick={() => handleTicketSelect('Cosmic')}
                 className={`flex-1 py-3 rounded-lg text-white font-semibold border ${ticketType === 'Cosmic' ? 'bg-purple-600 border-purple-500' : 'bg-gray-800 border-white/10'} transition`}
               >
-                Cosmic Admission
+                Cosmic
               </button>
             </div>
             <div className="flex items-center gap-4">

@@ -1585,7 +1585,7 @@ const addMealPlanTransaction = (req,res) => {
             return;
         }
         
-        pool.query(queries.getMealPlanPrice, [mealPlanID], (error,res) => {
+        pool.query(queries.getMealPlanPrice, [mealPlanID], (error,results) => {
             if(error){
                 console.log("Error fetching meal plan price:", error);
                 res.writeHead(500, {"Content-Type":"application/json"});
@@ -1601,7 +1601,7 @@ const addMealPlanTransaction = (req,res) => {
 
             const price = results[0].price;
 
-            pool.query(queries.addMealPlanTransaction, [VisitorID, mealPlanID, price], (error, results) => {
+            pool.query(queries.addMealPlanTransaction, [mealPlanID, VisitorID, new Date(), price], (error, results) => {
                 if(error){
                     console.log("Error making meal plan transaction:", error);
                     res.writeHead(500, {"Content-Type":"application/json"});
