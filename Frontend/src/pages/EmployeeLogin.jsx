@@ -4,9 +4,13 @@ import { motion } from 'framer-motion';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../components/AuthProvider';
+import { useContext } from 'react';
 
 export default function EmployeeLogin() {
   const navigate = useNavigate();
+  const { setAuth } = useContext(AuthContext);
+
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -14,7 +18,7 @@ export default function EmployeeLogin() {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,8 +51,16 @@ export default function EmployeeLogin() {
       const empData = await empRes.json();
   
       if (empRes.ok && empData.employeeID) {
-        localStorage.setItem('employeeID', empData.employeeID);
-        localStorage.setItem('role', 'employee');
+        const token = "employee-session";
+        const role = "employee";
+        const userID = empData.employeeID;
+
+        localStorage.setItem('token', token);
+        localStorage.setItem('userID', userID);
+        localStorage.setItem('role', role);
+
+        setAuth({ token, role, userID, isAuthenticated: true });
+
         navigate('/employee-dashboard');
         return;
       }
@@ -62,11 +74,17 @@ export default function EmployeeLogin() {
       const supData = await supRes.json();
   
       if (supRes.ok && supData.supervisorID) {
-        localStorage.setItem('supervisorID', supData.supervisorID);
-        localStorage.setItem('role', 'supervisor');
-        localStorage.setItem('department', supData.departmentName);
-        
+        const token = "supervisor-session";
+        const role = "supervisor";
+        const userID = supData.supervisorID;
         const department = supData.departmentName?.toLowerCase()
+
+        localStorage.setItem('token', token);
+        localStorage.setItem('role', role);
+        localStorage.setItem('userID', userID);
+        localStorage.setItem('department', department);
+
+        setAuth({ token, role, userID, isAuthenticated: true });
 
         if(department === 'merchandise'){
           navigate('/supervisor/merchandise');
@@ -74,8 +92,8 @@ export default function EmployeeLogin() {
         else if (department === 'maintenance'){
           navigate('/supervisor/maintenance');
         }
-        else{
-          navigate('/supervisor-portal');
+        else if (department === 'management'){
+          navigate('/supervisor/HR');
         }
         return;
       }

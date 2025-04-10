@@ -16,7 +16,7 @@ const corsMiddleWare = cors();
 const routeMap = {
     'GET': [
         '/rides', 
-        '/employees', 
+        '/supervisor/HR/employees', 
         '/merchandise', 
         '/maintenance', 
         '/merchandise-transactions', 
@@ -25,18 +25,30 @@ const routeMap = {
         '/supervisor/merchandise/low-stock',
         '/supervisor/sales-report',
         '/supervisor/merchandise/ticket-sales',
-        '/supervisor/visitors',
+        '/supervisor/HR/visitors',
         '/supervisor/merchandise/visitor-purchases',
         '/supervisor/maintenance/ride-maintenance',
-        '/supervisor/attendance-revenue',
+        '/supervisor/HR/attendance-revenue',
         '/employee/account-info',
         '/supervisor/account-info',
         '/account-info',
-        '/supervisor/notifications'
+        '/supervisor/merchandise/notifications',
+        '/supervisor/merchandise/items',
+        '/supervisor/merchandise/pending-orders',
+        '/supervisor/merchandise/merch',
+        '/supervisor/merchandise/orders',
+        '/supervisor/maintenance/rides',
+        '/supervisor/maintenance/employee-maintenance-request',
+        '/supervisor/maintenance/ridemaintenance-pending',
+        '/supervisor/maintenance/get-maintenance-requests',
+        '/purchase-history',
+        '/ticket-history',
+        '/alerts',
+        '/supervisor/HR/get-supervisors',
+        '/supervisor/HR/get-departments'
     ],
     'POST': [
-        '/add-employee', 
-        '/add-maintenance',
+        '/supervisor/HR/add-employee', 
         '/add-merchandise-transaction',
         '/login',
         '/add-visitor',
@@ -48,7 +60,12 @@ const routeMap = {
         '/supervisor/login',
         '/employee-login',
         '/supervisor/maintenance/insert-ride-maintenance',
-        '/supervisor/maintenance/update-ride-maintenance-status'
+        '/supervisor/maintenance/update-ride-maintenance-status',
+        '/supervisor/merchandise/reorders',
+        '/supervisor/merchandise/stock-arrivals',
+        '/supervisor/merchandise/add-merch',
+        '/supervisor/maintenance/maintenance-request',
+        '/meal-plan-purchase'
     ],
     'PUT': [
         '/update-employee', 
@@ -58,7 +75,8 @@ const routeMap = {
         '/supervisor/update-employee-info',//make
         '/supervisor/update-visitor-info',//make
         '/supervisor/update-operating-hours',//make
-        '/supervisor/update-event-date'//make
+        '/supervisor/update-event-date',//make
+        '/supervisor/maintenance/complete-request'
     ],
     'DELETE': [
         '/supervisor/delete-employee',
@@ -98,7 +116,6 @@ const routeMap = {
 });*/
 
 const server = http.createServer((req, res) => {
-    // ✅ Allow CORS manually
     res.setHeader("Access-Control-Allow-Origin", "*"); // OR better: "http://localhost:5173"
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");

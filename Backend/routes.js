@@ -9,11 +9,11 @@ function routes(req, res) {
         return actions.getRides(req, res);
     }
 
-    if (url.startsWith('/employees') && method === 'GET') {
+    if (url.startsWith('/supervisor/HR/employees') && method === 'GET') {
         return actions.getEmployees(req, res);
     }
 
-    if (url.startsWith('/add-employee') && method === 'POST') {
+    if (url.startsWith('/supervisor/HR/add-employee') && method === 'POST') {
         return actions.addEmployee(req, res);
     }
 
@@ -79,7 +79,7 @@ function routes(req, res) {
         return actions.getTicketSales(req, res);
     }
 
-    if (url.startsWith('/supervisor/visitors') && method === 'GET') {
+    if (url.startsWith('/supervisor/HR/visitors') && method === 'GET') {
         return actions.getVisitorRecords(req, res);
     }
 
@@ -95,7 +95,7 @@ function routes(req, res) {
         return actions.visitorPurchasesReport(req,res);
     }
 
-    if(url.startsWith('/supervisor/attendance-revenue') && method === 'GET'){
+    if(url.startsWith('/supervisor/HR/attendance-revenue') && method === 'GET'){
         return actions.attendanceAndRevenueReport(req,res);
     }
 
@@ -127,7 +127,7 @@ function routes(req, res) {
         return actions.updateMealPlan(req,res);
     }
 
-    if(url.startsWith('/supervisor/notifications') && method == 'GET'){
+    if(url.startsWith('/supervisor/merchandise/notifications') && method == 'GET'){
         return actions.sendLowStockNotifications(req,res);
     }//change route
 
@@ -137,6 +137,86 @@ function routes(req, res) {
 
     if(url.startsWith('/supervisor/maintenance/update-ride-maintenance-status') && method == 'POST'){
         return actions.completedRideMaintenance(req,res);
+    }
+
+    if(url.startsWith('/update-employee') && method === 'PUT'){
+        return actions.updateEmployeeInfo(req,res);
+    }
+
+    if(url.startsWith('/supervisor/merchandise/reorders') && method === 'POST'){
+        return actions.reorderMerchandise(req,res);
+    }
+
+    if(url.startsWith('/supervisor/merchandise/items') && method === 'GET'){
+        return actions.getMerchList(req,res);
+    }
+    
+    if(url.startsWith('/supervisor/merchandise/stock-arrivals') && method === 'POST'){
+        return actions.markStockArrivals(req,res);
+    }
+
+    if(url.startsWith('/supervisor/merchandise/pending-orders') && method === 'GET'){
+        return actions.getPendingOrders(req,res);
+    }
+
+    if(url.startsWith('/supervisor/merchandise/merch') && method === 'GET'){
+        return actions.getMerchandiseTable(req,res);
+    }
+
+    if(url.startsWith('/supervisor/merchandise/orders') && method === "GET"){
+        return actions.getMerchandiseReordersTable(req,res);
+    }
+
+    if(url.startsWith('/supervisor/merchandise/add-merch') && method === 'POST'){
+        return actions.addMerchandise(req,res);
+    }
+
+    if(url.startsWith('/supervisor/maintenance/maintenance-request') && method === "POST"){
+        return actions.addMaintenanceRequest(req,res);
+    }
+
+    if(url.startsWith('/supervisor/maintenance/rides') && method === "GET"){
+        return actions.getRidesForMaintenanceRequest(req,res);
+    }
+
+    if(url.startsWith('/supervisor/maintenance/employee-maintenance-request') && method === "GET"){
+        return actions.getEmployeesForMaintenanceRequest(req,res);
+    }
+
+    if(url.startsWith('/supervisor/maintenance/complete-request') && method === "PUT"){
+        return actions.completeMaintenanceRequest(req,res);
+    }
+
+    if(url.startsWith('/supervisor/maintenance/ridemaintenance-pending') && method === "GET"){
+        return actions.getPendingMaintenance(req,res);
+    }
+
+    if(url.startsWith('/supervisor/maintenance/get-maintenance-requests') && method === "GET"){
+        return actions.getMaintenanceRequests(req,res);
+    }
+
+    if(url.startsWith('/purchase-history') && method === "GET"){
+        return actions.getVisitorMerchPurchases(req,res);
+    }
+
+    if(url.startsWith('/ticket-history') && method === "GET"){
+        return actions.getVisitorTicketTransactions(req,res);
+    }
+
+    if(url.startsWith('/alerts') && method === "GET"){
+        return actions.getHomePageAlerts(req,res);
+    }
+
+    if(url.startsWith('/supervisor/HR/get-supervisors') && method === "GET"){
+        return actions.getSupervisorNames(req,res);
+    }
+
+    if(url.startsWith('/supervisor/HR/get-departments') && method === 'GET'){
+        return actions.getDepartmentNames(req,res);
+    }
+
+    if(url.startsWith('/meal-plan-purchase') && method === "POST"){
+        return actions.addMealPlanTransaction(req,res);
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
