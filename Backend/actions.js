@@ -1384,7 +1384,7 @@ const addMaintenanceRequest = (req,res) => {
             res.end(JSON.stringify({ message: "New maintenance request made successfully", maintenanceID: results.insertId}));
         });
     });
-}
+};
 
 const getRidesForMaintenanceRequest = (req,res) => {
     pool.query(queries.getRidesForMaintenanceRequest, (error,results) => {
@@ -1608,6 +1608,105 @@ const addMealPlanTransaction = (req,res) => {
     })
 };
 
+const deleteMerchandise = (req, res) => {
+    const merchandiseID = req.url.split('/').pop();
+    
+    if (!merchandiseID) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Missing merchandise ID" }));
+        return;
+    }
+    
+    pool.query('DELETE FROM merchandise WHERE merchandiseID = ?', [merchandiseID], (error, results) => {
+        if (error) {
+            console.error("Error deleting merchandise:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        
+        if (results.affectedRows === 0) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Merchandise not found" }));
+            return;
+        }
+        
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ message: "Merchandise deleted successfully" }));
+    });
+};
+
+const updateMerchandise = (req, res) => {
+    let body = '';
+    
+    req.on('data', (chunk) => {
+        body += chunk.toString();
+    });
+    
+    req.on('end', () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (err) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+        
+        const { merchandiseID, itemName, price, quantity, giftShopName, description } = parsedBody;
+        
+        if (!merchandiseID || !itemName || price === undefined || quantity === undefined) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Missing required fields" }));
+            return;
+        }
+        
+        pool.query(
+            'UPDATE merchandise SET itemName = ?, price = ?, quantity = ?, giftShopName = ?, description = ? WHERE merchandiseID = ?',
+            [itemName, price, quantity, giftShopName || null, description || null, merchandiseID],
+            (error, results) => {
+                if (error) {
+                    console.error("Error updating merchandise:", error);
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ error: "Internal server error" }));
+                    return;
+                }
+                
+                if (results.affectedRows === 0) {
+                    res.writeHead(404, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ error: "Merchandise not found" }));
+                    return;
+                }
+                
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ message: "Merchandise updated successfully" }));
+            }
+        );
+    });
+};
+
+const getMerchandiseSalesData = (req, res) => {
+    // This endpoint will return mock data for now
+    // In a real application, you would query the merchandisetransactions table
+    const mockSalesData = [
+        { itemName: "Space Helmet", quantity: 25, totalAmount: 1249.75, transactionDate: new Date('2023-10-01') },
+        { itemName: "Cosmic T-shirt", quantity: 40, totalAmount: 1199.60, transactionDate: new Date('2023-10-05') },
+        { itemName: "Alien Plush", quantity: 30, totalAmount: 599.70, transactionDate: new Date('2023-10-10') },
+        { itemName: "Rocket Keychain", quantity: 55, totalAmount: 274.45, transactionDate: new Date('2023-10-15') },
+        { itemName: "Galaxy Mug", quantity: 28, totalAmount: 419.72, transactionDate: new Date('2023-10-20') },
+        { itemName: "Astronaut Ice Cream", quantity: 60, totalAmount: 299.40, transactionDate: new Date('2023-10-25') },
+        { itemName: "Constellation Map", quantity: 15, totalAmount: 374.85, transactionDate: new Date('2023-11-01') },
+        { itemName: "Glow-in-the-dark Stars", quantity: 35, totalAmount: 174.65, transactionDate: new Date('2023-11-05') },
+        { itemName: "Space Puzzle", quantity: 18, totalAmount: 449.82, transactionDate: new Date('2023-11-10') },
+        { itemName: "UFO Frisbee", quantity: 42, totalAmount: 209.58, transactionDate: new Date('2023-11-15') },
+        { itemName: "Planet Stickers", quantity: 65, totalAmount: 129.35, transactionDate: new Date('2023-11-20') },
+        { itemName: "Solar System Model", quantity: 12, totalAmount: 599.88, transactionDate: new Date('2023-11-25') }
+    ];
+    
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(mockSalesData));
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -1659,5 +1758,8 @@ module.exports = {
     getHomePageAlerts,
     getSupervisorNames,
     getDepartmentNames,
-    addMealPlanTransaction
+    addMealPlanTransaction,
+    deleteMerchandise,
+    updateMerchandise,
+    getMerchandiseSalesData
 };  
