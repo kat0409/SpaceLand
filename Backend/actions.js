@@ -49,10 +49,8 @@ const addEmployee = (request, response) => {
             return;
         }
 
-        // Get employee details from request body
         const { FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth } = parsedBody;
 
-        // Validate required fields
         if (!FirstName || !LastName || !Email || !Address || !SupervisorID || !username || !password || !Department || !employmentStatus || !dateOfBirth) {
             response.writeHead(400, { "Content-Type": "application/json" });
             response.end(JSON.stringify({ error: "All fields are required" }));
@@ -61,7 +59,6 @@ const addEmployee = (request, response) => {
 
         console.log("Checking if SupervisorID exists:", SupervisorID);
 
-        // Check if the provided SupervisorID exists in `supervisors`
         pool.query('SELECT * FROM supervisors WHERE SupervisorID = ?', [SupervisorID], (error, results) => {
             if (error) {
                 console.error("Error verifying SupervisorID:", error);
@@ -77,7 +74,6 @@ const addEmployee = (request, response) => {
                 return;
             }
 
-            // Insert the new employee into the database
             pool.query(
                 'INSERT INTO employee (FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth) VALUES (?,?,?,?,?,?,?,?,?,?)',
                 [FirstName, LastName, Email, Address, SupervisorID, username, password, Department, employmentStatus, dateOfBirth],
@@ -108,36 +104,6 @@ const getRidesNeedingMaintenance = (request, response) => {
         }
         response.writeHead(200, {"Content-Type": "application/json"});
         response.end(JSON.stringify(results));
-    });
-};
-
-//add a maintenance job to the database
-const addMaintenance = (request, response) => {
-    let body = "";
-
-    request.on("data", (chunk) => {
-        body += chunk.toString();
-    });
-
-    request.on("end", () => {
-        const {MaintenanceID, RideID, MaintenanceStartDate, MaintenanceEndDate, MaintenanceEmployeeID, eventID} = JSON.parse(body);
-
-        if(!MaintenanceID || !RideID || !MaintenanceStartDate || !MaintenanceEndDate || !MaintenanceEmployeeID){
-            response.writeHead(400, {"Content-Type": "application/json"});
-            response.end(JSON.stringify({error: "MaintenanceID, RideID, MaintenanceStartDate, MaintenanceStartDate, MaintenanceEndDate, and MaintenanceEmployeeID are all required"}));
-            return;
-        }
-
-        pool.query(queries.addMaintenance, [MaintenanceID, RideID, MaintenanceStartDate, MaintenanceStartDate, MaintenanceEndDate, MaintenanceEmployeeID], (error, results) => {
-            if (error){
-                console.error("Error adding maintenance record:", error);
-                response.writeHead(500, {"Content-Type": "application/json"});
-                response.end(JSON.stringify({error: "Internal server error"}));
-                return;
-            }
-            response.writeHead(201, {"Content-Type": "application.json"});
-            response.end(JSON.stringify({message: "Maintenance record added successfully"}));
-        });
     });
 };
 
@@ -361,11 +327,11 @@ const addVisitor = (req, res) => {
         }
 
         // Ensure optional fields have defaults
-        const phone = Phone || null;
-        const address = Address || null;
-        const gender = Gender || null;
-        const height = Height || null;
-        const age = Age || null;
+        const phone = Phone || 'N/A';
+        const address = Address || 'N/A';
+        const gender = Gender || 'U';
+        const height = Height || 0;
+        const age = Age || 0;
 
         // Set checkboxes as 1 (true) if checked, else 0 (false)
         const accessibilityNeeds = AccessibilityNeeds ? 1 : 0;
@@ -476,7 +442,6 @@ const purchaseCosmicPass = (req, res) => {
         const totalAmount = quantity * price;
         const ticketType = "Cosmic";
 
-        // Insert into `tickettransactions`
         pool.query(queries.createTransaction, [VisitorID, quantity, totalAmount, ticketType], (err, transactionResult) => {
             if (err) {
                 console.error('Error creating transaction:', err);
@@ -487,7 +452,6 @@ const purchaseCosmicPass = (req, res) => {
 
             const transactionID = transactionResult.insertId;
 
-            // Insert tickets
             const ticketValues = [];
             for (let i = 0; i < quantity; i++) {
                 ticketValues.push([price, new Date(), transactionID, ticketType]);  // Removed detailID
@@ -536,7 +500,6 @@ const purchaseGeneralPass = (req, res) => {
         const totalAmount = quantity * price;
         const ticketType = "General";
 
-        // Insert into `tickettransactions`
         pool.query(queries.createTransaction, [VisitorID, quantity, totalAmount, ticketType], (err, transactionResult) => {
             if (err) {
                 console.error('Error creating transaction:', err);
@@ -547,7 +510,6 @@ const purchaseGeneralPass = (req, res) => {
 
             const transactionID = transactionResult.insertId;
 
-            // Insert tickets
             const ticketValues = [];
             for (let i = 0; i < quantity; i++) {
                 ticketValues.push([price, new Date(), transactionID, ticketType]);  // Removed detailID
@@ -583,19 +545,6 @@ const getEmployeesByDept = (req, res) => {
     pool.query(queries.getEmployeesByDepartment, [department], (error, results) => {
         if (error) {
             console.error("Error fetching employees by department:", error);
-            res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Internal server error" }));
-            return;
-        }
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(results));
-    });
-};
-
-const getMaintenanceRequests = (req, res) => {
-    pool.query(queries.getMaintenanceRequests, (error, results) => {
-        if (error) {
-            console.error("Error fetching maintenance requests:", error);
             res.writeHead(500, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ error: "Internal server error" }));
             return;
@@ -727,20 +676,114 @@ const rideMaintenanceReport = (req,res) => {
 };
 
 const visitorPurchasesReport = (req,res) => {
-    pool.query(queries.visitorPurchasesReport, (error, results) => {
-        if (error) {
-            console.error("Error fetching visitor purchases report:", error);
-            res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Internal server error" }));
+    const parsedUrl = require('url'). parse(req.url, true);
+    const {
+        startDate,
+        endDate,
+        ticketType,
+        visitorName,
+        minSpent,
+        maxSpent,
+        purchaseType,
+        merchandiseItem
+    } = parsedUrl.query;
+
+    let query = queries.visitorPurchasesReport
+    const conditions = [];
+    const params = [];
+    
+    if (ticketType){
+        conditions.push(`tt.ticketType = ?`);
+        params.push(ticketType);
+    }
+
+    if(visitorName){
+        conditions.push(`CONCAT(v.FirstName, ' ', v.LastName) LIKE ?`);
+        params.push(`%${visitorName}`);
+    }
+
+    if(startDate){
+        conditions.push(`(tt.transactionDate >= ? OR mt.transactionDate >= ?)`);
+        params.push(startDate, startDate);
+    }
+
+    if (endDate){
+        conditions.push(`(tt.transactionDate <= ? OR mt.transactionDate <= ?)`);
+        params.push(endDate, endDate);
+    }
+
+    if(minSpent){
+        conditions.push(`(COALESCE(tt.totalAmount, 0) + COALESCE(mt.totalAmount, 0) >= ?)`);
+        params.push(minSpent);
+    }
+
+    if (maxSpent){
+        conditions.push(`(COALESCE(tt.totalAmount, 0) + COALESCE(mt.totalAmount, 0)) <= ?`);
+        params.push(maxSpent);
+    }
+
+    if(purchaseType === "tickets"){
+        conditions.push(`tt.ticketType IS NOT NULL`);
+    }else if(purchaseType === "merchandise"){
+        conditions.push(`mt.merchandiseID IS NOT NULL`);
+    }else if(purchaseType === "both"){
+        conditions.push(`tt.ticketType IS NOT NULL AND mt.merchandiseID IS NOT NULL`);
+    }
+
+    if(merchandiseItem){
+        conditions.push(`m.itemName LIKE ?`);
+        params.push(`%${merchandiseItem}`);
+    }
+
+    if (conditions.length > 0){
+        query += ` AND ` + conditions.join(" AND ");
+    }
+
+    pool.query(query, params, (error, results) => {
+        if(error){
+            console.error("Error filtering visitor purchases:", error);
+            res.writeHead(500, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({error: "Internal server error"}));
             return;
         }
-        res.writeHead(200, { "Content-Type": "application/json" });
+        res.writeHead(200, {"Content-Type": "application/json"});
         res.end(JSON.stringify(results));
     });
 };
 
 const attendanceAndRevenueReport = (req,res) => {
-    pool.query(queries.attendanceAndRevenueReport, (error, results) => {
+    const parsedUrl = require('url').parse(req.url, true);
+    const {
+        startDate, //only choose to make optional parameters for attributes that can be modified in the report, we do not need revenue in here because it is necessary in the report
+        endDate,
+        weatherCondition
+    } = parsedUrl.query;
+
+    let query = queries.attendanceAndRevenueReport;
+    const params = [];
+    const conditions = [];
+
+    if(startDate){
+        conditions.push(`oh.dateOH >= ?`);
+        params.push(startDate);
+    }
+
+    if(endDate){
+        conditions.push(`oh.dateOH <= ?`);
+        params.push(endDate);
+    }
+
+    if(weatherCondition){
+        conditions.push(`oh.weatherCondition = ?`);
+        params.push(weatherCondition);
+    }
+
+    if(conditions.length > 0){
+        query += " And " + conditions.join(" And ");
+    }
+
+    query += ` GROUP BY oh.dateOH, oh.weatherCondition ORDER BY oh.dateOH DESC`; //remember to add this to the end of the query so we can use the aggregate functions
+    pool.query(query, params, (error, results) => {
         if (error) {
             console.error("Error fetching attendance and revenue report:", error);
             res.writeHead(500, { "Content-Type": "application/json" });
@@ -754,15 +797,15 @@ const attendanceAndRevenueReport = (req,res) => {
 
 const getVisitorAccountInfo = (req, res) => {
     const parsedUrl = url.parse(req.url, true); 
-    const { Username, Password } = parsedUrl.query; 
+    const { visitorID } = parsedUrl.query; 
 
-    if (!Username || !Password) {
+    if (!visitorID) {
         res.writeHead(400, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Missing 'username' and 'password' query parameter" }));
+        res.end(JSON.stringify({ error: "Missing 'VisitorID' query parameter" }));
         return;
     }
 
-    pool.query(queries.getVisitorAccountInfo, [Username, Password], (error, results) => {
+    pool.query(queries.getVisitorAccountInfo, [visitorID], (error, results) => {
         if (error) {
             console.error("Error visitor account information:", error);
             res.writeHead(500, { "Content-Type": "application/json" });
@@ -1049,19 +1092,541 @@ const completedRideMaintenance = (req,res) => {
     });
 };
 
+const updateEmployeeInfo = (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        let parsedBody;
+        try {
+        parsedBody = JSON.parse(body);
+        } catch (error) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ error: "Invalid JSON format" }));
+        }
+
+        const { employeeID, FirstName, LastName, Email, address, username, password } = parsedBody;
+
+        if (!employeeID) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "employeeID is required" }));
+        }
+
+        const fields = [];
+        const values = [];
+    
+        if (FirstName) {
+            fields.push("FirstName = ?");
+            values.push(FirstName);
+        }
+        if (LastName) {
+            fields.push("LastName = ?");
+            values.push(LastName);
+        }
+        if (Email) {
+            fields.push("Email = ?");
+            values.push(Email);
+        }
+        if (address) {
+            fields.push("Address = ?");
+            values.push(address);
+        }
+        if (username) {
+            fields.push("username = ?");
+            values.push(username);
+        }
+        if (password) {
+            fields.push("password = ?");
+            values.push(password);
+        }
+
+        if (fields.length === 0) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "No fields provided to update" }));
+        }
+    
+        const sql = `UPDATE employee SET ${fields.join(", ")} WHERE employeeID = ?`;
+        values.push(employeeID);
+    
+        pool.query(sql, values, (err, result) => {
+            if (err) {
+            console.error("Error updating employee:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Internal server error" }));
+            }
+    
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ message: "Employee info updated successfully." }));
+        });
+    });
+};
+
+const reorderMerchandise = (req,res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', () => {
+        let parsedBody;
+
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (error) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const {merchandiseID, quantityOrdered, expectedArrivalDate, status, notes} = parsedBody;
+
+        const statToInsert = status || 'pending';
+        const notesToInsert = notes || 'No notes';
+
+        if (!merchandiseID || !quantityOrdered || !expectedArrivalDate || !statToInsert || !notesToInsert) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "merchandiseID, quantityOrdered, expectedArrivalDate, status, and notes are required." }));
+            return;
+        }
+
+        pool.query(queries.reorderMerchandise, [merchandiseID, quantityOrdered, expectedArrivalDate, statToInsert, notesToInsert], (error, results) => {
+            if (error) {
+                        console.error("Error adding merchandise re-order:", error);
+                        res.writeHead(500, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ error: "Internal server error" }));
+                        return;
+                    }
+
+                    res.writeHead(201, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ message: "Merchandise ordered successfully", reorderID: results.insertId}));
+        });
+    });
+};
+
+const getMerchList = (req,res) => {
+    pool.query(queries.getMerchList, (err,results) => {
+        if(err){
+            console.error("Error fetching merchandise:", err);
+            res.writeHead(500, {'Content-Type': 'application/json'});
+            res.end(JSON.stringify({error: 'Failed to fetch merchandise'}));
+        }
+        else{
+            res.writeHead(200, {'Content-Type': 'application/json'});
+            res.end(JSON.stringify(results));
+        }
+    });
+};
+
+const markStockArrivals = (req,res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', () => {
+        let parsedBody;
+
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (error) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const {merchandiseID,quantityAdded,arrivalDate,notes,reorderID} = parsedBody;
+
+        const notesToInsert = notes || 'No notes';
+
+        if (!merchandiseID || !quantityAdded || !arrivalDate || !notesToInsert || !reorderID) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "merchandiseID, quantityOrdered, expectedArrivalDate, status, and notes are required." }));
+            return;
+        }
+
+        pool.query(queries.markStockArrivals, [merchandiseID,quantityAdded,arrivalDate,notes,reorderID], (error, results) => {
+            if (error) {
+                console.error("Error adding stock arrival:", error);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+
+            res.writeHead(201, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "New stock marked as arrived successfully", arrivalID: results.insertId}));
+        });
+    });
+};
+
+const getPendingOrders = (req, res) => {
+    pool.query(queries.getPendingOrders, (error, results) => {
+        if (error) {
+            console.error("Error fetching re-orders:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+    
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
+const getMerchandiseTable = (req, res) => {
+    pool.query(queries.getMerchandiseTable, (error, results) => {
+        if (error){
+            console.error("Error fetching available merchandise:", error);
+            res.writeHead(500, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({error: "Internal server error"}));
+            return;
+        }
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.end(JSON.stringify(results));
+    });
+};
+
+const getMerchandiseReordersTable = (req, res) => {
+    pool.query(queries.getMerchandiseReordersTable, (error, results) => {
+        if (error){
+            console.error("Error fetching pending orders:", error);
+            res.writeHead(500, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({error: "Internal server error"}));
+            return;
+        }
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.end(JSON.stringify(results));
+    });
+};
+
+const addMerchandise = (req,res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', () => {
+        let parsedBody;
+
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (error) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const {itemName,price,quantity} = parsedBody;
+
+        const giftShopName = 'Andromeda Galaxy Gift Shop';
+        const departmentNumber = 5;
+
+        if (!itemName || !price || !quantity || !giftShopName || !departmentNumber) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "itemName, price, and quantity are required." }));
+            return;
+        }
+
+        pool.query(queries.addMerchandise, [itemName, price, quantity, giftShopName, departmentNumber], (error, results) => {
+            if (error) {
+                        console.error("Error adding merchandise:", error);
+                        res.writeHead(500, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ error: "Internal server error" }));
+                        return;
+                    }
+
+                    res.writeHead(201, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ message: "New item added successfully", merchandiseID: results.insertId}));
+        });
+    });
+};
+
+const addMaintenanceRequest = (req,res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', () => {
+        let parsedBody;
+
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (error) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const {RideID,status,reason,MaintenanceEndDate,MaintenanceEmployeeID,MaintenanceStartDate} = parsedBody;
+
+        if (!RideID || !status || !reason || !MaintenanceStartDate || !MaintenanceEndDate || !MaintenanceEmployeeID) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Ride ID number, status, reason, start date, expected end date, and employee ID number  are required." }));
+            return;
+        }
+
+        pool.query(queries.addMaintenanceRequest, [RideID,status,reason,MaintenanceEndDate,MaintenanceEmployeeID,MaintenanceStartDate], (error, results) => {
+            if (error) {
+                console.error("Error making a maintenance request:", error);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+
+            res.writeHead(201, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "New maintenance request made successfully", maintenanceID: results.insertId}));
+        });
+    });
+}
+
+const getRidesForMaintenanceRequest = (req,res) => {
+    pool.query(queries.getRidesForMaintenanceRequest, (error,results) => {
+        if (error){
+            console.log("Error fetching ride information for maintenance request:", error);
+            res.writeHead(500, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({error: "Internal server error"}));
+            return;
+        }
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.end(JSON.stringify(results));
+    });
+};
+
+const getEmployeesForMaintenanceRequest = (req,res) => {
+    pool.query(queries.getMaintenanceEmployeesForMR, (error, results) => {
+        if (error){
+            console.log("Error fetching maintenance employee info:", error);
+            res.writeHead(500, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({error: "Internal server error"}));
+            return;
+        }
+        res.writeHead(200, {"Content-Type":"application/json"});
+        res.end(JSON.stringify(results));
+    });
+}
+
+const completeMaintenanceRequest = (req, res) => {
+    let body = "";
+
+    req.on("data", chunk => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        let parsedBody;
+
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (err) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON" }));
+            return;
+        }
+
+        const { maintenanceID, MaintenanceEndDate } = parsedBody;
+
+        if (!maintenanceID || !MaintenanceEndDate) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "maintenanceID and MaintenanceEndDate are required." }));
+            return;
+        }
+
+        pool.query(queries.completeMaintenanceRequest, [MaintenanceEndDate, maintenanceID], (err, results) => {
+            if (err) {
+            console.error("Error completing maintenance request:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Database error" }));
+            return;
+            }
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Maintenance marked as completed" }));
+        });
+    });
+};
+
+const getPendingMaintenance = (req,res) => {
+    pool.query(queries.getPendingMaintenance, (error,results) => {
+        if(error){
+            console.error("Error fetching pending maintenance requests:", error);
+            res.writeHead(500, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({error: "Internal server error"}));
+            return;
+        }
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.end(JSON.stringify(results));
+    });
+};
+
+const getMaintenanceRequests = (req,res) => {
+    pool.query(queries.getMaintenanceRequests, (error, results) => {
+        if(error){
+            console.error("Error fetching ride maintenance requests:", error);
+            res.writeHead(500, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({error: "Internal server error"}));
+            return;
+        }
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.end(JSON.stringify(results));
+    });
+};
+
+const getVisitorMerchPurchases = (req,res) => {
+    const parsedUrl = url.parse(req.url, true);//use when: redirected from another page -> we need to pass info we received in the page we redirected from (the url contains the visitorID)
+    const visitorID = parsedUrl.query.visitorID;
+
+    if(!visitorID){
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Missing visitorID" }));
+        return;
+    }
+    pool.query(queries.getVisitorMerchPurchases, [visitorID], (error, results) => {
+        if(error){
+            console.error("Error fetching purchase history:", error);
+            res.writeHead(500, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({error: "Internal server error"}));
+            return;
+        }
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.end(JSON.stringify(results));
+    });
+};
+
+const getVisitorTicketTransactions = (req,res) => {
+    const parsedUrl = url.parse(req.url, true);//use when: redirected from another page -> we need to pass info we received in the page we redirected from (the url contains the visitorID)
+    const visitorID = parsedUrl.query.visitorID;
+
+    if(!visitorID){
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Missing visitorID" }));
+        return;
+    }
+    pool.query(queries.getVisitorTicketTransactions, [visitorID], (error, results) => {
+        if(error){
+            console.error("Error fetching purchase history:", error);
+            res.writeHead(500, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({error: "Internal server error"}));
+            return;
+        }
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.end(JSON.stringify(results));
+    });
+};
+
+const getHomePageAlerts = (req,res) => {
+    pool.query(queries.getHomePageAlerts, (error, results) => {
+        if (error) {
+            console.error("Error fetching homepage alerts:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+    
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
+const getSupervisorNames = (req,res) => {
+    pool.query(queries.getSupervisorNames, (error, results) => {
+        if(error) {
+            console.error("Error fetching supervisor names:", error);
+            res.writeHead(500, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({error: "Internal server error"}));
+            return;
+        }
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.end(JSON.stringify(results));
+    });
+};
+
+const getDepartmentNames = (req,res) => {
+    pool.query(queries.getDepartmentNames, (error, results) => {
+        if(error) {
+            console.error("Error fetching department names:", error);
+            res.writeHead(500, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({error: "Internal server error"}));
+            return;
+        }
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.end(JSON.stringify(results));
+    });
+};
+
+const addMealPlanTransaction = (req,res) => {
+    let body = '';
+
+    req.on('data', (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', () => {
+        let parsedBody;
+        try{
+            parsedBody = JSON.parse(body);
+        }
+        catch{
+            res.writeHead(400, {"Content-Type":"application/json"});
+            res.end(JSON.stringify({error: "Invalid JSON format"}));
+            return;
+        }
+
+        const {VisitorID, mealPlanID} = parsedBody;
+        if(!VisitorID || !mealPlanID){
+            res.writeHead(400, {"Content-Type":"application/json"});
+            res.end(JSON.stringify({error: "Visitor ID and meal plan ID are required."}));
+            return;
+        }
+        
+        pool.query(queries.getMealPlanPrice, [mealPlanID], (error,results) => {
+            if(error){
+                console.log("Error fetching meal plan price:", error);
+                res.writeHead(500, {"Content-Type":"application/json"});
+                res.end(JSON.stringify({error: "Internal server error"}));
+                return;
+            }
+            
+            if(results.length === 0){
+                res.writeHead(404, {"Content-Type":"application/json"});
+                res.end(JSON.stringify("Meal plan not found in the system."));
+                return;
+            }
+
+            const price = results[0].price;
+
+            pool.query(queries.addMealPlanTransaction, [mealPlanID, VisitorID, new Date(), price], (error, results) => {
+                if(error){
+                    console.log("Error making meal plan transaction:", error);
+                    res.writeHead(500, {"Content-Type":"application/json"});
+                    res.end(JSON.stringify("Internal server error"));
+                    return;
+                }
+                const transactionID = results.insertId;
+                res.writeHead(200, {"Content-Type":"application/json"});
+                res.end(JSON.stringify({message: "Meal plan purchases successfully", transactionID}));
+            });
+        });
+    })
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
     getEmployees,
     addEmployee,
     getRidesNeedingMaintenance,
-    addMaintenance,
     getMerchandiseTransactions,
     loginVisitor,
     addVisitor,
     checkVisitorExists,
     getEmployeesByDept,
-    getMaintenanceRequests,
     updateMaintenanceStatus,
     getLowStockMerchandise,
     getSalesReport,
@@ -1082,5 +1647,25 @@ module.exports = {
     purchaseGeneralPass,
     sendLowStockNotifications,
     insertRideMaintenance,
-    completedRideMaintenance
-};
+    completedRideMaintenance,
+    updateEmployeeInfo,
+    reorderMerchandise,
+    getMerchList,
+    markStockArrivals,
+    getPendingOrders,
+    getMerchandiseTable,
+    getMerchandiseReordersTable,
+    addMerchandise,
+    addMaintenanceRequest,
+    getRidesForMaintenanceRequest,
+    getEmployeesForMaintenanceRequest,
+    completeMaintenanceRequest,
+    getPendingMaintenance,
+    getMaintenanceRequests,
+    getVisitorMerchPurchases,
+    getVisitorTicketTransactions,
+    getHomePageAlerts,
+    getSupervisorNames,
+    getDepartmentNames,
+    addMealPlanTransaction
+};  

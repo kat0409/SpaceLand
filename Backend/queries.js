@@ -8,8 +8,6 @@ const addEmployee = 'INSERT INTO employee (FirstName, LastName, Email, Address, 
 
 const getRidesNeedingMaintenance = 'SELECT * FROM rides WHERE MaintenanceNeed = 1';
 
-const addMaintenance = 'INSERT INTO maintenance (RideID, MaintenanceStartDate, MaintenanceEndDate, MaintenanceEmployeeID, eventID) VALUES (?,?,?,?,?,)';
-
 const getMerchandiseTransactions = 'SELECT * FROM merchandiseTransactions';
 
 const addMerchandiseTransaction = 'INSERT INTO merchandiseTransactions (merchandiseID, VisitorID, transactionDate, quantity, totalAmount) VALUES (?,?,?,?,?)';
@@ -25,12 +23,6 @@ const addRestaurantTransaction = 'INSERT INTO restaurantTransactions (restaurant
 const getSupervisors = 'SELECT * FROM supervisors';
 
 const getSupervisorIDbyDept = 'SELECT SupervisorID FROM supervisors WHERE departmentName = ?';
-
-const updateEmployeeForDeletion = 'UPDATE employee SET employmentStatus = 0 WHERE EmployeeID = ?';
-
-const updateEmployeeForRehire = 'UPDATE employee SET employmentStatus = 1 WHERE EmployeeID = ?';
-
-const updateEmployeeInfo = 'UPDATE employee SET FirstName = ?, LastName = ?, Email = ?, Address = ?, SupervisorID = ?, username = ?, password = ?, Department = ?, employmentStatus = ?, dateOfBirth = ?';
 
 const getEmployeeInfo = 'SELECT * FROM employee WHERE EmployeeID = ?';
 
@@ -61,7 +53,9 @@ const authenticateEmployee = 'SELECT EmployeeID  FROM employee WHERE username = 
 
 const authenticateSupervisor = `SELECT SupervisorID, departmentIDNumber, departmentName FROM supervisors WHERE username = ? AND password = ?`;
 
-const sendLowStockNotifications =  `SELECT * FROM lowstocknotifications WHERE supervisorID = ? AND isRead = 0 ORDER BY messsageTime DESC`;
+const sendLowStockNotifications =  `SELECT * FROM lowstocknotifications 
+    WHERE supervisorID = ? AND isRead = 0 ORDER BY messsageTime DESC
+`;
 
 const addVisitor = `
     INSERT INTO visitors (FirstName, LastName, Phone, Email, Address, DateOfBirth, 
@@ -89,10 +83,6 @@ const insertTickets = `
 
 const getEmployeesByDepartment = `
     SELECT * FROM employee WHERE Department = ?
-`;
-
-const getMaintenanceRequests = `
-    SELECT * FROM rides WHERE MaintenanceNeed = 1
 `;
 
 /*const updateRideMaintenanceStatus = `
@@ -152,6 +142,45 @@ const removeHomePageAlert = `
     WHERE rideID = ? AND isResolved = 0;
 `;
 
+const reorderMerchandise = `
+    INSERT INTO merchandiseReorders (merchandiseID,quantityOrdered,
+    expectedArrivalDate,status,notes)
+    VALUES (?,?,?,?,?)
+`;
+
+const getMerchList = `
+    SELECT merchandiseID, itemName FROM merchandise ORDER BY itemName;
+`;
+
+const markStockArrivals = `
+    INSERT INTO stockArrivals (merchandiseID,quantityAdded,arrivalDate,
+    notes,reorderID)
+    VALUES (?,?,?,?,?)
+`;
+
+const getPendingOrders = `
+    SELECT r.reorderID, r.merchandiseID, r.quantityOrdered, r.expectedArrivalDate, m.itemName
+    FROM merchandisereorders r
+    JOIN merchandise m ON r.merchandiseID = m.merchandiseID
+    WHERE r.status = 'pending'
+`;
+
+const getMerchandiseTable = `
+    SELECT * FROM merchandise
+`;
+
+const getMerchandiseReordersTable =`
+    SELECT r.reorderID, r.quantityOrdered, r.expectedArrivalDate, r.status, r.notes, m.itemName
+    FROM merchandisereorders r
+    JOIN merchandise m ON r.merchandiseID = m.merchandiseID
+`;
+
+const addMerchandise = `
+    INSERT INTO merchandise (itemName, price, quantity, giftShopName, departmentNumber)
+    Values (?,?,?,?,?)
+`;
+
+
 //Reports
 const rideMaintenanceReport = `
     SELECT 
@@ -190,13 +219,14 @@ const visitorPurchasesReport = `
     LEFT JOIN 
         merchandisetransactions mt ON v.VisitorID = mt.VisitorID
     LEFT JOIN 
-        merchandise m ON mt.merchandiseID = m.merchandiseID;
-
+        merchandise m ON mt.merchandiseID = m.merchandiseID
+    WHERE 1=1
 `;
+//check the WHERE 1=1 during debugging
 
 const attendanceAndRevenueReport = `
     SELECT 
-        oh.date AS Operating_Date,
+        oh.dateOH AS Operating_Date,
         COUNT(DISTINCT t.ticketID) AS Tickets_Sold,
         COALESCE(SUM(tt.totalAmount), 0) AS Total_Ticket_Revenue,
         oh.weatherCondition AS Weather_Condition
@@ -206,19 +236,43 @@ const attendanceAndRevenueReport = `
         tickets t ON oh.ticketID = t.ticketID 
     LEFT JOIN 
         tickettransactions tt ON t.transactionID = tt.transactionID 
-    GROUP BY 
-        oh.date, oh.weatherCondition
-    ORDER BY 
-        oh.date DESC;
-
+    WHERE 1=1
 `;
+
+/*GROUP BY 
+oh.dateOH, oh.weatherCondition
+ORDER BY 
+oh.dateOH DESC*/
 
 const getVisitorAccountInfo = `
     SELECT v.FirstName, v.LastName, v.Phone,
     v.Email, v.Address, v.DateOfBirth, v.AccessibilityNeeds,
     v.Gender, v.Height, v.Age, v.MilitaryStatus
     FROM visitors v
-    WHERE v.Username = ? AND v.Password = ?;
+    WHERE v.VisitorID = ?;
+`;
+
+const getVisitorMerchPurchases = `
+    SELECT
+        mt.transactionDate,
+        m.itemName,
+        m.giftShopName,
+        mt.quantity,
+        m.price,
+        mt.totalAmount
+    FROM merchandisetransactions mt
+    JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+    WHERE mt.VisitorID = ?
+`;
+
+const getVisitorTicketTransactions = `
+    SELECT
+        tt.transactionDate,
+        tt.ticketType,
+        tt.quantity,
+        tt.totalAmount
+    FROM tickettransactions tt
+    WHERE tt.VisitorID = ?;
 `;
 
 const getEmployeeAccountInfo = `
@@ -237,10 +291,101 @@ const getSupervisorAccountInfo = `
     WHERE s.username = ? AND s.password = ?;
 `;
 
+const updateEmployeeForDeletion = 'UPDATE employee SET employmentStatus = 0 WHERE EmployeeID = ?';
+
+const updateEmployeeForRehire = 'UPDATE employee SET employmentStatus = 1 WHERE EmployeeID = ?';
+
+const updateEmployeeInfo = `
+    UPDATE employee 
+    SET FirstName = ?, LastName = ?, Email = ?, 
+    Address = ?, username = ?, password = ?
+    WHERE employeeID = ?`;
+
 const updateMealPlan = `
     UPDATE restaurant
     SET mealPlanTier = ?, price = ?
-    WHERE restaurantID = ?
+    WHERE restaurantID = ?;
+`;
+const deleteEmployee = `
+    DELETE FROM employee WHERE employmentStatus == 0 AND EmployeeID = ?;
+`;
+
+const updateOperatingHours = `
+    UPDATE operating_hours
+    SET dateOH = ?, openingTime = ?, closingTime = ?
+    WHERE operatingHoursID = ?;
+`;
+
+const updateVisitorInfo = `
+    UPDATE vistors as v
+    SET v.FirstName = ?, v.LastName = ?, v.Phone = ?, v.Email = ?, v.Address = ?, v.AccessibilityNeeds = ?, v.Gender = ?, v.MilitaryStatus = ?
+    WHERE v.VisitorID = ? AND v.Username = ? AND v.Password = ?;
+`;
+
+const addMaintenanceRequest = `
+    INSERT INTO ridemaintenance (rideID, status, reason, MaintenanceEndDate, MaintenanceEmployeeID, MaintenanceStartDate)
+    VALUES (?,?,?,?,?,?)
+`;
+
+const getMaintenanceEmployeesForMR = `
+    SELECT EmployeeID, FirstName, LastName
+    FROM employee
+    WHERE Department = 'Maintenance' AND employmentStatus = 1
+`;
+
+const getRidesForMaintenanceRequest = `
+    SELECT RideID, RideName
+    FROM Rides
+`;
+
+const completeMaintenanceRequest = `
+    UPDATE rideMaintenance
+    SET status = 'completed', MaintenanceEndDate = ?
+    WHERE maintenanceID = ?
+`;
+
+const getPendingMaintenance = `
+    SELECT r.maintenanceID, r.rideID, rd.RideName, r.status, r.reason, r.MaintenanceStartDate, r.MaintenanceEndDate,
+        r.MaintenanceEmployeeID, e.FirstName, e.LastName
+    FROM ridemaintenance r
+    JOIN rides rd ON r.rideID = rd.RideID
+    LEFT JOIN employee e ON r.MaintenanceEmployeeID = e.EmployeeID
+    WHERE r.status IN ('pending');
+`;
+
+const getMaintenanceRequests = `
+    SELECT r.RideName, rm.rideID, rm.status, rm.reason, rm.MaintenanceStartDate, rm.MaintenanceEndDate, rm.MaintenanceEmployeeID
+    FROM rideMaintenance rm
+    JOIN rides r ON r.RideID = rm.rideID
+`;
+
+const getHomePageAlerts = `
+    SELECT a.alertID, a.alertMessage, a.timestamp, r.RideName
+    FROM homepagealerts a
+    JOIN rides r ON a.rideID = r.RideID
+    WHERE a.isResolved = 0
+    ORDER BY a.timestamp DESC
+`;
+
+const getSupervisorNames = `
+    SELECT s.SupervisorID, s.FirstName, s.LastName
+    FROM supervisors s
+`;
+
+const getDepartmentNames = `
+    SELECT DISTINCT s.departmentIDNumber, s.DepartmentName
+    From supervisors s
+`;
+
+const addMealPlanTransaction = `
+    INSERT INTO mealPlanTransactions(mealPlanID, VisitorID,transactionDate,price)
+    VALUES(?,?,?,?)
+`;
+
+const getMealPlanPrice = `
+    SELECT price
+    FROM mealPLans
+    WHERE mealPlanID = ?
 `;
 
 module.exports = {
@@ -248,7 +393,6 @@ module.exports = {
     getEmployees,
     addEmployee,
     getRidesNeedingMaintenance,
-    addMaintenance,
     getMerchandiseTransactions,
     addMerchandiseTransaction,
     addRestaurant,
@@ -289,7 +433,30 @@ module.exports = {
     sendLowStockNotifications,
     insertRideMaintenance,
     completedRideMaintenance,
-    removeHomePageAlert
+    removeHomePageAlert,
+    deleteEmployee,
+    updateMealPlan,
+    updateOperatingHours,
+    updateVisitorInfo,
+    reorderMerchandise,
+    getMerchList,
+    markStockArrivals,
+    getPendingOrders,
+    getMerchandiseTable,
+    getMerchandiseReordersTable,
+    addMerchandise,
+    addMaintenanceRequest,
+    getRidesForMaintenanceRequest,
+    getMaintenanceEmployeesForMR,
+    completeMaintenanceRequest,
+    getPendingMaintenance,
+    getVisitorMerchPurchases,
+    getVisitorTicketTransactions,
+    getHomePageAlerts,
+    getSupervisorNames,
+    getDepartmentNames,
+    addMealPlanTransaction,
+    getMealPlanPrice
 };
 
 //checkMerchQuantity

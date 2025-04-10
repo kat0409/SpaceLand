@@ -1,4 +1,5 @@
 // src/App.jsx
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { motion } from "framer-motion";
 import Home from "./pages/Home";
@@ -13,9 +14,9 @@ import Pricing from "./pages/Pricing";
 import CursorOverlay from "./components/ui/CursorOverlay";
 import SupervisorPortal from "./pages/SupervisorPortal";
 import Purchase from "./pages/Purchase";
-import MerchandiseSupervisorPortal from "./pages/MerchandiseSupervisorPortal";
-import MaintenanceSupervisorPortal from "./pages/MaintenanceSupervisorPortal";
-
+import MerchandiseSupervisorPortal from './pages/MerchandiseSupervisorPortal';
+import MaintenanceSupervisorPortal from './pages/MaintenanceSupervisorPortal';
+import HRSupervisorPortal from './pages/HRSupervisorPortal';
 
 export default function App() {
   return (
@@ -41,6 +42,7 @@ export default function App() {
           <Route path="/purchase" element={<Purchase />} />
           <Route path="/supervisor/merchandise" element={<MerchandiseSupervisorPortal />} />
           <Route path="/supervisor/maintenance" element={<MaintenanceSupervisorPortal />} />
+          <Route path="/supervisor/HR" element={<HRSupervisorPortal />} />
         </Routes>
       </motion.div>
     </Router>
