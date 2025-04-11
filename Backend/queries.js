@@ -428,6 +428,12 @@ const clockIn = `
     ON DUPLICATE KEY UPDATE clockIn = NOW()
 `;
 
+const clockOut = `
+    UPDATE employee_attendance
+    SET clockOut = NOW()
+    WHERE EmployeeID = ? AND date = ?
+`;
+
 
 module.exports = {
     getRides,
@@ -504,7 +510,8 @@ module.exports = {
     deleteEvent,
     getEmployeeSchedule,
     requestTimeOff,
-    clockIn
+    clockIn,
+    clockOut
 };
 
 //checkMerchQuantity

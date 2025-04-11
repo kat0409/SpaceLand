@@ -259,6 +259,10 @@ function routes(req, res) {
         return actions.clockIn(req,res);
     }
 
+    if(url.startsWith('/employee/clock-out') && method === "PUT"){
+        return actions.clockOut(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
