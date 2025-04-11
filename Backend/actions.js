@@ -1761,6 +1761,52 @@ const addEvent = (req,res) => {
     });
 }
 
+const updateEvent = (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        let parsedBody;
+
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (error) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const { eventID, eventName, durationMin, description, event_date, type } = parsedBody;
+
+        if (!eventID || !eventName || !durationMin || !description || !event_date || !type) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "All fields including eventID are required." }));
+            return;
+        }
+
+        pool.query(queries.updateEvent, [eventName, durationMin, description, event_date, type, eventID], (error, results) => {
+            if (error) {
+                console.error("Error updating event:", error);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+
+            if (results.affectedRows === 0) {
+                res.writeHead(404, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Event not found" }));
+                return;
+            }
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Event updated successfully" }));
+        });
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -1817,5 +1863,6 @@ module.exports = {
     updateMerchandise,
     getMerchandiseSalesData,
     getEvents,
-    addEvent
+    addEvent,
+    updateEvent
 };  

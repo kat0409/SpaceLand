@@ -403,6 +403,11 @@ const addEvent = `
     VALUES (?,?,?,?,?)
 `;
 
+const updateEvent = `
+    UPDATE parkevent 
+    SET eventName = ?, durationMin = ?, description = ?, event_date = ?, type = ? WHERE eventID = ?
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -473,7 +478,8 @@ module.exports = {
     addMealPlanTransaction,
     getMealPlanPrice,
     getEvents,
-    addEvent
+    addEvent,
+    updateEvent
 };
 
 //checkMerchQuantity
