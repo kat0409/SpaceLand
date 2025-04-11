@@ -473,6 +473,12 @@ const updateTimeOffRequestStatus = `
     WHERE requestID = ?
 `;
 
+const updateEmployeeProfile = (fields) => `
+    UPDATE employee
+    SET ${fields.join(', ')}
+    WHERE EmployeeID = ?
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -556,6 +562,7 @@ module.exports = {
     deleteEmployeeSchedule,
     getTimeOffRequests,
     updateTimeOffRequestStatus,
+    updateEmployeeProfile
 };
 
 //checkMerchQuantity

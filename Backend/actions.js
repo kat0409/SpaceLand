@@ -2077,6 +2077,94 @@ const updateTimeOffRequestStatus = (req, res) => {
     });
 };
 
+const updateEmployeeProfile = (req, res) => {
+    let body = "";
+    req.on("data", chunk => (body += chunk));
+    req.on("end", () => {
+        const {
+            EmployeeID,
+            FirstName,
+            LastName,
+            Email,
+            Address,
+            username,
+            password,
+            Department,
+            employmentStatus,
+            SupervisorID
+        } = JSON.parse(body);
+    
+        if (!EmployeeID) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "EmployeeID is required" }));
+        }
+    
+        const fields = [];
+        const values = [];
+    
+        if (FirstName !== undefined) {
+            fields.push("FirstName = ?");
+            values.push(FirstName);
+        }
+        if (LastName !== undefined) {
+            fields.push("LastName = ?");
+            values.push(LastName);
+        }
+        if (Email !== undefined) {
+            fields.push("Email = ?");
+            values.push(Email);
+        }
+        if (Address !== undefined) {
+            fields.push("Address = ?");
+            values.push(Address);
+        }
+        if (username !== undefined) {
+            fields.push("username = ?");
+            values.push(username);
+        }
+        if (password !== undefined) {
+            fields.push("password = ?");
+            values.push(password);
+        }
+        if (Department !== undefined) {
+            fields.push("Department = ?");
+            values.push(Department);
+        }
+        if (employmentStatus !== undefined) {
+            fields.push("employmentStatus = ?");
+            values.push(employmentStatus);
+        }
+        if (SupervisorID !== undefined) {
+            fields.push("SupervisorID = ?");
+            values.push(SupervisorID);
+        }
+    
+        if (fields.length === 0) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "No fields provided to update" }));
+        }
+    
+        const sql = queries.updateEmployeeProfile(fields);
+        values.push(EmployeeID);
+    
+        pool.query(sql, values, (err, result) => {
+            if (err) {
+            console.error("Error updating employee profile:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Internal server error" }));
+            }
+    
+            if (result.affectedRows === 0) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Employee not found" }));
+            }
+    
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Employee profile updated successfully" }));
+        });
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -2145,5 +2233,6 @@ module.exports = {
     addEmployeeSchedule,
     deleteEmployeeSchedule,
     getTimeOffRequests,
-    updateTimeOffRequestStatus
+    updateTimeOffRequestStatus,
+    updateEmployeeProfile
 };  
