@@ -240,7 +240,7 @@ function routes(req, res) {
     }
 
     if(url.startsWith('/supervisor/HR/update-event') && method === "PUT"){
-        return actions.addEvent(req,res);
+        return actions.updateEvent(req,res);
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });

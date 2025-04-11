@@ -1781,13 +1781,46 @@ const updateEvent = (req, res) => {
 
         const { eventID, eventName, durationMin, description, event_date, type } = parsedBody;
 
-        if (!eventID || !eventName || !durationMin || !description || !event_date || !type) {
+        if (!eventID) {
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "All fields including eventID are required." }));
+            res.end(JSON.stringify({ error: "eventID is required" }));
             return;
         }
 
-        pool.query(queries.updateEvent, [eventName, durationMin, description, event_date, type, eventID], (error, results) => {
+        const fields = [];
+        const values = [];
+
+        if (eventName !== undefined) {
+            fields.push("eventName = ?");
+            values.push(eventName);
+        }
+        if (durationMin !== undefined) {
+            fields.push("durationMin = ?");
+            values.push(durationMin);
+        }
+        if (description !== undefined) {
+            fields.push("description = ?");
+            values.push(description);
+        }
+        if (event_date !== undefined) {
+            fields.push("event_date = ?");
+            values.push(event_date);
+        }
+        if (type !== undefined) {
+            fields.push("type = ?");
+            values.push(type);
+        }
+
+        if (fields.length === 0) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "No fields provided to update" }));
+            return;
+        }
+
+        const sql = `UPDATE parkevent SET ${fields.join(", ")} WHERE eventID = ?`;
+        values.push(eventID);
+
+        pool.query(sql, values, (error, result) => {
             if (error) {
                 console.error("Error updating event:", error);
                 res.writeHead(500, { "Content-Type": "application/json" });
@@ -1795,7 +1828,7 @@ const updateEvent = (req, res) => {
                 return;
             }
 
-            if (results.affectedRows === 0) {
+            if (result.affectedRows === 0) {
                 res.writeHead(404, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({ error: "Event not found" }));
                 return;
