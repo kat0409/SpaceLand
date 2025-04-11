@@ -1901,6 +1901,23 @@ const requestTimeOff = (req, res) => {
     });
 };
 
+const clockIn = (req, res) => {
+    let body = "";
+    req.on("data", chunk => (body += chunk));
+    req.on("end", () => {
+        const { EmployeeID } = JSON.parse(body);
+        const date = new Date().toISOString().split("T")[0];
+        pool.query(queries.clockIn, [EmployeeID, date], (err) => {
+            if (err) {
+                res.writeHead(500, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Clock-in failed" }));
+            }
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Clocked in" }));
+        });
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -1961,5 +1978,6 @@ module.exports = {
     updateEvent,
     deleteEvent,
     getEmployeeSchedule,
-    requestTimeOff
+    requestTimeOff,
+    clockIn
 };  

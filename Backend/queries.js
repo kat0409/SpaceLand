@@ -422,6 +422,13 @@ const requestTimeOff = `
     VALUES (?, ?, ?, ?, 'pending')
 `;
 
+const clockIn = `
+    INSERT INTO employee_attendance (EmployeeID, clockIn, date)
+    VALUES (?, NOW(), ?)
+    ON DUPLICATE KEY UPDATE clockIn = NOW()
+`;
+
+
 module.exports = {
     getRides,
     getEmployees,
@@ -496,7 +503,8 @@ module.exports = {
     updateEvent,
     deleteEvent,
     getEmployeeSchedule,
-    requestTimeOff
+    requestTimeOff,
+    clockIn
 };
 
 //checkMerchQuantity
