@@ -1410,7 +1410,7 @@ const getEmployeesForMaintenanceRequest = (req,res) => {
         res.writeHead(200, {"Content-Type":"application/json"});
         res.end(JSON.stringify(results));
     });
-}
+};
 
 const completeMaintenanceRequest = (req, res) => {
     let body = "";
