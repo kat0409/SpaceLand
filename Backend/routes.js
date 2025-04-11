@@ -239,6 +239,10 @@ function routes(req, res) {
         return actions.addEvent(req,res);
     }
 
+    if(url.startsWith('/supervisor/events/delete') && method === 'POST'){
+        return actions.deleteEvent(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
