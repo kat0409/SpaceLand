@@ -1881,6 +1881,26 @@ const getEmployeeSchedule = (req, res) => {
     });
 };
 
+const requestTimeOff = (req, res) => {
+    let body = "";
+    req.on("data", chunk => (body += chunk));
+    req.on("end", () => {
+        const { EmployeeID, startDate, endDate, reason } = JSON.parse(body);
+        if (!EmployeeID || !startDate || !endDate || !reason) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Missing fields" }));
+        }
+        pool.query(queries.requestTimeOff, [EmployeeID, startDate, endDate, reason], (err, results) => {
+            if (err) {
+                res.writeHead(500, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Failed to request time off" }));
+            }
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Request submitted", requestID: results.insertId }));
+        });
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -1940,5 +1960,6 @@ module.exports = {
     addEvent,
     updateEvent,
     deleteEvent,
-    getEmployeeSchedule
+    getEmployeeSchedule,
+    requestTimeOff
 };  

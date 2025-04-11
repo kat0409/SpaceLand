@@ -417,6 +417,11 @@ const getEmployeeSchedule = `
     ORDER BY scheduleDate
 `;
 
+const requestTimeOff = `
+    INSERT INTO employee_timeoff_request (EmployeeID, startDate, endDate, reason, status)
+    VALUES (?, ?, ?, ?, 'pending')
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -490,7 +495,8 @@ module.exports = {
     addEvent,
     updateEvent,
     deleteEvent,
-    getEmployeeSchedule
+    getEmployeeSchedule,
+    requestTimeOff
 };
 
 //checkMerchQuantity
