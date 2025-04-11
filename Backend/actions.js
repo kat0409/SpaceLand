@@ -2034,7 +2034,19 @@ const deleteEmployeeSchedule = (req, res) => {
             res.end(JSON.stringify({ message: "Schedule deleted successfully" }));
         });
     });
-};  
+}; 
+
+const getTimeOffRequests = (req, res) => {
+    pool.query(queries.getTimeOffRequests, (err, results) => {
+        if (err) {
+            console.error("Error fetching time off requests:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Internal server error" }));
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
 
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
@@ -2102,5 +2114,6 @@ module.exports = {
     getEmployeeProfile,
     getFilteredEmployees,
     addEmployeeSchedule,
-    deleteEmployeeSchedule
+    deleteEmployeeSchedule,
+    getTimeOffRequests
 };  

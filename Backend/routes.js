@@ -279,6 +279,10 @@ function routes(req, res) {
         return actions.deleteEmployeeSchedule(req,res);
     }
 
+    if(url.startsWith('/supervisor/HR/time-off-request') && method === "GET"){
+        return actions.getTimeOffRequests(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }

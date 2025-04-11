@@ -460,6 +460,13 @@ const deleteEmployeeSchedule = `
     WHERE EmployeeID = ? AND scheduleDate = ?
 `;
 
+const getTimeOffRequests = `
+    SELECT r.requestID, r.EmployeeID, e.FirstName, e.LastName, r.startDate, r.endDate, r.reason, r.status
+    FROM employee_timeoff_request r
+    JOIN employee e ON r.EmployeeID = e.EmployeeID
+    ORDER BY r.startDate DESC
+`;
+
 
 module.exports = {
     getRides,
@@ -541,7 +548,8 @@ module.exports = {
     getEmployeeProfile,
     getFilteredEmployees,
     addEmployeeSchedule,
-    deleteEmployeeSchedule
+    deleteEmployeeSchedule,
+    getTimeOffRequests
 };
 
 //checkMerchQuantity

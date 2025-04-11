@@ -49,7 +49,8 @@ const routeMap = {
         '/get-events',
         '/employee/get-schedule',
         '/employee/profile',
-        '/supervisor/HR/get-employees-params'
+        '/supervisor/HR/get-employees-params',
+        '/supervisor/HR/time-off-request'
     ],
     'POST': [
         '/supervisor/HR/add-employee', 
