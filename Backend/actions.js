@@ -1245,7 +1245,7 @@ const markStockArrivals = (req,res) => {
 
         if (!merchandiseID || !quantityAdded || !arrivalDate || !notesToInsert || !reorderID) {
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "merchandiseID, quantityAdded, arrivalDate, notes, and reorderID are required." }));
+            res.end(JSON.stringify({ error: "merchandiseID, quantityOrdered, expectedArrivalDate, status, and notes are required." }));
             return;
         }
 
