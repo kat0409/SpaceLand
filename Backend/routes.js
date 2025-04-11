@@ -299,6 +299,10 @@ function routes(req, res) {
         return actions.getFilteredSalesReport(req,res);
     }
 
+    if(url.startsWith('/supervisor/HR/employee-names') && method === "GET"){
+        return actions.getEmployeeNames(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }

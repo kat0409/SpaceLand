@@ -621,6 +621,11 @@ const salesReport = `
     ORDER BY d.transactionDate;
 `;
 
+const getEmployeeNames = `
+    SELECT CONCAT(e.FirstName, ' ', e.LastName) AS FullName
+    FROM employee e;
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -706,7 +711,8 @@ module.exports = {
     updateTimeOffRequestStatus,
     updateEmployeeProfile,
     archiveEmployeeData,
-    salesReport
+    salesReport,
+    getEmployeeNames
 };
 
 //checkMerchQuantity
