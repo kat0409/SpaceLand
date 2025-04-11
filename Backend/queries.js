@@ -184,20 +184,26 @@ const addMerchandise = `
 //Reports
 const rideMaintenanceReport = `
     SELECT 
-        r.RideName AS Ride,
-        m.MaintenanceStartDate AS Start_Date,
-        m.MaintenanceEndDate AS End_Date,
-        CONCAT(e.FirstName, ' ', e.LastName) AS Maintenance_Employee,
-        m.status AS Status,
-        m.reason AS Reason
-    FROM 
-        ridemaintenance m
-    JOIN 
-        rides r ON m.rideID = r.RideID
-    LEFT JOIN 
-        employee e ON m.MaintenanceEmployeeID = e.EmployeeID
-    ORDER BY 
-        m.MaintenanceStartDate DESC;
+        rm.maintenanceID,
+        r.RideName,
+        CONCAT(e.FirstName, ' ', e.LastName) AS AssignedEmployee,
+        rm.status,
+        rm.reason,
+        DATE(rm.MaintenanceStartDate) AS StartDate,
+        DATE(rm.MaintenanceEndDate) AS EndDate,
+
+        IFNULL(TIMESTAMPDIFF(DAY, rm.MaintenanceStartDate, rm.MaintenanceEndDate), 0) AS DaysTaken,
+
+        IFNULL((
+            SELECT AVG(TIMESTAMPDIFF(DAY, rm2.MaintenanceStartDate, rm2.MaintenanceEndDate))
+            FROM ridemaintenance rm2
+            WHERE rm2.rideID = rm.rideID AND rm2.status = 'completed'
+        ), 0) AS AvgFixTimeForRide
+
+    FROM ridemaintenance rm
+    JOIN rides r ON rm.rideID = r.RideID
+    LEFT JOIN employee e ON rm.MaintenanceEmployeeID = e.EmployeeID
+    ORDER BY rm.MaintenanceStartDate DESC;
 `;
 
 const visitorPurchasesReport = `
@@ -225,18 +231,18 @@ const visitorPurchasesReport = `
 //check the WHERE 1=1 during debugging
 
 const attendanceAndRevenueReport = `
-    SELECT 
-        oh.dateOH AS Operating_Date,
-        COUNT(DISTINCT t.ticketID) AS Tickets_Sold,
-        COALESCE(SUM(tt.totalAmount), 0) AS Total_Ticket_Revenue,
-        oh.weatherCondition AS Weather_Condition
-    FROM 
-        operating_hours oh
-    LEFT JOIN 
-        tickets t ON oh.ticketID = t.ticketID 
-    LEFT JOIN 
-        tickettransactions tt ON t.transactionID = tt.transactionID 
-    WHERE 1=1
+    SELECT  
+        oh.dateOH,
+        COALESCE(SUM(tt.totalAmount), 0) AS TicketRevenue,
+        COALESCE(SUM(mt.price), 0) AS MealPlanRevenue,
+        COALESCE(SUM(rt.amount), 0) AS FoodRevenue,
+        (COALESCE(SUM(tt.totalAmount), 0) + COALESCE(SUM(mt.price), 0) + COALESCE(SUM(rt.amount), 0)) AS TotalRevenue,
+        oh.weatherCondition
+    FROM operating_hours oh
+    LEFT JOIN tickettransactions tt ON DATE(tt.transactionDate) = oh.dateOH
+    LEFT JOIN mealplantransactions mt ON DATE(mt.transactionDate) = oh.dateOH
+    LEFT JOIN restauranttransactions rt ON DATE(rt.transactionDate) = oh.dateOH
+    WHERE 1 = 1
 `;
 
 /*GROUP BY 
@@ -388,11 +394,32 @@ const getMealPlanPrice = `
     WHERE mealPlanID = ?
 `;
 
-// Events Queries
-const getEvents = 'SELECT * FROM parkevent ORDER BY event_date';
-const addEvent = 'INSERT INTO parkevent (eventName, durationMin, description, event_date, type) VALUES (?, ?, ?, ?, ?)';
-const updateEvent = 'UPDATE parkevent SET eventName = ?, durationMin = ?, description = ?, event_date = ?, type = ? WHERE eventID = ?';
-const deleteEvent = 'DELETE FROM parkevent WHERE eventID = ?';
+// Employee schedule queries
+const getEmployeeSchedule = `
+    SELECT s.*, l.locationName
+    FROM shifts s
+    LEFT JOIN locations l ON s.locationID = l.locationID
+    WHERE s.employeeID = ? AND s.shiftDate >= ? AND s.shiftDate <= ?
+    ORDER BY s.shiftDate, s.startTime
+`;
+
+const createTimeOffRequest = `
+    INSERT INTO timeoff_requests (employeeID, startDate, endDate, reason, type, status)
+    VALUES (?, ?, ?, ?, ?, ?)
+`;
+
+const getEmployeeTimeOffRequests = `
+    SELECT *
+    FROM timeoff_requests
+    WHERE employeeID = ?
+    ORDER BY requestDate DESC
+`;
+
+const updateTimeOffRequestStatus = `
+    UPDATE timeoff_requests
+    SET status = ?, reviewedBy = ?, reviewDate = NOW()
+    WHERE requestID = ?
+`;
 
 module.exports = {
     getRides,
@@ -463,10 +490,10 @@ module.exports = {
     getDepartmentNames,
     addMealPlanTransaction,
     getMealPlanPrice,
-    getEvents,
-    addEvent,
-    updateEvent,
-    deleteEvent
+    getEmployeeSchedule,
+    createTimeOffRequest,
+    getEmployeeTimeOffRequests,
+    updateTimeOffRequestStatus,
 };
 
 //checkMerchQuantity

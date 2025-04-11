@@ -1707,7 +1707,6 @@ const getMerchandiseSalesData = (req, res) => {
     res.end(JSON.stringify(mockSalesData));
 };
 
-// Get all events
 const getEmployeeSchedule = (req, res) => {
     const parsedUrl = url.parse(req.url, true);
     const { employeeID, startDate } = parsedUrl.query;
@@ -1737,23 +1736,7 @@ const getEmployeeSchedule = (req, res) => {
     );
 };
 
-const getEvents = (req, res) => {
-    console.log("Attempting to fetch events...");
-    pool.query(queries.getEvents, (err, results) => {
-        if (err) {
-            console.error("Error fetching events:", err);
-            res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Internal server error" }));
-            return;
-        }
-        console.log("Events fetched successfully:", results);
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(results));
-    });
-};
-
-// Add new event
-const addEvent = (req, res) => {
+const submitTimeOffRequest = (req, res) => {
     let body = "";
 
     req.on("data", (chunk) => {
@@ -1770,96 +1753,53 @@ const addEvent = (req, res) => {
             return;
         }
 
-        const { eventName, durationMin, description, event_date, type } = parsedBody;
-        console.log("Event data received:", { eventName, durationMin, description, event_date, type });
+        const { employeeID, startDate, endDate, reason, type, status } = parsedBody;
 
-        if (!eventName || !durationMin || !description || !event_date || !type) {
-            console.log("Missing required fields");
+        if (!employeeID || !startDate || !endDate || !reason || !type || !status) {
             res.writeHead(400, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ error: "All fields are required" }));
             return;
         }
 
-        pool.query(queries.addEvent, [eventName, durationMin, description, event_date, type], (err, results) => {
-            if (err) {
-                console.error("Error adding event:", err);
-                res.writeHead(500, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ error: "Internal server error" }));
-                return;
-            }
-            console.log("Event added successfully:", results);
-            res.writeHead(201, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ message: "Event added successfully" }));
-        });
-    });
-};
-
-// Delete event and create notification
-const deleteEvent = (req, res) => {
-    let body = "";
-    
-    req.on("data", (chunk) => {
-        body += chunk.toString();
-    });
-
-    req.on("end", () => {
-        let parsedBody;
-        try {
-            parsedBody = JSON.parse(body);
-        } catch (error) {
-            res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Invalid JSON format" }));
-            return;
-        }
-
-        const { eventID, eventName } = parsedBody;
-
-        // First, get the event details before deleting
-        pool.query('SELECT * FROM parkevent WHERE eventID = ?', [eventID], (err, results) => {
-            if (err) {
-                console.error("Error fetching event:", err);
-                res.writeHead(500, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ error: "Internal server error" }));
-                return;
-            }
-
-            if (results.length === 0) {
-                res.writeHead(404, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ error: "Event not found" }));
-                return;
-            }
-
-            const event = results[0];
-
-            // Delete the event
-            pool.query(queries.deleteEvent, [eventID], (err, results) => {
-                if (err) {
-                    console.error("Error deleting event:", err);
+        pool.query(
+            queries.createTimeOffRequest,
+            [employeeID, startDate, endDate, reason, type, status],
+            (error, results) => {
+                if (error) {
+                    console.error("Error submitting time off request:", error);
                     res.writeHead(500, { "Content-Type": "application/json" });
                     res.end(JSON.stringify({ error: "Internal server error" }));
                     return;
                 }
-
-                // Create notification about the cancelled event
-                const alertMessage = `Event Cancelled: ${event.eventName} scheduled for ${new Date(event.event_date).toLocaleDateString()} has been cancelled.`;
-                
-                pool.query(
-                    'INSERT INTO homepagealerts (alertMessage, timestamp, isResolved) VALUES (?, NOW(), 0)',
-                    [alertMessage],
-                    (err, results) => {
-                        if (err) {
-                            console.error("Error creating alert:", err);
-                        }
-                    }
-                );
-
-                res.writeHead(200, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ 
-                    message: "Event deleted successfully",
-                    alertMessage: alertMessage
+                res.writeHead(201, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({
+                    message: "Time off request submitted successfully",
+                    requestID: results.insertId
                 }));
-            });
-        });
+            }
+        );
+    });
+};
+
+const getEmployeeTimeOffRequests = (req, res) => {
+    const parsedUrl = url.parse(req.url, true);
+    const { employeeID } = parsedUrl.query;
+
+    if (!employeeID) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Employee ID is required" }));
+        return;
+    }
+
+    pool.query(queries.getEmployeeTimeOffRequests, [employeeID], (error, results) => {
+        if (error) {
+            console.error("Error fetching time off requests:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
     });
 };
 
@@ -1918,7 +1858,7 @@ module.exports = {
     deleteMerchandise,
     updateMerchandise,
     getMerchandiseSalesData,
-    getEvents,
-    addEvent,
-    deleteEvent
+    getEmployeeSchedule,
+    submitTimeOffRequest,
+    getEmployeeTimeOffRequests,
 };  
