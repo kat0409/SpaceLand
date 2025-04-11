@@ -450,6 +450,11 @@ const getFilteredEmployees = (conditions) => `
     ${conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : ''}
 `;
 
+const addEmployeeSchedule = `
+    INSERT INTO employee_schedule (EmployeeID, Department, scheduleDate, shiftStart, shiftEnd, isRecurring)
+    VALUES (?, ?, ?, ?, ?, ?)
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -528,7 +533,8 @@ module.exports = {
     clockIn,
     clockOut,
     getEmployeeProfile,
-    getFilteredEmployees
+    getFilteredEmployees,
+    addEmployeeSchedule
 };
 
 //checkMerchQuantity

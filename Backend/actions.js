@@ -1984,6 +1984,29 @@ const getFilteredEmployees = (req, res) => {
     });
 };
 
+const addEmployeeSchedule = (req, res) => {
+    let body = "";
+    req.on("data", (chunk) => (body += chunk.toString()));
+    req.on("end", () => {
+        const { EmployeeID, Department, scheduleDate, shiftStart, shiftEnd, isRecurring } = JSON.parse(body);
+
+        if (!EmployeeID || !Department || !scheduleDate || !shiftStart || !shiftEnd || isRecurring === undefined) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Missing required fields" }));
+        }
+
+        pool.query(queries.addEmployeeSchedule, [EmployeeID, Department, scheduleDate, shiftStart, shiftEnd, isRecurring], (err) => {
+            if (err) {
+                console.error("Error adding schedule:", err);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Internal error" }));
+            }
+            res.writeHead(201, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Schedule added" }));
+        });
+    });
+};  
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -2048,5 +2071,6 @@ module.exports = {
     clockIn,
     clockOut,
     getEmployeeProfile,
-    getFilteredEmployees
+    getFilteredEmployees,
+    addEmployeeSchedule
 };  
