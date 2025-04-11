@@ -492,12 +492,14 @@ const salesReport = `
     SELECT
     d.transactionDate,
 
+    -- Total sales
     (
         (SELECT COUNT(*) FROM tickettransactions WHERE DATE(transactionDate) = d.transactionDate) +
         (SELECT COUNT(*) FROM mealplantransactions WHERE DATE(transactionDate) = d.transactionDate) +
         (SELECT COUNT(*) FROM merchandisetransactions WHERE DATE(transactionDate) = d.transactionDate)
     ) AS totalSales,
 
+    -- Total revenue
     (
         IFNULL((
         SELECT SUM(tix.price)
@@ -518,6 +520,7 @@ const salesReport = `
         ), 0)
     ) AS totalRevenue,
 
+    -- Average revenue per item
     (
         (
         IFNULL((SELECT SUM(tix.price)
@@ -540,57 +543,69 @@ const salesReport = `
         )
     ) AS avgRevenuePerItem,
 
-    (SELECT t2.ticketType
+        -- Best-selling ticket type
+    IFNULL((
+    SELECT t2.ticketType
     FROM tickettransactions t2
     WHERE DATE(t2.transactionDate) = d.transactionDate
     GROUP BY t2.ticketType
     ORDER BY COUNT(*) DESC
     LIMIT 1
-    ) AS bestSellingTicket,
+    ), 'N/A') AS bestSellingTicket,
 
-    (SELECT t2.ticketType
+    -- Worst-selling ticket type
+    IFNULL((
+    SELECT t2.ticketType
     FROM tickettransactions t2
     WHERE DATE(t2.transactionDate) = d.transactionDate
     GROUP BY t2.ticketType
     ORDER BY COUNT(*) ASC
     LIMIT 1
-    ) AS worstSellingTicket,
-        
-    (SELECT mp.mealPlanName
+    ), 'N/A') AS worstSellingTicket,
+
+    -- Best-selling meal plan
+    IFNULL((
+    SELECT mp.mealPlanName
     FROM mealplantransactions m2
     JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID
     WHERE DATE(m2.transactionDate) = d.transactionDate
     GROUP BY mp.mealPlanName
     ORDER BY COUNT(*) DESC
     LIMIT 1
-    ) AS bestSellingMealPlan,
+    ), 'N/A') AS bestSellingMealPlan,
 
-    (SELECT mp.mealPlanName
+    -- Worst-selling meal plan
+    IFNULL((
+    SELECT mp.mealPlanName
     FROM mealplantransactions m2
     JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID
     WHERE DATE(m2.transactionDate) = d.transactionDate
     GROUP BY mp.mealPlanName
     ORDER BY COUNT(*) ASC
     LIMIT 1
-    ) AS worstSellingMealPlan,
+    ), 'N/A') AS worstSellingMealPlan,
 
-    (SELECT m.itemName
+    -- Best-selling merch
+    IFNULL((
+    SELECT m.itemName
     FROM merchandisetransactions mt2
     JOIN merchandise m ON mt2.merchandiseID = m.merchandiseID
     WHERE DATE(mt2.transactionDate) = d.transactionDate
     GROUP BY m.itemName
     ORDER BY COUNT(*) DESC
     LIMIT 1
-    ) AS bestSellingMerch,
+    ), 'N/A') AS bestSellingMerch,
 
-    (SELECT m.itemName
+    -- Worst-selling merch
+    IFNULL((
+    SELECT m.itemName
     FROM merchandisetransactions mt2
     JOIN merchandise m ON mt2.merchandiseID = m.merchandiseID
     WHERE DATE(mt2.transactionDate) = d.transactionDate
     GROUP BY m.itemName
     ORDER BY COUNT(*) ASC
     LIMIT 1
-    ) AS worstSellingMerch
+    ), 'N/A') AS worstSellingMerch
 
     FROM (
     SELECT DISTINCT DATE(transactionDate) AS transactionDate
@@ -690,7 +705,8 @@ module.exports = {
     getTimeOffRequests,
     updateTimeOffRequestStatus,
     updateEmployeeProfile,
-    archiveEmployeeData
+    archiveEmployeeData,
+    salesReport
 };
 
 //checkMerchQuantity
