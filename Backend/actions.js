@@ -2202,6 +2202,193 @@ const deleteEmployee = (req, res) => {
     });
 };
 
+const getFilteredSalesReport = (req, res) => {
+    const { startDate, endDate, transactionType = "all", bestOnly = "0" } = url.parse(req.url, true).query;
+
+    if (!startDate || !endDate) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ error: "startDate and endDate are required" }));
+    }
+
+    const validTypes = ["ticket", "mealplan", "merch"];
+    let includeTypes = transactionType === "all" ? validTypes : [transactionType];
+
+    // Build union for distinct dates
+    const unionParts = [];
+    if (includeTypes.includes("ticket")) unionParts.push("SELECT transactionDate FROM tickettransactions");
+    if (includeTypes.includes("mealplan")) unionParts.push("SELECT transactionDate FROM mealplantransactions");
+    if (includeTypes.includes("merch")) unionParts.push("SELECT transactionDate FROM merchandisetransactions");
+
+    const dateSource = `(${unionParts.join(" UNION ALL ")})`;
+
+    const fields = [`d.transactionDate`];
+
+    if (bestOnly === "0") {
+        if (includeTypes.includes("ticket")) {
+            fields.push(`
+            (
+                SELECT COUNT(*) FROM tickettransactions t2
+                WHERE DATE(t2.transactionDate) = d.transactionDate
+            )`);
+        }
+        if (includeTypes.includes("mealplan")) {
+            fields.push(`
+            (
+                SELECT COUNT(*) FROM mealplantransactions m2
+                WHERE DATE(m2.transactionDate) = d.transactionDate
+            )`);
+        }
+        if (includeTypes.includes("merch")) {
+            fields.push(`
+            (
+                SELECT COUNT(*) FROM merchandisetransactions mt2
+                WHERE DATE(mt2.transactionDate) = d.transactionDate
+            )`);
+        }
+    
+        fields.push(`
+            (
+            IFNULL((
+                SELECT SUM(tix.price)
+                FROM tickettransactions t2
+                JOIN tickets tix ON t2.transactionID = tix.transactionID
+                WHERE DATE(t2.transactionDate) = d.transactionDate
+            ), 0) +
+            IFNULL((
+                SELECT SUM(mp.price)
+                FROM mealplantransactions m2
+                JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID
+                WHERE DATE(m2.transactionDate) = d.transactionDate
+            ), 0) +
+            IFNULL((
+                SELECT SUM(mt2.totalAmount)
+                FROM merchandisetransactions mt2
+                WHERE DATE(mt2.transactionDate) = d.transactionDate
+            ), 0)
+            ) AS totalRevenue
+        `);
+    
+        fields.push(`
+            (
+            (
+                IFNULL((SELECT SUM(tix.price) FROM tickettransactions t2 JOIN tickets tix ON t2.transactionID = tix.transactionID WHERE DATE(t2.transactionDate) = d.transactionDate), 0) +
+                IFNULL((SELECT SUM(mp.price) FROM mealplantransactions m2 JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID WHERE DATE(m2.transactionDate) = d.transactionDate), 0) +
+                IFNULL((SELECT SUM(mt2.totalAmount) FROM merchandisetransactions mt2 WHERE DATE(mt2.transactionDate) = d.transactionDate), 0)
+            )
+            /
+            (
+                (SELECT COUNT(*) FROM tickettransactions WHERE DATE(transactionDate) = d.transactionDate) +
+                (SELECT COUNT(*) FROM mealplantransactions WHERE DATE(transactionDate) = d.transactionDate) +
+                (SELECT COUNT(*) FROM merchandisetransactions WHERE DATE(transactionDate) = d.transactionDate)
+            )
+            ) AS avgRevenuePerItem
+        `);
+        }
+    
+        if (includeTypes.includes("ticket")) {
+        fields.push(`
+            IFNULL((
+            SELECT t2.ticketType
+            FROM tickettransactions t2
+            WHERE DATE(t2.transactionDate) = d.transactionDate
+            GROUP BY t2.ticketType
+            ORDER BY COUNT(*) DESC
+            LIMIT 1
+            ), 'N/A') AS bestSellingTicket
+        `);
+    
+        if (bestOnly === "0") {
+            fields.push(`
+            IFNULL((
+                SELECT t2.ticketType
+                FROM tickettransactions t2
+                WHERE DATE(t2.transactionDate) = d.transactionDate
+                GROUP BY t2.ticketType
+                ORDER BY COUNT(*) ASC
+                LIMIT 1
+            ), 'N/A') AS worstSellingTicket
+            `);
+        }
+        }
+    
+        if (includeTypes.includes("mealplan")) {
+        fields.push(`
+            IFNULL((
+            SELECT mp.mealPlanName
+            FROM mealplantransactions m2
+            JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID
+            WHERE DATE(m2.transactionDate) = d.transactionDate
+            GROUP BY mp.mealPlanName
+            ORDER BY COUNT(*) DESC
+            LIMIT 1
+            ), 'N/A') AS bestSellingMealPlan
+        `);
+    
+        if (bestOnly === "0") {
+            fields.push(`
+            IFNULL((
+                SELECT mp.mealPlanName
+                FROM mealplantransactions m2
+                JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID
+                WHERE DATE(m2.transactionDate) = d.transactionDate
+                GROUP BY mp.mealPlanName
+                ORDER BY COUNT(*) ASC
+                LIMIT 1
+            ), 'N/A') AS worstSellingMealPlan
+            `);
+        }
+        }
+    
+        if (includeTypes.includes("merch")) {
+        fields.push(`
+            IFNULL((
+            SELECT m.itemName
+            FROM merchandisetransactions mt2
+            JOIN merchandise m ON mt2.merchandiseID = m.merchandiseID
+            WHERE DATE(mt2.transactionDate) = d.transactionDate
+            GROUP BY m.itemName
+            ORDER BY COUNT(*) DESC
+            LIMIT 1
+            ), 'N/A') AS bestSellingMerch
+        `);
+    
+        if (bestOnly === "0") {
+            fields.push(`
+            IFNULL((
+                SELECT m.itemName
+                FROM merchandisetransactions mt2
+                JOIN merchandise m ON mt2.merchandiseID = m.merchandiseID
+                WHERE DATE(mt2.transactionDate) = d.transactionDate
+                GROUP BY m.itemName
+                ORDER BY COUNT(*) ASC
+                LIMIT 1
+            ), 'N/A') AS worstSellingMerch
+            `);
+        }
+        }
+    
+        const sql = `
+        SELECT ${fields.join(',')}
+        FROM (
+            SELECT DISTINCT DATE(transactionDate) AS transactionDate
+            FROM ${dateSource} combined
+            WHERE DATE(transactionDate) BETWEEN ? AND ?
+        ) d
+        ORDER BY d.transactionDate
+        `;
+    
+        pool.query(sql, [startDate, endDate], (err, results) => {
+        if (err) {
+            console.error("Error generating sales report:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Internal server error" }));
+        }
+    
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};  
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -2272,5 +2459,6 @@ module.exports = {
     getTimeOffRequests,
     updateTimeOffRequestStatus,
     updateEmployeeProfile,
-    deleteEmployee
+    deleteEmployee,
+    getFilteredSalesReport
 };  

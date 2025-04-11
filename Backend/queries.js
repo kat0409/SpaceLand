@@ -616,7 +616,7 @@ const salesReport = `
         UNION ALL
         SELECT transactionDate FROM merchandisetransactions
     ) AS combined
-    WHERE DATE(transactionDate) BETWEEN '2025-04-01' AND '2025-04-11'
+    WHERE DATE(transactionDate) BETWEEN ? AND ?
     ) d
     ORDER BY d.transactionDate;
 `;
