@@ -5,7 +5,7 @@ import { AuthContext } from '../components/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import EmployeeManagement from './EmployeeManagement';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
 export default function HRSupervisorPortal() {
     const { auth } = useContext(AuthContext)

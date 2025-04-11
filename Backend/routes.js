@@ -251,12 +251,48 @@ function routes(req, res) {
         return actions.getEmployeeSchedule(req,res);
     }
 
-    if (url.startsWith('/employee/time-off-request') && method === 'POST') {
-        return actions.submitTimeOffRequest(req, res);
+    if(url.startsWith('/employee/time-off-request') && method === "POST"){
+        return actions.requestTimeOff(req,res);
     }
 
     if(url.startsWith('/employee/clock-in') && method === "POST"){
         return actions.clockIn(req,res);
+    }
+
+    if(url.startsWith('/employee/clock-out') && method === "PUT"){
+        return actions.clockOut(req,res);
+    }
+
+    if(url.startsWith('/employee/profile') && method === "GET"){
+        return actions.getEmployeeProfile(req,res);
+    }
+
+    if(url.startsWith('/supervisor/HR/get-employees-params') && method === "GET"){
+        return actions.getFilteredEmployees(req,res);
+    }
+
+    if(url.startsWith('/supervisor/HR/schedule') && method === "POST"){
+        return actions.addEmployeeSchedule(req,res);
+    }
+
+    if(url.startsWith('/supervisor/HR/schedule-delete') && method === "DELETE"){
+        return actions.deleteEmployeeSchedule(req,res);
+    }
+
+    if(url.startsWith('/supervisor/HR/time-off-request') && method === "GET"){
+        return actions.getTimeOffRequests(req,res);
+    }
+
+    if(url.startsWith('/supervisor/HR/update-time-off-request') && method === "PUT"){
+        return actions.updateTimeOffRequestStatus(req,res);
+    }
+
+    if(url.startsWith('/supervisor/HR/update-employee-profile') && method === "PUT"){
+        return actions.updateEmployeeProfile(req,res);
+    }
+
+    if(url.startsWith('/supervisor/HR/fire-employee') && method === "POST"){
+        return actions.deleteEmployee(req,res);
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });

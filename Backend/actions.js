@@ -1881,25 +1881,6 @@ const getEmployeeSchedule = (req, res) => {
     });
 };
 
-
-
-const clockIn = (req, res) => {
-    let body = "";
-    req.on("data", chunk => (body += chunk));
-    req.on("end", () => {
-        const { EmployeeID } = JSON.parse(body);
-        const date = new Date().toISOString().split("T")[0];
-        pool.query(queries.clockIn, [EmployeeID, date], (err) => {
-            if (err) {
-                res.writeHead(500, { "Content-Type": "application/json" });
-                return res.end(JSON.stringify({ error: "Clock-in failed" }));
-            }
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ message: "Clocked in" }));
-        });
-    });
-};
-
 const requestTimeOff = (req, res) => {
     let body = "";
     req.on("data", chunk => (body += chunk));
@@ -1920,7 +1901,306 @@ const requestTimeOff = (req, res) => {
     });
 };
 
+const clockIn = (req, res) => {
+    let body = "";
+    req.on("data", chunk => (body += chunk));
+    req.on("end", () => {
+        const { EmployeeID } = JSON.parse(body);
+        const date = new Date().toISOString().split("T")[0];
+        pool.query(queries.clockIn, [EmployeeID, date], (err) => {
+            if (err) {
+                res.writeHead(500, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Clock-in failed" }));
+            }
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Clocked in" }));
+        });
+    });
+};
 
+const clockOut = (req, res) => {
+    let body = "";
+    req.on("data", chunk => (body += chunk));
+    req.on("end", () => {
+        const { EmployeeID } = JSON.parse(body);
+        const date = new Date().toISOString().split("T")[0];
+        pool.query(queries.clockOut, [EmployeeID, date], (err) => {
+            if (err) {
+                res.writeHead(500, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Clock-out failed" }));
+            }
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Clocked out" }));
+        });
+    });
+};
+
+const getEmployeeProfile = (req, res) => {
+    const parsedUrl = require("url").parse(req.url, true);
+    const employeeID = parsedUrl.query.EmployeeID;
+    pool.query(queries.getEmployeeProfile, [employeeID], (err, results) => {
+        if (err || results.length === 0) {
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Failed to fetch profile" }));
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results[0]));
+    });
+};
+
+const getFilteredEmployees = (req, res) => {
+    const parsedUrl = require("url").parse(req.url, true);
+    const { name, department, status } = parsedUrl.query;
+  
+    const conditions = [];
+    const values = [];
+  
+    if (name) {
+        conditions.push("(e.FirstName LIKE CONCAT('%', ?, '%') OR e.LastName LIKE CONCAT('%', ?, '%'))");
+        values.push(name, name);
+    }
+  
+    if (department) {
+        conditions.push("e.Department = ?");
+        values.push(department);
+    }
+  
+    if (status) {
+        conditions.push("e.employmentStatus = ?");
+        values.push(status);
+    }
+  
+    const sql = queries.getFilteredEmployees(conditions);
+  
+    pool.query(sql, values, (err, results) => {
+        if (err) {
+            console.error("Error fetching employees:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Internal server error" }));
+        }
+    
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
+const addEmployeeSchedule = (req, res) => {
+    let body = "";
+    req.on("data", (chunk) => (body += chunk.toString()));
+    req.on("end", () => {
+        const { EmployeeID, Department, scheduleDate, shiftStart, shiftEnd, isRecurring } = JSON.parse(body);
+
+        if (!EmployeeID || !Department || !scheduleDate || !shiftStart || !shiftEnd || isRecurring === undefined) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Missing required fields" }));
+        }
+
+        pool.query(queries.addEmployeeSchedule, [EmployeeID, Department, scheduleDate, shiftStart, shiftEnd, isRecurring], (err) => {
+            if (err) {
+                console.error("Error adding schedule:", err);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Internal error" }));
+            }
+            res.writeHead(201, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Schedule added" }));
+        });
+    });
+};  
+
+const deleteEmployeeSchedule = (req, res) => {
+    let body = "";
+    req.on("data", (chunk) => (body += chunk.toString()));
+    req.on("end", () => {
+        const { EmployeeID, scheduleDate } = JSON.parse(body);
+    
+        if (!EmployeeID || !scheduleDate) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "EmployeeID and scheduleDate are required" }));
+        }
+    
+        pool.query(queries.deleteEmployeeSchedule, [EmployeeID, scheduleDate], (err, results) => {
+            if (err) {
+            console.error("Error deleting schedule:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Internal server error" }));
+            }
+    
+            if (results.affectedRows === 0) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "No matching schedule found" }));
+            }
+    
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Schedule deleted successfully" }));
+        });
+    });
+}; 
+
+const getTimeOffRequests = (req, res) => {
+    pool.query(queries.getTimeOffRequests, (err, results) => {
+        if (err) {
+            console.error("Error fetching time off requests:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Internal server error" }));
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
+const updateTimeOffRequestStatus = (req, res) => {
+    let body = "";
+    req.on("data", (chunk) => (body += chunk.toString()));
+    req.on("end", () => {
+        const { requestID, status } = JSON.parse(body);
+    
+        if (!requestID || !status || !['approved', 'denied'].includes(status)) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Invalid requestID or status" }));
+        }
+    
+        pool.query(queries.updateTimeOffRequestStatus, [status, requestID], (err, result) => {
+            if (err) {
+            console.error("Error updating time off status:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Internal server error" }));
+            }
+    
+            if (result.affectedRows === 0) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Request not found" }));
+            }
+    
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: `Request ${status} successfully` }));
+        });
+    });
+};
+
+const updateEmployeeProfile = (req, res) => {
+    let body = "";
+    req.on("data", chunk => (body += chunk));
+    req.on("end", () => {
+        const {
+            EmployeeID,
+            FirstName,
+            LastName,
+            Email,
+            Address,
+            username,
+            password,
+            Department,
+            employmentStatus,
+            SupervisorID
+        } = JSON.parse(body);
+    
+        if (!EmployeeID) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "EmployeeID is required" }));
+        }
+    
+        const fields = [];
+        const values = [];
+    
+        if (FirstName !== undefined) {
+            fields.push("FirstName = ?");
+            values.push(FirstName);
+        }
+        if (LastName !== undefined) {
+            fields.push("LastName = ?");
+            values.push(LastName);
+        }
+        if (Email !== undefined) {
+            fields.push("Email = ?");
+            values.push(Email);
+        }
+        if (Address !== undefined) {
+            fields.push("Address = ?");
+            values.push(Address);
+        }
+        if (username !== undefined) {
+            fields.push("username = ?");
+            values.push(username);
+        }
+        if (password !== undefined) {
+            fields.push("password = ?");
+            values.push(password);
+        }
+        if (Department !== undefined) {
+            fields.push("Department = ?");
+            values.push(Department);
+        }
+        if (employmentStatus !== undefined) {
+            fields.push("employmentStatus = ?");
+            values.push(employmentStatus);
+        }
+        if (SupervisorID !== undefined) {
+            fields.push("SupervisorID = ?");
+            values.push(SupervisorID);
+        }
+    
+        if (fields.length === 0) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "No fields provided to update" }));
+        }
+    
+        const sql = queries.updateEmployeeProfile(fields);
+        values.push(EmployeeID);
+    
+        pool.query(sql, values, (err, result) => {
+            if (err) {
+            console.error("Error updating employee profile:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Internal server error" }));
+            }
+    
+            if (result.affectedRows === 0) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Employee not found" }));
+            }
+    
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Employee profile updated successfully" }));
+        });
+    });
+};
+
+const deleteEmployee = (req, res) => {
+    let body = "";
+    req.on("data", chunk => (body += chunk));
+    req.on("end", () => {
+        const { EmployeeID } = JSON.parse(body);
+    
+        if (!EmployeeID) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "EmployeeID is required" }));
+        }
+
+        pool.query(queries.archiveEmployeeData, [EmployeeID], (archiveErr) => {
+            if (archiveErr) {
+            console.error("Error archiving employee data:", archiveErr);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Failed to archive employee data" }));
+            }
+
+            pool.query(queries.deleteEmployee, [EmployeeID], (err, result) => {
+            if (err) {
+                console.error("Error deleting employee:", err);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Internal server error" }));
+            }
+    
+            if (result.affectedRows === 0) {
+                res.writeHead(404, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Employee not found" }));
+            }
+    
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Employee deleted successfully" }));
+            });
+        });
+    });
+};
 
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
@@ -1983,5 +2263,14 @@ module.exports = {
     deleteEvent,
     getEmployeeSchedule,
     requestTimeOff,
-    clockIn
+    clockIn,
+    clockOut,
+    getEmployeeProfile,
+    getFilteredEmployees,
+    addEmployeeSchedule,
+    deleteEmployeeSchedule,
+    getTimeOffRequests,
+    updateTimeOffRequestStatus,
+    updateEmployeeProfile,
+    deleteEmployee
 };  

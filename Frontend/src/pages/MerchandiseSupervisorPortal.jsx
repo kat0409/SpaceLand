@@ -9,7 +9,7 @@ import InventoryOverviewChart from '../components/InventoryOverviewChart';
 import EditMerchandiseModal from '../components/EditMerchandiseModal';
 import { AuthContext } from '../components/AuthProvider';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
 export default function SupervisorPortal() {
     const [lowStock, setLowStock] = useState([]);

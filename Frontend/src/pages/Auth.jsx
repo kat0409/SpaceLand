@@ -16,7 +16,7 @@ export default function Auth() {
 
   // Optional: use .env for backend URL
   //const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://spaceland.onrender.com";
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com'; // Change this if backend is deployed
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com'; // Change this if backend is deployed
 
   console.log(BACKEND_URL);
 

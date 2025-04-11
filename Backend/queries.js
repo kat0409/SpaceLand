@@ -312,9 +312,6 @@ const updateMealPlan = `
     SET mealPlanTier = ?, price = ?
     WHERE restaurantID = ?;
 `;
-const deleteEmployee = `
-    DELETE FROM employee WHERE employmentStatus == 0 AND EmployeeID = ?;
-`;
 
 const updateOperatingHours = `
     UPDATE operating_hours
@@ -428,6 +425,186 @@ const clockIn = `
     ON DUPLICATE KEY UPDATE clockIn = NOW()
 `;
 
+const clockOut = `
+    UPDATE employee_attendance
+    SET clockOut = NOW()
+    WHERE EmployeeID = ? AND date = ?
+`;
+
+const getEmployeeProfile = `
+    SELECT EmployeeID, FirstName, LastName, Email, Address, Department, dateOfBirth
+    FROM employee
+    WHERE EmployeeID = ?
+`;
+
+const getFilteredEmployees = (conditions) => `
+    SELECT 
+        e.EmployeeID, e.FirstName, e.LastName, e.Email, e.Address, 
+        e.Department, e.username, e.employmentStatus, e.dateOfBirth,
+        s.FirstName AS SupervisorFirstName, s.LastName AS SupervisorLastName
+    FROM employee e
+    LEFT JOIN supervisors s ON e.SupervisorID = s.SupervisorID
+    ${conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : ''}
+`;
+
+const addEmployeeSchedule = `
+    INSERT INTO employee_schedule (EmployeeID, Department, scheduleDate, shiftStart, shiftEnd, isRecurring)
+    VALUES (?, ?, ?, ?, ?, ?)
+`;
+
+const deleteEmployeeSchedule = `
+    DELETE FROM employee_schedule
+    WHERE EmployeeID = ? AND scheduleDate = ?
+`;
+
+const getTimeOffRequests = `
+    SELECT r.requestID, r.EmployeeID, e.FirstName, e.LastName, r.startDate, r.endDate, r.reason, r.status
+    FROM employee_timeoff_request r
+    JOIN employee e ON r.EmployeeID = e.EmployeeID
+    ORDER BY r.startDate DESC
+`;
+
+const updateTimeOffRequestStatus = `
+    UPDATE employee_timeoff_request
+    SET status = ?
+    WHERE requestID = ?
+`;
+
+const updateEmployeeProfile = (fields) => `
+    UPDATE employee
+    SET ${fields.join(', ')}
+    WHERE EmployeeID = ?
+`;
+
+const archiveEmployeeData = `
+    INSERT INTO archived_employee_data (EmployeeID, FirstName, LastName, Email, Address, username, Department, employmentStatus, dateArchived)
+    SELECT EmployeeID, FirstName, LastName, Email, Address, username, Department, employmentStatus, NOW()
+    FROM employee
+    WHERE EmployeeID = ?
+`;
+
+const deleteEmployee = `
+    DELETE FROM employee
+    WHERE EmployeeID = ?
+`;
+
+const salesReport = `
+    SELECT
+    d.transactionDate,
+
+    (
+        (SELECT COUNT(*) FROM tickettransactions WHERE DATE(transactionDate) = d.transactionDate) +
+        (SELECT COUNT(*) FROM mealplantransactions WHERE DATE(transactionDate) = d.transactionDate) +
+        (SELECT COUNT(*) FROM merchandisetransactions WHERE DATE(transactionDate) = d.transactionDate)
+    ) AS totalSales,
+
+    (
+        IFNULL((
+        SELECT SUM(tix.price)
+        FROM tickettransactions t2
+        JOIN tickets tix ON t2.transactionID = tix.transactionID
+        WHERE DATE(t2.transactionDate) = d.transactionDate
+        ), 0) +
+        IFNULL((
+        SELECT SUM(mp.price)
+        FROM mealplantransactions m2
+        JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID
+        WHERE DATE(m2.transactionDate) = d.transactionDate
+        ), 0) +
+        IFNULL((
+        SELECT SUM(mt2.totalAmount)
+        FROM merchandisetransactions mt2
+        WHERE DATE(mt2.transactionDate) = d.transactionDate
+        ), 0)
+    ) AS totalRevenue,
+
+    (
+        (
+        IFNULL((SELECT SUM(tix.price)
+                FROM tickettransactions t2
+                JOIN tickets tix ON t2.transactionID = tix.transactionID
+                WHERE DATE(t2.transactionDate) = d.transactionDate), 0) +
+        IFNULL((SELECT SUM(mp.price)
+                FROM mealplantransactions m2
+                JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID
+                WHERE DATE(m2.transactionDate) = d.transactionDate), 0) +
+        IFNULL((SELECT SUM(mt2.totalAmount)
+                FROM merchandisetransactions mt2
+                WHERE DATE(mt2.transactionDate) = d.transactionDate), 0)
+        )
+        /
+        (
+        (SELECT COUNT(*) FROM tickettransactions WHERE DATE(transactionDate) = d.transactionDate) +
+        (SELECT COUNT(*) FROM mealplantransactions WHERE DATE(transactionDate) = d.transactionDate) +
+        (SELECT COUNT(*) FROM merchandisetransactions WHERE DATE(transactionDate) = d.transactionDate)
+        )
+    ) AS avgRevenuePerItem,
+
+    (SELECT t2.ticketType
+    FROM tickettransactions t2
+    WHERE DATE(t2.transactionDate) = d.transactionDate
+    GROUP BY t2.ticketType
+    ORDER BY COUNT(*) DESC
+    LIMIT 1
+    ) AS bestSellingTicket,
+
+    (SELECT t2.ticketType
+    FROM tickettransactions t2
+    WHERE DATE(t2.transactionDate) = d.transactionDate
+    GROUP BY t2.ticketType
+    ORDER BY COUNT(*) ASC
+    LIMIT 1
+    ) AS worstSellingTicket,
+        
+    (SELECT mp.mealPlanName
+    FROM mealplantransactions m2
+    JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID
+    WHERE DATE(m2.transactionDate) = d.transactionDate
+    GROUP BY mp.mealPlanName
+    ORDER BY COUNT(*) DESC
+    LIMIT 1
+    ) AS bestSellingMealPlan,
+
+    (SELECT mp.mealPlanName
+    FROM mealplantransactions m2
+    JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID
+    WHERE DATE(m2.transactionDate) = d.transactionDate
+    GROUP BY mp.mealPlanName
+    ORDER BY COUNT(*) ASC
+    LIMIT 1
+    ) AS worstSellingMealPlan,
+
+    (SELECT m.itemName
+    FROM merchandisetransactions mt2
+    JOIN merchandise m ON mt2.merchandiseID = m.merchandiseID
+    WHERE DATE(mt2.transactionDate) = d.transactionDate
+    GROUP BY m.itemName
+    ORDER BY COUNT(*) DESC
+    LIMIT 1
+    ) AS bestSellingMerch,
+
+    (SELECT m.itemName
+    FROM merchandisetransactions mt2
+    JOIN merchandise m ON mt2.merchandiseID = m.merchandiseID
+    WHERE DATE(mt2.transactionDate) = d.transactionDate
+    GROUP BY m.itemName
+    ORDER BY COUNT(*) ASC
+    LIMIT 1
+    ) AS worstSellingMerch
+
+    FROM (
+    SELECT DISTINCT DATE(transactionDate) AS transactionDate
+    FROM (
+        SELECT transactionDate FROM tickettransactions
+        UNION ALL
+        SELECT transactionDate FROM mealplantransactions
+        UNION ALL
+        SELECT transactionDate FROM merchandisetransactions
+    ) AS combined
+    WHERE DATE(transactionDate) BETWEEN '2025-04-01' AND '2025-04-11'
+    ) d
+    ORDER BY d.transactionDate;
+`;
 
 module.exports = {
     getRides,
@@ -504,7 +681,16 @@ module.exports = {
     deleteEvent,
     getEmployeeSchedule,
     requestTimeOff,
-    clockIn
+    clockIn,
+    clockOut,
+    getEmployeeProfile,
+    getFilteredEmployees,
+    addEmployeeSchedule,
+    deleteEmployeeSchedule,
+    getTimeOffRequests,
+    updateTimeOffRequestStatus,
+    updateEmployeeProfile,
+    archiveEmployeeData
 };
 
 //checkMerchQuantity

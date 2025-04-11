@@ -17,7 +17,7 @@ export default function ScheduleViewer({ employeeID }) {
   useEffect(() => {
     const fetchSchedule = async () => {
       try {
-        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
+        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
         const response = await fetch(
           `${BACKEND_URL}/employee/schedule?employeeID=${employeeID}&startDate=${selectedWeek.toISOString()}`
         );
