@@ -2399,6 +2399,17 @@ const getEmployeeNames = (req,res) => {
     });
 };
 
+const getEmployeeScheduleForSup = (req,res) => {
+    pool.query(queries.getEmployeeScheduleForSup, (err, results) => {
+        if (err) {
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Failed to fetch profile" }));
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -2471,5 +2482,6 @@ module.exports = {
     updateEmployeeProfile,
     deleteEmployee,
     getFilteredSalesReport,
-    getEmployeeNames
+    getEmployeeNames,
+    getEmployeeScheduleForSup
 };  

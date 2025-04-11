@@ -303,6 +303,10 @@ function routes(req, res) {
         return actions.getEmployeeNames(req,res);
     }
 
+    if(url.startsWith('/supervisor/HR/get-schedule') && method === "GET"){
+        return actions.getEmployeeScheduleForSup(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }

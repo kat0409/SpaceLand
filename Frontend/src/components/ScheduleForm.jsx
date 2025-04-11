@@ -35,7 +35,7 @@ const ScheduleForm = ({ onScheduleAdded }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const response = await fetch("/supervisor/HR/schedule", {
+        const response = await fetch(`${BACKEND_URL}/supervisor/HR/schedule`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(form),

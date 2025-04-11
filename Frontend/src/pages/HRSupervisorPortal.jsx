@@ -40,7 +40,7 @@ export default function HRSupervisorPortal() {
 
         const handleSubmit = async (e) => {
             e.preventDefault();
-            const res = await fetch(`${BACKEND_URL}/supervisor/employee/schedule`, {
+            const res = await fetch(`${BACKEND_URL}/supervisor/HR/schedule`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(form)

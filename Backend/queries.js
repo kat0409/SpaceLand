@@ -622,8 +622,13 @@ const salesReport = `
 `;
 
 const getEmployeeNames = `
-    SELECT CONCAT(e.FirstName, ' ', e.LastName) AS FullName
-    FROM employee e;
+    SELECT e.EmployeeID, CONCAT(e.FirstName, ' ', e.LastName) AS FullName, es.*
+    FROM employee_schedule es
+    JOIN employee e ON es.EmployeeID = e.EmployeeID;
+`;
+
+const getEmployeeScheduleForSup  = `
+    SELECT * FROM employee_schedule;
 `;
 
 module.exports = {
@@ -712,7 +717,8 @@ module.exports = {
     updateEmployeeProfile,
     archiveEmployeeData,
     salesReport,
-    getEmployeeNames
+    getEmployeeNames,
+    getEmployeeScheduleForSup
 };
 
 //checkMerchQuantity
