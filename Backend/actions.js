@@ -2213,7 +2213,6 @@ const getFilteredSalesReport = (req, res) => {
     const validTypes = ["ticket", "mealplan", "merch"];
     let includeTypes = transactionType === "all" ? validTypes : [transactionType];
 
-    // Build union for distinct dates
     const unionParts = [];
     if (includeTypes.includes("ticket")) unionParts.push("SELECT transactionDate FROM tickettransactions");
     if (includeTypes.includes("mealplan")) unionParts.push("SELECT transactionDate FROM mealplantransactions");
