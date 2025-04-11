@@ -11,6 +11,8 @@ export default function HRSupervisorPortal() {
     const { auth } = useContext(AuthContext)
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState("scheduling");
+    const [refreshKey, setRefreshKey] = useState(Date.now());
 
     console.log('HRSupervisorPortal rendered with auth:', auth);
 
@@ -23,6 +25,48 @@ export default function HRSupervisorPortal() {
         endDate: '',
         weatherCondition: ''
     });
+
+    const ScheduleForm = ({ onScheduleAdded }) => {
+        const [form, setForm] = useState({
+            EmployeeID: '',
+            Department: '',
+            scheduleDate: '',
+            shiftStart: '',
+            shiftEnd: '',
+            isRecurring: false,
+        });
+
+        const handleSubmit = async (e) => {
+            e.preventDefault();
+            const res = await fetch(`${BACKEND_URL}/supervisor/employee/schedule`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(form)
+            });
+            const data = await res.json();
+            if (res.ok) {
+                onScheduleAdded(); // refresh
+            } else {
+                alert(data.error || 'Failed to add schedule');
+            }
+        };
+
+        return (
+            <form onSubmit={handleSubmit} className="space-y-2 bg-white/10 p-4 rounded-xl mb-4">
+                <h3 className="font-bold text-lg">Create Employee Schedule</h3>
+                <input placeholder="Employee ID" value={form.EmployeeID} onChange={e => setForm({ ...form, EmployeeID: e.target.value })} className="w-full p-2 rounded" required />
+                <input placeholder="Department" value={form.Department} onChange={e => setForm({ ...form, Department: e.target.value })} className="w-full p-2 rounded" required />
+                <input type="date" value={form.scheduleDate} onChange={e => setForm({ ...form, scheduleDate: e.target.value })} className="w-full p-2 rounded" required />
+                <input type="time" value={form.shiftStart} onChange={e => setForm({ ...form, shiftStart: e.target.value })} className="w-full p-2 rounded" required />
+                <input type="time" value={form.shiftEnd} onChange={e => setForm({ ...form, shiftEnd: e.target.value })} className="w-full p-2 rounded" required />
+                <label className="flex items-center space-x-2">
+                <input type="checkbox" checked={form.isRecurring} onChange={e => setForm({ ...form, isRecurring: e.target.checked })} />
+                <span>Recurring?</span>
+                </label>
+                <button className="bg-purple-600 px-4 py-2 rounded text-white">Submit</button>
+            </form>
+        );
+    };
 
     useEffect(() => {
         console.log('Auth effect triggered with auth:', auth);
@@ -110,6 +154,49 @@ export default function HRSupervisorPortal() {
             <Header />
             <section className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white px-6 py-20">
                 <h1 className="text-4xl font-bold mb-8 text-center">👥 HR Supervisor Portal</h1>
+
+                <div className="flex flex-wrap border-b border-gray-700 mb-6">
+                    <button 
+                        className={`py-2 px-4 font-medium ${activeTab === 'scheduling' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400 hover:text-white'}`}
+                        onClick={() => setActiveTab('scheduling')}
+                    >
+                        Scheduling
+                    </button>
+
+                    <button 
+                        className={`py-2 px-4 font-medium ${activeTab === 'employeeManagement' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400 hover:text-white'}`}
+                        onClick={() => setActiveTab('employeeManagement')}
+                    >
+                        Employee Management
+                    </button>
+
+                    <button 
+                        className={`py-2 px-4 font-medium ${activeTab === 'attendance' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400 hover:text-white'}`}
+                        onClick={() => setActiveTab('attendance')}
+                    >
+                        Attendance Report
+                    </button>
+                </div>
+
+                {activeTab === 'scheduling' && (
+                    <div className="space-y-6">
+                        <ScheduleForm onScheduleAdded={() => setRefreshKey(Date.now())} />
+                        <EmployeeScheduleList refreshKey={refreshKey} />
+                        <TimeOffRequests refreshKey={refreshKey} />
+                    </div>
+                )}
+
+                {activeTab === 'employeeManagement' && (
+                    <div>
+                        {/* Place employee profile filtering/editing UI here */}
+                    </div>
+                )}
+
+                {activeTab === 'attendance' && (
+                    <div>
+                        {/* Place attendance and revenue report UI here */}
+                    </div>
+                )}
         
                 {/* Employee List */}
                 <div className="space-y-12">
