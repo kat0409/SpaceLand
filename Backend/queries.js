@@ -408,6 +408,8 @@ const updateEvent = `
     SET eventName = ?, durationMin = ?, description = ?, event_date = ?, type = ? WHERE eventID = ?
 `;
 
+const deleteEvent = 'DELETE FROM parkevent WHERE eventID = ?';
+
 module.exports = {
     getRides,
     getEmployees,
@@ -479,7 +481,8 @@ module.exports = {
     getMealPlanPrice,
     getEvents,
     addEvent,
-    updateEvent
+    updateEvent,
+    deleteEvent
 };
 
 //checkMerchQuantity
