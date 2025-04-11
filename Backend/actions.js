@@ -1708,6 +1708,35 @@ const getMerchandiseSalesData = (req, res) => {
 };
 
 // Get all events
+const getEmployeeSchedule = (req, res) => {
+    const parsedUrl = url.parse(req.url, true);
+    const { employeeID, startDate } = parsedUrl.query;
+
+    if (!employeeID || !startDate) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Missing required parameters" }));
+        return;
+    }
+
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 6); // Get a week's worth of shifts
+
+    pool.query(
+        queries.getEmployeeSchedule,
+        [employeeID, startDate, endDate.toISOString()],
+        (error, results) => {
+            if (error) {
+                console.error("Error fetching employee schedule:", error);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(results));
+        }
+    );
+};
+
 const getEvents = (req, res) => {
     console.log("Attempting to fetch events...");
     pool.query(queries.getEvents, (err, results) => {
