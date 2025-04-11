@@ -235,6 +235,10 @@ function routes(req, res) {
         return actions.getEvents(req,res);
     }
 
+    if(url.startsWith('/supervisor/HR/add-events') && method === "POST"){
+        return actions.addEvent(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }

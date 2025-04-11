@@ -398,6 +398,11 @@ const getEvents = `
     SELECT * FROM parkevent ORDER BY event_date
 `;
 
+const addEvent = `
+    INSERT INTO parkevent (eventName, durationMin, description, event_date, type)
+    VALUES (?,?,?,?,?)
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -467,7 +472,8 @@ module.exports = {
     getDepartmentNames,
     addMealPlanTransaction,
     getMealPlanPrice,
-    getEvents
+    getEvents,
+    addEvent
 };
 
 //checkMerchQuantity
