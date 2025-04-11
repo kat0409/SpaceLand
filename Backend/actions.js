@@ -2392,7 +2392,7 @@ const getEmployeeNames = (req,res) => {
     pool.query(queries.getEmployeeNames, (err, results) => {
         if (err) {
             res.writeHead(500, { "Content-Type": "application/json" });
-            return res.end(JSON.stringify({ error: "Failed to fetch profile" }));
+            return res.end(JSON.stringify({ error: "Failed to fetch names" }));
         }
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify(results));
@@ -2403,10 +2403,39 @@ const getEmployeeScheduleForSup = (req,res) => {
     pool.query(queries.getEmployeeScheduleForSup, (err, results) => {
         if (err) {
             res.writeHead(500, { "Content-Type": "application/json" });
-            return res.end(JSON.stringify({ error: "Failed to fetch profile" }));
+            return res.end(JSON.stringify({ error: "Failed to fetch schedule" }));
         }
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify(results));
+    });
+};
+
+const getSpecificEmployeeSchedule = (req, res) => {
+    let body = "";
+    req.on("data", (chunk) => (body += chunk.toString()));
+    req.on("end", () => {
+        try {
+            const { EmployeeID } = JSON.parse(body);
+
+            if (!EmployeeID) {
+                res.writeHead(400, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "EmployeeID is required" }));
+            }
+
+            pool.query(queries.getSpecificEmployeeSchedule, [EmployeeID], (err, results) => {
+                if (err) {
+                    console.error(err);
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    return res.end(JSON.stringify({ error: "Failed to fetch schedule" }));
+                }
+
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify(results));
+            });
+        } catch (err) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON" }));
+        }
     });
 };
 
@@ -2483,5 +2512,6 @@ module.exports = {
     deleteEmployee,
     getFilteredSalesReport,
     getEmployeeNames,
-    getEmployeeScheduleForSup
+    getEmployeeScheduleForSup,
+    getSpecificEmployeeSchedule
 };  

@@ -457,6 +457,12 @@ const deleteEmployeeSchedule = `
     WHERE EmployeeID = ? AND scheduleDate = ?
 `;
 
+const getSpecificEmployeeSchedule = `
+    SELECT e.scheduleDate
+    FROM employee_schedule e
+    WHERE e.EmployeeID = ?
+`;
+
 const getTimeOffRequests = `
     SELECT r.requestID, r.EmployeeID, e.FirstName, e.LastName, r.startDate, r.endDate, r.reason, r.status
     FROM employee_timeoff_request r
@@ -718,7 +724,8 @@ module.exports = {
     archiveEmployeeData,
     salesReport,
     getEmployeeNames,
-    getEmployeeScheduleForSup
+    getEmployeeScheduleForSup,
+    getSpecificEmployeeSchedule
 };
 
 //checkMerchQuantity
