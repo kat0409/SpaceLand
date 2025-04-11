@@ -45,7 +45,8 @@ const routeMap = {
         '/ticket-history',
         '/alerts',
         '/supervisor/HR/get-supervisors',
-        '/supervisor/HR/get-departments'
+        '/supervisor/HR/get-departments',
+        '/get-events'
     ],
     'POST': [
         '/supervisor/HR/add-employee', 
@@ -65,7 +66,8 @@ const routeMap = {
         '/supervisor/merchandise/stock-arrivals',
         '/supervisor/merchandise/add-merch',
         '/supervisor/maintenance/maintenance-request',
-        '/meal-plan-purchase'
+        '/meal-plan-purchase',
+        '/supervisor/HR/add-events'
     ],
     'PUT': [
         '/update-employee', 
@@ -76,14 +78,16 @@ const routeMap = {
         '/supervisor/update-visitor-info',//make
         '/supervisor/update-operating-hours',//make
         '/supervisor/update-event-date',//make
-        '/supervisor/maintenance/complete-request'
+        '/supervisor/maintenance/complete-request',
+        '/supervisor/HR/update-event'
     ],
     'DELETE': [
         '/supervisor/delete-employee',
         '/supervisor/delete-maintenance', 
         '/supervisor/delete-item',//make
         '/supervisor/delete-meal-plan',//make
-        '/supervisor/delete-ride'//make
+        '/supervisor/delete-ride',//make
+        '/supervisor/HR/delete-event'
     ],
 };
 

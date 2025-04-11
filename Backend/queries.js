@@ -394,32 +394,21 @@ const getMealPlanPrice = `
     WHERE mealPlanID = ?
 `;
 
-// Employee schedule queries
-const getEmployeeSchedule = `
-    SELECT s.*, l.locationName
-    FROM shifts s
-    LEFT JOIN locations l ON s.locationID = l.locationID
-    WHERE s.employeeID = ? AND s.shiftDate >= ? AND s.shiftDate <= ?
-    ORDER BY s.shiftDate, s.startTime
+const getEvents = `
+    SELECT * FROM parkevent ORDER BY event_date
 `;
 
-const createTimeOffRequest = `
-    INSERT INTO timeoff_requests (employeeID, startDate, endDate, reason, type, status)
-    VALUES (?, ?, ?, ?, ?, ?)
+const addEvent = `
+    INSERT INTO parkevent (eventName, durationMin, description, event_date, type)
+    VALUES (?,?,?,?,?)
 `;
 
-const getEmployeeTimeOffRequests = `
-    SELECT *
-    FROM timeoff_requests
-    WHERE employeeID = ?
-    ORDER BY requestDate DESC
+const updateEvent = `
+    UPDATE parkevent 
+    SET eventName = ?, durationMin = ?, description = ?, event_date = ?, type = ? WHERE eventID = ?
 `;
 
-const updateTimeOffRequestStatus = `
-    UPDATE timeoff_requests
-    SET status = ?, reviewedBy = ?, reviewDate = NOW()
-    WHERE requestID = ?
-`;
+const deleteEvent = 'DELETE FROM parkevent WHERE eventID = ?';
 
 module.exports = {
     getRides,
@@ -490,10 +479,10 @@ module.exports = {
     getDepartmentNames,
     addMealPlanTransaction,
     getMealPlanPrice,
-    getEmployeeSchedule,
-    createTimeOffRequest,
-    getEmployeeTimeOffRequests,
-    updateTimeOffRequestStatus,
+    getEvents,
+    addEvent,
+    updateEvent,
+    deleteEvent
 };
 
 //checkMerchQuantity

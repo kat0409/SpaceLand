@@ -231,16 +231,20 @@ function routes(req, res) {
         return actions.addMealPlanTransaction(req,res);
     }
 
-    if (url.startsWith('/employee/schedule') && method === 'GET') {
-        return actions.getEmployeeSchedule(req, res);
+    if(url.startsWith('/get-events') && method === "GET"){
+        return actions.getEvents(req,res);
     }
 
-    if (url.startsWith('/employee/time-off-request') && method === 'POST') {
-        return actions.submitTimeOffRequest(req, res);
+    if(url.startsWith('/supervisor/HR/add-events') && method === "POST"){
+        return actions.addEvent(req,res);
     }
 
-    if (url.startsWith('/employee/time-off-requests') && method === 'GET') {
-        return actions.getEmployeeTimeOffRequests(req, res);
+    if(url.startsWith('/supervisor/HR/update-event') && method === "PUT"){
+        return actions.updateEvent(req,res);
+    }
+    
+    if(url.startsWith('/supervisor/HR/delete-event') && method === "DELETE"){
+        return actions.deleteEvent(req,res);
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
