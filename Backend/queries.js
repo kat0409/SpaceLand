@@ -488,6 +488,124 @@ const deleteEmployee = `
     WHERE EmployeeID = ?
 `;
 
+const salesReport = `
+    SELECT
+    d.transactionDate,
+
+    (
+        (SELECT COUNT(*) FROM tickettransactions WHERE DATE(transactionDate) = d.transactionDate) +
+        (SELECT COUNT(*) FROM mealplantransactions WHERE DATE(transactionDate) = d.transactionDate) +
+        (SELECT COUNT(*) FROM merchandisetransactions WHERE DATE(transactionDate) = d.transactionDate)
+    ) AS totalSales,
+
+    (
+        IFNULL((
+        SELECT SUM(tix.price)
+        FROM tickettransactions t2
+        JOIN tickets tix ON t2.transactionID = tix.transactionID
+        WHERE DATE(t2.transactionDate) = d.transactionDate
+        ), 0) +
+        IFNULL((
+        SELECT SUM(mp.price)
+        FROM mealplantransactions m2
+        JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID
+        WHERE DATE(m2.transactionDate) = d.transactionDate
+        ), 0) +
+        IFNULL((
+        SELECT SUM(mt2.totalAmount)
+        FROM merchandisetransactions mt2
+        WHERE DATE(mt2.transactionDate) = d.transactionDate
+        ), 0)
+    ) AS totalRevenue,
+
+    (
+        (
+        IFNULL((SELECT SUM(tix.price)
+                FROM tickettransactions t2
+                JOIN tickets tix ON t2.transactionID = tix.transactionID
+                WHERE DATE(t2.transactionDate) = d.transactionDate), 0) +
+        IFNULL((SELECT SUM(mp.price)
+                FROM mealplantransactions m2
+                JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID
+                WHERE DATE(m2.transactionDate) = d.transactionDate), 0) +
+        IFNULL((SELECT SUM(mt2.totalAmount)
+                FROM merchandisetransactions mt2
+                WHERE DATE(mt2.transactionDate) = d.transactionDate), 0)
+        )
+        /
+        (
+        (SELECT COUNT(*) FROM tickettransactions WHERE DATE(transactionDate) = d.transactionDate) +
+        (SELECT COUNT(*) FROM mealplantransactions WHERE DATE(transactionDate) = d.transactionDate) +
+        (SELECT COUNT(*) FROM merchandisetransactions WHERE DATE(transactionDate) = d.transactionDate)
+        )
+    ) AS avgRevenuePerItem,
+
+    (SELECT t2.ticketType
+    FROM tickettransactions t2
+    WHERE DATE(t2.transactionDate) = d.transactionDate
+    GROUP BY t2.ticketType
+    ORDER BY COUNT(*) DESC
+    LIMIT 1
+    ) AS bestSellingTicket,
+
+    (SELECT t2.ticketType
+    FROM tickettransactions t2
+    WHERE DATE(t2.transactionDate) = d.transactionDate
+    GROUP BY t2.ticketType
+    ORDER BY COUNT(*) ASC
+    LIMIT 1
+    ) AS worstSellingTicket,
+        
+    (SELECT mp.mealPlanName
+    FROM mealplantransactions m2
+    JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID
+    WHERE DATE(m2.transactionDate) = d.transactionDate
+    GROUP BY mp.mealPlanName
+    ORDER BY COUNT(*) DESC
+    LIMIT 1
+    ) AS bestSellingMealPlan,
+
+    (SELECT mp.mealPlanName
+    FROM mealplantransactions m2
+    JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID
+    WHERE DATE(m2.transactionDate) = d.transactionDate
+    GROUP BY mp.mealPlanName
+    ORDER BY COUNT(*) ASC
+    LIMIT 1
+    ) AS worstSellingMealPlan,
+
+    (SELECT m.itemName
+    FROM merchandisetransactions mt2
+    JOIN merchandise m ON mt2.merchandiseID = m.merchandiseID
+    WHERE DATE(mt2.transactionDate) = d.transactionDate
+    GROUP BY m.itemName
+    ORDER BY COUNT(*) DESC
+    LIMIT 1
+    ) AS bestSellingMerch,
+
+    (SELECT m.itemName
+    FROM merchandisetransactions mt2
+    JOIN merchandise m ON mt2.merchandiseID = m.merchandiseID
+    WHERE DATE(mt2.transactionDate) = d.transactionDate
+    GROUP BY m.itemName
+    ORDER BY COUNT(*) ASC
+    LIMIT 1
+    ) AS worstSellingMerch
+
+    FROM (
+    SELECT DISTINCT DATE(transactionDate) AS transactionDate
+    FROM (
+        SELECT transactionDate FROM tickettransactions
+        UNION ALL
+        SELECT transactionDate FROM mealplantransactions
+        UNION ALL
+        SELECT transactionDate FROM merchandisetransactions
+    ) AS combined
+    WHERE DATE(transactionDate) BETWEEN '2025-04-01' AND '2025-04-11'
+    ) d
+    ORDER BY d.transactionDate;
+`;
+
 module.exports = {
     getRides,
     getEmployees,
