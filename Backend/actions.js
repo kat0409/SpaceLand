@@ -2048,6 +2048,35 @@ const getTimeOffRequests = (req, res) => {
     });
 };
 
+const updateTimeOffRequestStatus = (req, res) => {
+    let body = "";
+    req.on("data", (chunk) => (body += chunk.toString()));
+    req.on("end", () => {
+        const { requestID, status } = JSON.parse(body);
+    
+        if (!requestID || !status || !['approved', 'denied'].includes(status)) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Invalid requestID or status" }));
+        }
+    
+        pool.query(queries.updateTimeOffRequestStatus, [status, requestID], (err, result) => {
+            if (err) {
+            console.error("Error updating time off status:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Internal server error" }));
+            }
+    
+            if (result.affectedRows === 0) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Request not found" }));
+            }
+    
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: `Request ${status} successfully` }));
+        });
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -2115,5 +2144,6 @@ module.exports = {
     getFilteredEmployees,
     addEmployeeSchedule,
     deleteEmployeeSchedule,
-    getTimeOffRequests
+    getTimeOffRequests,
+    updateTimeOffRequestStatus
 };  

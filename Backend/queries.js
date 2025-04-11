@@ -467,6 +467,11 @@ const getTimeOffRequests = `
     ORDER BY r.startDate DESC
 `;
 
+const updateTimeOffRequestStatus = `
+    UPDATE employee_timeoff_request
+    SET status = ?
+    WHERE requestID = ?
+`;
 
 module.exports = {
     getRides,
@@ -549,7 +554,8 @@ module.exports = {
     getFilteredEmployees,
     addEmployeeSchedule,
     deleteEmployeeSchedule,
-    getTimeOffRequests
+    getTimeOffRequests,
+    updateTimeOffRequestStatus,
 };
 
 //checkMerchQuantity
