@@ -410,6 +410,13 @@ const updateEvent = `
 
 const deleteEvent = 'DELETE FROM parkevent WHERE eventID = ?';
 
+const getEmployeeSchedule = `
+    SELECT scheduleDate, shiftStart, shiftEnd
+    FROM employee_schedule
+    WHERE EmployeeID = ? AND scheduleDate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 21 DAY)
+    ORDER BY scheduleDate
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -482,7 +489,8 @@ module.exports = {
     getEvents,
     addEvent,
     updateEvent,
-    deleteEvent
+    deleteEvent,
+    getEmployeeSchedule
 };
 
 //checkMerchQuantity
