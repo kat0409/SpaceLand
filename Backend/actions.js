@@ -2165,6 +2165,43 @@ const updateEmployeeProfile = (req, res) => {
     });
 };
 
+const deleteEmployee = (req, res) => {
+    let body = "";
+    req.on("data", chunk => (body += chunk));
+    req.on("end", () => {
+        const { EmployeeID } = JSON.parse(body);
+    
+        if (!EmployeeID) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "EmployeeID is required" }));
+        }
+
+        pool.query(queries.archiveEmployeeData, [EmployeeID], (archiveErr) => {
+            if (archiveErr) {
+            console.error("Error archiving employee data:", archiveErr);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Failed to archive employee data" }));
+            }
+
+            pool.query(queries.deleteEmployee, [EmployeeID], (err, result) => {
+            if (err) {
+                console.error("Error deleting employee:", err);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Internal server error" }));
+            }
+    
+            if (result.affectedRows === 0) {
+                res.writeHead(404, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Employee not found" }));
+            }
+    
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Employee deleted successfully" }));
+            });
+        });
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -2234,5 +2271,6 @@ module.exports = {
     deleteEmployeeSchedule,
     getTimeOffRequests,
     updateTimeOffRequestStatus,
-    updateEmployeeProfile
+    updateEmployeeProfile,
+    deleteEmployee
 };  

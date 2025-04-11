@@ -312,9 +312,6 @@ const updateMealPlan = `
     SET mealPlanTier = ?, price = ?
     WHERE restaurantID = ?;
 `;
-const deleteEmployee = `
-    DELETE FROM employee WHERE employmentStatus == 0 AND EmployeeID = ?;
-`;
 
 const updateOperatingHours = `
     UPDATE operating_hours
@@ -479,6 +476,18 @@ const updateEmployeeProfile = (fields) => `
     WHERE EmployeeID = ?
 `;
 
+const archiveEmployeeData = `
+    INSERT INTO archived_employee_data (EmployeeID, FirstName, LastName, Email, Address, username, Department, employmentStatus, dateArchived)
+    SELECT EmployeeID, FirstName, LastName, Email, Address, username, Department, employmentStatus, NOW()
+    FROM employee
+    WHERE EmployeeID = ?
+`;
+
+const deleteEmployee = `
+    DELETE FROM employee
+    WHERE EmployeeID = ?
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -562,7 +571,8 @@ module.exports = {
     deleteEmployeeSchedule,
     getTimeOffRequests,
     updateTimeOffRequestStatus,
-    updateEmployeeProfile
+    updateEmployeeProfile,
+    archiveEmployeeData
 };
 
 //checkMerchQuantity
