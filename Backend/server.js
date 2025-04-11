@@ -69,7 +69,8 @@ const routeMap = {
         '/supervisor/maintenance/maintenance-request',
         '/meal-plan-purchase',
         '/supervisor/HR/add-events',
-        '/employee/time-off-request'
+        '/employee/time-off-request',
+        '/employee/clock-in'
     ],
     'PUT': [
         '/update-employee', 
