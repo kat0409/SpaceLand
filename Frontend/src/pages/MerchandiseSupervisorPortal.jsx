@@ -59,7 +59,7 @@ export default function SupervisorPortal() {
             if (filters.transactionType) params.append("transactionType", filters.transactionType);
             if (filters.bestOnly) params.append("bestOnly", filters.bestOnly);
         
-            const response = await fetch(`http://localhost:3000/merchandise/sales-report?${params.toString()}`);
+            const response = await fetch(`https://spaceland.onrender.com/supervisor/merchandise/sales-report?${params.toString()}`);
             const data = await response.json();
         
         if (!Array.isArray(data)) {
@@ -67,7 +67,7 @@ export default function SupervisorPortal() {
             return;
         }
 
-          setSalesData(data); // ← assumes you're using useState for this
+            setSalesData(data); 
         } catch (error) {
             console.error("Error fetching sales report:", error);
         }
@@ -194,7 +194,7 @@ export default function SupervisorPortal() {
             });
         
         // Fetch merchandise sales data for charts
-        fetch(`${BACKEND_URL}/supervisor/merchandise/sales-data`)
+        /*fetch(`${BACKEND_URL}/supervisor/merchandise/sales-data`)
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
@@ -203,7 +203,7 @@ export default function SupervisorPortal() {
                     console.error("Unexpected sales data:", data);
                 }
             })
-            .catch(err => console.error("Error fetching sales data:", err));
+            .catch(err => console.error("Error fetching sales data:", err));*/
             
         fetchFilteredReport();
     }, []);
