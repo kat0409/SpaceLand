@@ -5,6 +5,7 @@ import { AuthContext } from '../components/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import EmployeeManagement from './EmployeeManagement';
 import EmployeeScheduleDisplay from '../components/EmployeeScheduleDisplay';
+import DeleteScheduleForm from '../components/DeleteScheduleForm';
 import ScheduleForm from '../components/ScheduleForm';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
@@ -183,6 +184,7 @@ export default function HRSupervisorPortal() {
                 {activeTab === 'scheduling' && (
                     <div className="space-y-6">
                         <ScheduleForm onScheduleAdded={() => setRefreshKey(Date.now())} />
+                        <DeleteScheduleForm onScheduleDeleted={() => setRefreshKey(Date.now())} />
                         <EmployeeScheduleDisplay refreshKey={refreshKey} />
                     </div>
                 )}
