@@ -1869,6 +1869,18 @@ const deleteEvent = (req, res) => {
     });
 };
 
+const getEmployeeSchedule = (req, res) => {
+    const employeeID = req.url.split("/").pop();
+    pool.query(queries.getEmployeeSchedule, [employeeID], (err, results) => {
+        if (err) {
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Failed to fetch schedule" }));
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -1927,5 +1939,6 @@ module.exports = {
     getEvents,
     addEvent,
     updateEvent,
-    deleteEvent
+    deleteEvent,
+    getEmployeeSchedule
 };  
