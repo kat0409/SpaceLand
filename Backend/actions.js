@@ -1721,6 +1721,46 @@ const getEvents = (req,res) => {
     });
 }
 
+const addEvent = (req,res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', () => {
+        let parsedBody;
+
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (error) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const {eventName, durationMin, description, event_date, type} = parsedBody;
+
+        if (!eventName || !durationMin || !description || !event_date || !type) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Event name, duration, description, event date, and type  are required." }));
+            return;
+        }
+
+        pool.query(queries.addEvent, [eventName, durationMin, description, event_date, type], (error, results) => {
+            if (error) {
+                console.error("Error adding an event:", error);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+
+            res.writeHead(201, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "New event added successfully", eventID: results.insertId}));
+        });
+    });
+}
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -1776,5 +1816,6 @@ module.exports = {
     deleteMerchandise,
     updateMerchandise,
     getMerchandiseSalesData,
-    getEvents
+    getEvents,
+    addEvent
 };  
