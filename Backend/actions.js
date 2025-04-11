@@ -1935,6 +1935,19 @@ const clockOut = (req, res) => {
     });
 };
 
+const getEmployeeProfile = (req, res) => {
+    const parsedUrl = require("url").parse(req.url, true);
+    const employeeID = parsedUrl.query.EmployeeID;
+    pool.query(queries.getEmployeeProfile, [employeeID], (err, results) => {
+        if (err || results.length === 0) {
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Failed to fetch profile" }));
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results[0]));
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -1997,5 +2010,6 @@ module.exports = {
     getEmployeeSchedule,
     requestTimeOff,
     clockIn,
-    clockOut
+    clockOut,
+    getEmployeeProfile
 };  

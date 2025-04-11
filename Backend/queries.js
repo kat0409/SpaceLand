@@ -434,6 +434,11 @@ const clockOut = `
     WHERE EmployeeID = ? AND date = ?
 `;
 
+const getEmployeeProfile = `
+    SELECT EmployeeID, FirstName, LastName, Email, Address, Department, dateOfBirth
+    FROM employee
+    WHERE EmployeeID = ?
+`;
 
 module.exports = {
     getRides,
@@ -511,7 +516,8 @@ module.exports = {
     getEmployeeSchedule,
     requestTimeOff,
     clockIn,
-    clockOut
+    clockOut,
+    getEmployeeProfile
 };
 
 //checkMerchQuantity
