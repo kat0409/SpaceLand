@@ -1707,6 +1707,20 @@ const getMerchandiseSalesData = (req, res) => {
     res.end(JSON.stringify(mockSalesData));
 };
 
+const getEvents = (req,res) => {
+    pool.query(queries.getEvents, (error, results) => {
+        if(error){
+            console.log("Error fetching events:", error);
+            res.writeHead(500, {"Content-Type":"application/json"});
+            res.end(JSON.stringify({error: "Internal server error"}));
+            return;
+        }
+        const eventID = results.insertId;
+        res.writeHead(200, {"Content-Type":"application/json"});
+        res.end(JSON.stringify({message: "Events fetched successfully", eventID}));
+    });
+}
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -1761,5 +1775,6 @@ module.exports = {
     addMealPlanTransaction,
     deleteMerchandise,
     updateMerchandise,
-    getMerchandiseSalesData
+    getMerchandiseSalesData,
+    getEvents
 };  
