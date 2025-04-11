@@ -410,6 +410,25 @@ const updateEvent = `
 
 const deleteEvent = 'DELETE FROM parkevent WHERE eventID = ?';
 
+const getEmployeeSchedule = `
+    SELECT scheduleDate, shiftStart, shiftEnd
+    FROM employee_schedule
+    WHERE EmployeeID = ? AND scheduleDate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 21 DAY)
+    ORDER BY scheduleDate
+`;
+
+const requestTimeOff = `
+    INSERT INTO employee_timeoff_request (EmployeeID, startDate, endDate, reason, status)
+    VALUES (?, ?, ?, ?, 'pending')
+`;
+
+const clockIn = `
+    INSERT INTO employee_attendance (EmployeeID, clockIn, date)
+    VALUES (?, NOW(), ?)
+    ON DUPLICATE KEY UPDATE clockIn = NOW()
+`;
+
+
 module.exports = {
     getRides,
     getEmployees,
@@ -482,7 +501,10 @@ module.exports = {
     getEvents,
     addEvent,
     updateEvent,
-    deleteEvent
+    deleteEvent,
+    getEmployeeSchedule,
+    requestTimeOff,
+    clockIn
 };
 
 //checkMerchQuantity
