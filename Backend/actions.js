@@ -1245,7 +1245,7 @@ const markStockArrivals = (req,res) => {
 
         if (!merchandiseID || !quantityAdded || !arrivalDate || !notesToInsert || !reorderID) {
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "merchandiseID, quantityAdded, arrivalDate, notes, and reorderID are required." }));
+            res.end(JSON.stringify({ error: "merchandiseID, quantityOrdered, expectedArrivalDate, status, and notes are required." }));
             return;
         }
 
@@ -1707,44 +1707,30 @@ const getMerchandiseSalesData = (req, res) => {
     res.end(JSON.stringify(mockSalesData));
 };
 
-const getEmployeeSchedule = (req, res) => {
-    const parsedUrl = url.parse(req.url, true);
-    const { employeeID, startDate } = parsedUrl.query;
-
-    if (!employeeID || !startDate) {
-        res.writeHead(400, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Missing required parameters" }));
-        return;
-    }
-
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + 6); // Get a week's worth of shifts
-
-    pool.query(
-        queries.getEmployeeSchedule,
-        [employeeID, startDate, endDate.toISOString()],
-        (error, results) => {
-            if (error) {
-                console.error("Error fetching employee schedule:", error);
-                res.writeHead(500, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ error: "Internal server error" }));
-                return;
-            }
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify(results));
+const getEvents = (req,res) => {
+    pool.query(queries.getEvents, (error, results) => {
+        if(error){
+            console.log("Error fetching events:", error);
+            res.writeHead(500, {"Content-Type":"application/json"});
+            res.end(JSON.stringify({error: "Internal server error"}));
+            return;
         }
-    );
-};
+        const eventID = results.insertId;
+        res.writeHead(200, {"Content-Type":"application/json"});
+        res.end(JSON.stringify({message: "Events fetched successfully", eventID}));
+    });
+}
 
-const submitTimeOffRequest = (req, res) => {
+const addEvent = (req,res) => {
     let body = "";
 
     req.on("data", (chunk) => {
         body += chunk.toString();
     });
 
-    req.on("end", () => {
+    req.on('end', () => {
         let parsedBody;
+
         try {
             parsedBody = JSON.parse(body);
         } catch (error) {
@@ -1753,53 +1739,133 @@ const submitTimeOffRequest = (req, res) => {
             return;
         }
 
-        const { employeeID, startDate, endDate, reason, type, status } = parsedBody;
+        const {eventName, durationMin, description, event_date, type} = parsedBody;
 
-        if (!employeeID || !startDate || !endDate || !reason || !type || !status) {
+        if (!eventName || !durationMin || !description || !event_date || !type) {
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "All fields are required" }));
+            res.end(JSON.stringify({ error: "Event name, duration, description, event date, and type  are required." }));
             return;
         }
 
-        pool.query(
-            queries.createTimeOffRequest,
-            [employeeID, startDate, endDate, reason, type, status],
-            (error, results) => {
-                if (error) {
-                    console.error("Error submitting time off request:", error);
-                    res.writeHead(500, { "Content-Type": "application/json" });
-                    res.end(JSON.stringify({ error: "Internal server error" }));
-                    return;
-                }
-                res.writeHead(201, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({
-                    message: "Time off request submitted successfully",
-                    requestID: results.insertId
-                }));
+        pool.query(queries.addEvent, [eventName, durationMin, description, event_date, type], (error, results) => {
+            if (error) {
+                console.error("Error adding an event:", error);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
             }
-        );
+
+            res.writeHead(201, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "New event added successfully", eventID: results.insertId}));
+        });
+    });
+}
+
+const updateEvent = (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        let parsedBody;
+
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (error) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const { eventID, eventName, durationMin, description, event_date, type } = parsedBody;
+
+        if (!eventID) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "eventID is required" }));
+            return;
+        }
+
+        const fields = [];
+        const values = [];
+
+        if (eventName !== undefined) {
+            fields.push("eventName = ?");
+            values.push(eventName);
+        }
+        if (durationMin !== undefined) {
+            fields.push("durationMin = ?");
+            values.push(durationMin);
+        }
+        if (description !== undefined) {
+            fields.push("description = ?");
+            values.push(description);
+        }
+        if (event_date !== undefined) {
+            fields.push("event_date = ?");
+            values.push(event_date);
+        }
+        if (type !== undefined) {
+            fields.push("type = ?");
+            values.push(type);
+        }
+
+        if (fields.length === 0) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "No fields provided to update" }));
+            return;
+        }
+
+        const sql = `UPDATE parkevent SET ${fields.join(", ")} WHERE eventID = ?`;
+        values.push(eventID);
+
+        pool.query(sql, values, (error, result) => {
+            if (error) {
+                console.error("Error updating event:", error);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+
+            if (result.affectedRows === 0) {
+                res.writeHead(404, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Event not found" }));
+                return;
+            }
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Event updated successfully" }));
+        });
     });
 };
 
-const getEmployeeTimeOffRequests = (req, res) => {
-    const parsedUrl = url.parse(req.url, true);
-    const { employeeID } = parsedUrl.query;
+const deleteEvent = (req, res) => {
+    const parsedUrl = require('url').parse(req.url, true);
+    const { eventID } = parsedUrl.query;
 
-    if (!employeeID) {
+    if (!eventID) {
         res.writeHead(400, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Employee ID is required" }));
+        res.end(JSON.stringify({ error: "Missing 'eventID' query parameter" }));
         return;
     }
 
-    pool.query(queries.getEmployeeTimeOffRequests, [employeeID], (error, results) => {
+    pool.query('DELETE FROM parkevent WHERE eventID = ?', [eventID], (error, results) => {
         if (error) {
-            console.error("Error fetching time off requests:", error);
+            console.error("Error deleting event:", error);
             res.writeHead(500, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ error: "Internal server error" }));
             return;
         }
+
+        if (results.affectedRows === 0) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Event not found" }));
+            return;
+        }
+
         res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(results));
+        res.end(JSON.stringify({ message: "Event deleted successfully" }));
     });
 };
 
@@ -1858,7 +1924,8 @@ module.exports = {
     deleteMerchandise,
     updateMerchandise,
     getMerchandiseSalesData,
-    getEmployeeSchedule,
-    submitTimeOffRequest,
-    getEmployeeTimeOffRequests,
+    getEvents,
+    addEvent,
+    updateEvent,
+    deleteEvent
 };  
