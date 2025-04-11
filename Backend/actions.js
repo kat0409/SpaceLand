@@ -1245,7 +1245,7 @@ const markStockArrivals = (req,res) => {
 
         if (!merchandiseID || !quantityAdded || !arrivalDate || !notesToInsert || !reorderID) {
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "merchandiseID, quantityOrdered, expectedArrivalDate, status, and notes are required." }));
+            res.end(JSON.stringify({ error: "merchandiseID, quantityAdded, expectedArrivalDate, status, and notes are required." }));
             return;
         }
 
@@ -1715,9 +1715,8 @@ const getEvents = (req,res) => {
             res.end(JSON.stringify({error: "Internal server error"}));
             return;
         }
-        const eventID = results.insertId;
         res.writeHead(200, {"Content-Type":"application/json"});
-        res.end(JSON.stringify({message: "Events fetched successfully", eventID}));
+        res.end(JSON.stringify(results));
     });
 }
 
