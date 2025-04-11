@@ -242,6 +242,10 @@ function routes(req, res) {
     if(url.startsWith('/supervisor/HR/update-event') && method === "PUT"){
         return actions.updateEvent(req,res);
     }
+    
+    if(url.startsWith('/supervisor/HR/delete-event') && method === "DELETE"){
+        return actions.deleteEvent(req,res);
+    }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
