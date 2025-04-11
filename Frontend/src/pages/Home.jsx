@@ -1,7 +1,6 @@
 import Header from '../components/Header';
 import Hero from '../components/Hero';
 import RidesPreview from '../components/RidesPreview';
-import EventsPreview from '../components/EventsPreview';
 import DiningSection from '../components/DiningSection';
 import PricingSection from '../components/PricingSection';
 import Footer from '../components/Footer';
@@ -39,7 +38,6 @@ export default function Home() {
       )}
       <Hero />
       <RidesPreview />
-      <EventsPreview />
       <DiningSection />
       <PricingSection />
       <Footer />
