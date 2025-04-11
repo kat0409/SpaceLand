@@ -394,6 +394,33 @@ const getMealPlanPrice = `
     WHERE mealPlanID = ?
 `;
 
+// Employee schedule queries
+const getEmployeeSchedule = `
+    SELECT s.*, l.locationName
+    FROM shifts s
+    LEFT JOIN locations l ON s.locationID = l.locationID
+    WHERE s.employeeID = ? AND s.shiftDate >= ? AND s.shiftDate <= ?
+    ORDER BY s.shiftDate, s.startTime
+`;
+
+const createTimeOffRequest = `
+    INSERT INTO timeoff_requests (employeeID, startDate, endDate, reason, type, status)
+    VALUES (?, ?, ?, ?, ?, ?)
+`;
+
+const getEmployeeTimeOffRequests = `
+    SELECT *
+    FROM timeoff_requests
+    WHERE employeeID = ?
+    ORDER BY requestDate DESC
+`;
+
+const updateTimeOffRequestStatus = `
+    UPDATE timeoff_requests
+    SET status = ?, reviewedBy = ?, reviewDate = NOW()
+    WHERE requestID = ?
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -462,7 +489,11 @@ module.exports = {
     getSupervisorNames,
     getDepartmentNames,
     addMealPlanTransaction,
-    getMealPlanPrice
+    getMealPlanPrice,
+    getEmployeeSchedule,
+    createTimeOffRequest,
+    getEmployeeTimeOffRequests,
+    updateTimeOffRequestStatus,
 };
 
 //checkMerchQuantity
