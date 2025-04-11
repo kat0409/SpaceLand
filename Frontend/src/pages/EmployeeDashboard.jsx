@@ -1,40 +1,38 @@
 // src/pages/EmployeeDashboard.jsx
-import React, { useEffect, useState, useContext, useCallback } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
+import { motion } from 'framer-motion';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { AuthContext } from "../components/AuthProvider";
 import { useNavigate } from 'react-router-dom';
+import EmployeeProfile from '../components/employee/EmployeeProfile';
+import ScheduleViewer from '../components/employee/ScheduleViewer';
+import TimeOffRequest from '../components/employee/TimeOffRequest';
 
 export default function EmployeeDashboard() {
-  const { auth } = useContext(AuthContext)
-  //const { auth, logout } = useContext(AuthContext);
+  const { auth } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('profile');
 
   const [employee, setEmployee] = useState(null);
   const [error, setError] = useState('');
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
   useEffect(() => {
-    if(!auth.isAuthenticated || auth.role !== "employee"){
-      navigate("/employee-login")
+    if (!auth.isAuthenticated || auth.role !== "employee") {
+      navigate("/employee-login");
     }
   }, [auth, navigate]);
 
-  const employeeID = localStorage.getItem('employeeID');
-
   useEffect(() => {
-    if (!employeeID) {
-      setError('Employee ID not found in localStorage.');
-      return;
-    }
-
     const fetchEmployeeData = async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/employee/account-info?employeeID=${employeeID}`);
+        const res = await fetch(`${BACKEND_URL}/employee/account-info?employeeID=${auth.userID}`);
         const data = await res.json();
 
         if (res.ok && data && data.EmployeeID) {
           setEmployee(data);
+          setError('');
         } else {
           setError('Unable to fetch employee info.');
         }
@@ -44,33 +42,78 @@ export default function EmployeeDashboard() {
       }
     };
 
-    fetchEmployeeData();
-  }, [employeeID]);
+    if (auth.userID) {
+      fetchEmployeeData();
+    }
+  }, [auth.userID]);
+
+  const handleProfileUpdate = (updatedData) => {
+    setEmployee(prev => ({
+      ...prev,
+      ...updatedData
+    }));
+  };
+
+  const tabs = [
+    { id: 'profile', label: '👤 Profile' },
+    { id: 'schedule', label: '📅 Schedule' },
+    { id: 'timeoff', label: '🏖 Time Off' }
+  ];
 
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white px-6 py-16">
-        <div className="max-w-3xl mx-auto bg-white/5 backdrop-blur-lg p-8 rounded-2xl shadow-lg border border-white/10">
-          <h1 className="text-3xl font-bold mb-4 text-center">🧑‍💼 Employee Dashboard</h1>
-
-          {error && <p className="text-red-400 mb-4 text-center">{error}</p>}
-
-          {employee ? (
-            <div className="space-y-4 text-sm md:text-base">
-              <p><strong>Name:</strong> {employee.FirstName} {employee.LastName}</p>
-              <p><strong>Email:</strong> {employee.Email}</p>
-              <p><strong>Department:</strong> {employee.Department}</p>
-              <p><strong>Supervisor ID:</strong> {employee.SupervisorID}</p>
-              <p><strong>Address:</strong> {employee.Address}</p>
-              <p><strong>Employment Status:</strong> {employee.employmentStatus === 1 ? 'Active' : 'Inactive'}</p>
-              <p><strong>Username:</strong> {employee.username}</p>
+      <motion.main
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white px-6 py-16"
+      >
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between mb-8">
+            <h1 className="text-4xl font-bold mb-4 md:mb-0">
+              Welcome, {employee?.FirstName || 'Employee'}! 👋
+            </h1>
+            <div className="flex space-x-2 overflow-x-auto pb-2 md:pb-0">
+              {tabs.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-6 py-2 rounded-lg transition-colors whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-white/5 hover:bg-white/10'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
-          ) : !error && (
-            <p className="text-center text-gray-400">Loading employee data...</p>
+          </div>
+
+          {error && (
+            <div className="bg-red-900/50 text-red-400 p-4 rounded-lg mb-6">
+              {error}
+            </div>
           )}
+
+          <div className="space-y-8">
+            {activeTab === 'profile' && employee && (
+              <EmployeeProfile
+                employee={employee}
+                onUpdate={handleProfileUpdate}
+              />
+            )}
+
+            {activeTab === 'schedule' && auth.userID && (
+              <ScheduleViewer employeeID={auth.userID} />
+            )}
+
+            {activeTab === 'timeoff' && auth.userID && (
+              <TimeOffRequest employeeID={auth.userID} />
+            )}
+          </div>
         </div>
-      </main>
+      </motion.main>
       <Footer />
     </>
   );
