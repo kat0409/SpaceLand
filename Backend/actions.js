@@ -1410,7 +1410,7 @@ const getEmployeesForMaintenanceRequest = (req,res) => {
         res.writeHead(200, {"Content-Type":"application/json"});
         res.end(JSON.stringify(results));
     });
-}
+};
 
 const completeMaintenanceRequest = (req, res) => {
     let body = "";
@@ -1707,6 +1707,102 @@ const getMerchandiseSalesData = (req, res) => {
     res.end(JSON.stringify(mockSalesData));
 };
 
+const getEmployeeSchedule = (req, res) => {
+    const parsedUrl = url.parse(req.url, true);
+    const { employeeID, startDate } = parsedUrl.query;
+
+    if (!employeeID || !startDate) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Missing required parameters" }));
+        return;
+    }
+
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 6); // Get a week's worth of shifts
+
+    pool.query(
+        queries.getEmployeeSchedule,
+        [employeeID, startDate, endDate.toISOString()],
+        (error, results) => {
+            if (error) {
+                console.error("Error fetching employee schedule:", error);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(results));
+        }
+    );
+};
+
+const submitTimeOffRequest = (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (error) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const { employeeID, startDate, endDate, reason, type, status } = parsedBody;
+
+        if (!employeeID || !startDate || !endDate || !reason || !type || !status) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "All fields are required" }));
+            return;
+        }
+
+        pool.query(
+            queries.createTimeOffRequest,
+            [employeeID, startDate, endDate, reason, type, status],
+            (error, results) => {
+                if (error) {
+                    console.error("Error submitting time off request:", error);
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ error: "Internal server error" }));
+                    return;
+                }
+                res.writeHead(201, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({
+                    message: "Time off request submitted successfully",
+                    requestID: results.insertId
+                }));
+            }
+        );
+    });
+};
+
+const getEmployeeTimeOffRequests = (req, res) => {
+    const parsedUrl = url.parse(req.url, true);
+    const { employeeID } = parsedUrl.query;
+
+    if (!employeeID) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Employee ID is required" }));
+        return;
+    }
+
+    pool.query(queries.getEmployeeTimeOffRequests, [employeeID], (error, results) => {
+        if (error) {
+            console.error("Error fetching time off requests:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -1761,5 +1857,8 @@ module.exports = {
     addMealPlanTransaction,
     deleteMerchandise,
     updateMerchandise,
-    getMerchandiseSalesData
+    getMerchandiseSalesData,
+    getEmployeeSchedule,
+    submitTimeOffRequest,
+    getEmployeeTimeOffRequests,
 };  
