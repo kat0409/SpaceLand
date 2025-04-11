@@ -5,12 +5,12 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onren
 export default function DeleteScheduleForm({ onScheduleDeleted }) {
     const [employees, setEmployees] = useState([]);
     const [schedules, setSchedules] = useState([]);
-    const [selectedEmployeeID, setSelectedEmployeeID] = useState('');
+    const [selectedEmployeeName, setSelectedEmployeeName] = useState('');
     const [selectedScheduleDate, setSelectedScheduleDate] = useState('');
 
     // Load employee list on mount
     useEffect(() => {
-        fetch(`${BACKEND_URL}/supervisor/HR/get-employee-names`)
+        fetch(`${BACKEND_URL}/supervisor/HR/employee-names`)
             .then(res => res.json())
             .then(data => {
                 setEmployees(data);
@@ -18,14 +18,19 @@ export default function DeleteScheduleForm({ onScheduleDeleted }) {
             .catch(err => console.error("Failed to load employees:", err));
     }, []);
 
-    // Load schedules when employee changes
+    // Load schedules when employee name changes
     useEffect(() => {
-        if (!selectedEmployeeID) return;
+        if (!selectedEmployeeName) return;
+
+        const employee = employees.find(e => e.FullName === selectedEmployeeName);
+        if (!employee) return;
+
+        const employeeID = employee.EmployeeID;
 
         fetch(`${BACKEND_URL}/supervisor/HR/get-specific-schedule`, {
-            method: "POST",
+            method: "POST", // ✅ must be POST
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ EmployeeID: selectedEmployeeID })
+            body: JSON.stringify({ EmployeeID: employeeID })
         })
             .then(res => res.json())
             .then(data => {
@@ -36,15 +41,24 @@ export default function DeleteScheduleForm({ onScheduleDeleted }) {
                 console.error("Failed to fetch schedules:", err);
                 setSchedules([]);
             });
-    }, [selectedEmployeeID]);
+    }, [selectedEmployeeName, employees]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const res = await fetch(`${BACKEND_URL}/supervisor/HR/delete-schedule`, {
+
+        const employee = employees.find(e => e.FullName === selectedEmployeeName);
+        if (!employee) {
+            alert("Could not match employee.");
+            return;
+        }
+
+        const employeeID = employee.EmployeeID;
+
+        const res = await fetch(`${BACKEND_URL}/supervisor/HR/schedule-delete`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                EmployeeID: selectedEmployeeID,
+                EmployeeID: employeeID,
                 scheduleDate: selectedScheduleDate
             }),
         });
@@ -54,7 +68,7 @@ export default function DeleteScheduleForm({ onScheduleDeleted }) {
         if (res.ok) {
             alert('Schedule deleted successfully');
             onScheduleDeleted();
-            setSelectedEmployeeID('');
+            setSelectedEmployeeName('');
             setSelectedScheduleDate('');
             setSchedules([]);
         } else {
@@ -67,14 +81,14 @@ export default function DeleteScheduleForm({ onScheduleDeleted }) {
             <h3 className="font-bold text-lg">Delete Employee Schedule</h3>
 
             <select
-                value={selectedEmployeeID}
-                onChange={(e) => setSelectedEmployeeID(e.target.value)}
+                value={selectedEmployeeName}
+                onChange={(e) => setSelectedEmployeeName(e.target.value)}
                 className="w-full p-2 rounded"
                 required
             >
                 <option value="">Select an Employee</option>
                 {employees.map(emp => (
-                    <option key={emp.EmployeeID} value={emp.EmployeeID}>
+                    <option key={emp.EmployeeID} value={emp.FullName}>
                         {emp.FullName}
                     </option>
                 ))}
