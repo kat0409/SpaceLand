@@ -3,35 +3,60 @@ import React, { useState, useEffect } from 'react';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
 export default function DeleteScheduleForm({ onScheduleDeleted }) {
+    const [employees, setEmployees] = useState([]);
     const [schedules, setSchedules] = useState([]);
-    const [selected, setSelected] = useState('');
+    const [selectedEmployeeID, setSelectedEmployeeID] = useState('');
+    const [selectedScheduleDate, setSelectedScheduleDate] = useState('');
 
+    // Load employee list on mount
     useEffect(() => {
-        // Fetch all existing schedules from the backend
-        fetch(`${BACKEND_URL}/supervisor/HR/get-schedule`)
+        fetch(`${BACKEND_URL}/supervisor/HR/get-employee-names`)
+            .then(res => res.json())
+            .then(data => {
+                setEmployees(data);
+            })
+            .catch(err => console.error("Failed to load employees:", err));
+    }, []);
+
+    // Load schedules when employee changes
+    useEffect(() => {
+        if (!selectedEmployeeID) return;
+
+        fetch(`${BACKEND_URL}/supervisor/HR/get-specific-schedule`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ EmployeeID: selectedEmployeeID })
+        })
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) setSchedules(data);
+                else setSchedules([]);
             })
-            .catch(err => console.error("Error loading schedules:", err));
-    }, []);
+            .catch(err => {
+                console.error("Failed to fetch schedules:", err);
+                setSchedules([]);
+            });
+    }, [selectedEmployeeID]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const [EmployeeID, scheduleDate] = selected.split('|');
-
         const res = await fetch(`${BACKEND_URL}/supervisor/HR/delete-schedule`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ EmployeeID, scheduleDate }),
+            body: JSON.stringify({
+                EmployeeID: selectedEmployeeID,
+                scheduleDate: selectedScheduleDate
+            }),
         });
 
         const data = await res.json();
 
         if (res.ok) {
             alert('Schedule deleted successfully');
-            onScheduleDeleted(); // refresh
-            setSelected('');
+            onScheduleDeleted();
+            setSelectedEmployeeID('');
+            setSelectedScheduleDate('');
+            setSchedules([]);
         } else {
             alert(data.error || 'Failed to delete schedule');
         }
@@ -42,15 +67,30 @@ export default function DeleteScheduleForm({ onScheduleDeleted }) {
             <h3 className="font-bold text-lg">Delete Employee Schedule</h3>
 
             <select
-                value={selected}
-                onChange={(e) => setSelected(e.target.value)}
+                value={selectedEmployeeID}
+                onChange={(e) => setSelectedEmployeeID(e.target.value)}
                 className="w-full p-2 rounded"
                 required
             >
-                <option value="">Select a schedule</option>
+                <option value="">Select an Employee</option>
+                {employees.map(emp => (
+                    <option key={emp.EmployeeID} value={emp.EmployeeID}>
+                        {emp.FullName}
+                    </option>
+                ))}
+            </select>
+
+            <select
+                value={selectedScheduleDate}
+                onChange={(e) => setSelectedScheduleDate(e.target.value)}
+                className="w-full p-2 rounded"
+                required
+                disabled={!schedules.length}
+            >
+                <option value="">Select a Schedule Date</option>
                 {schedules.map((s, idx) => (
-                    <option key={idx} value={`${s.EmployeeID}|${s.scheduleDate}`}>
-                        {`Employee ${s.EmployeeID} – ${new Date(s.scheduleDate).toLocaleDateString()}`}
+                    <option key={idx} value={s.scheduleDate}>
+                        {new Date(s.scheduleDate).toLocaleDateString()}
                     </option>
                 ))}
             </select>
