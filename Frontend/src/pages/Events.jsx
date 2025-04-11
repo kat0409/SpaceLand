@@ -12,15 +12,14 @@ export default function Events() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
+  const [showAddEventModal, setShowAddEventModal] = useState(false);
+  const [newEvent, setNewEvent] = useState({
     eventName: '',
     durationMin: '',
     description: '',
     event_date: '',
     type: ''
   });
-  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     fetchEvents();
@@ -28,43 +27,37 @@ export default function Events() {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/get-events`);
+      setLoading(true);
+      const response = await fetch(`${BACKEND_URL}/events`);
       if (!response.ok) {
         throw new Error('Failed to fetch events');
       }
       const data = await response.json();
       setEvents(data);
-      setError(null);
     } catch (err) {
-      setError('Failed to load events');
-      console.error('Error fetching events:', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleAddEvent = async (e) => {
     e.preventDefault();
     try {
-      const endpoint = editingId 
-        ? `${BACKEND_URL}/supervisor/HR/update-event`
-        : `${BACKEND_URL}/supervisor/HR/add-events`;
-      
-      const response = await fetch(endpoint, {
-        method: editingId ? 'PUT' : 'POST',
+      const response = await fetch(`${BACKEND_URL}/supervisor/events/add`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(editingId ? { ...formData, eventID: editingId } : formData),
+        body: JSON.stringify(newEvent),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save event');
+        throw new Error('Failed to add event');
       }
 
-      setShowModal(false);
-      setEditingId(null);
-      setFormData({
+      setShowAddEventModal(false);
+      setNewEvent({
         eventName: '',
         durationMin: '',
         description: '',
@@ -73,56 +66,53 @@ export default function Events() {
       });
       fetchEvents();
     } catch (err) {
-      setError('Failed to save event. Please try again.');
-      console.error('Error saving event:', err);
+      setError(err.message);
     }
   };
 
-  const handleDelete = async (eventID) => {
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewEvent(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleDeleteEvent = async (eventID, eventName) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/supervisor/HR/delete-event`, {
-        method: 'DELETE',
+      const response = await fetch(`${BACKEND_URL}/supervisor/events/delete`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ eventID }),
+        body: JSON.stringify({ eventID, eventName }),
       });
 
       if (!response.ok) {
         throw new Error('Failed to delete event');
       }
 
+      const data = await response.json();
+      setError(null);
       fetchEvents();
     } catch (err) {
-      setError('Failed to delete event. Please try again.');
-      console.error('Error deleting event:', err);
+      setError(err.message);
     }
-  };
-
-  const handleEdit = (event) => {
-    setEditingId(event.eventID);
-    setFormData({
-      eventName: event.eventName,
-      durationMin: event.durationMin,
-      description: event.description,
-      event_date: event.event_date.split('T')[0],
-      type: event.type
-    });
-    setShowModal(true);
   };
 
   const isSupervisor = auth.isAuthenticated && auth.role === 'supervisor';
 
-  const formatDate = (dateString) => {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
       <Header />
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Events</h1>
+      <div className="container mx-auto px-4 py-20">
+        <motion.h1 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-4xl font-bold mb-8 text-center"
+        >
+          SpaceLand Events
+        </motion.h1>
 
         {error && (
           <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6">
@@ -131,141 +121,144 @@ export default function Events() {
         )}
 
         {isSupervisor && (
-          <button
-            onClick={() => setShowModal(true)}
-            className="mb-6 px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700"
-          >
-            Add Event
-          </button>
+          <div className="flex justify-end mb-6">
+            <button
+              onClick={() => setShowAddEventModal(true)}
+              className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition"
+            >
+              Add New Event
+            </button>
+          </div>
         )}
 
         {loading ? (
-          <p>Loading events...</p>
+          <p className="text-center">Loading events...</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {events.map(event => (
-              <div key={event.eventID} className="bg-gray-800 p-4 rounded-lg">
-                <h3 className="text-xl font-bold mb-2">{event.eventName}</h3>
-                <p className="text-gray-300 mb-2">{event.description}</p>
-                <p className="text-sm text-gray-400 mb-2">
-                  Date: {formatDate(event.event_date)}
-                </p>
-                <p className="text-sm text-gray-400 mb-2">
-                  Duration: {event.durationMin} minutes
-                </p>
-                <p className="text-sm text-gray-400 mb-4">
-                  Type: {event.type}
-                </p>
-                {isSupervisor && (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEdit(event)}
-                      className="px-3 py-1 bg-blue-600 rounded hover:bg-blue-700"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(event.eventID)}
-                      className="px-3 py-1 bg-red-600 rounded hover:bg-red-700"
-                    >
-                      Delete
-                    </button>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {events.map((event) => (
+              <motion.div
+                key={event.eventID}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-gray-800/50 rounded-lg overflow-hidden"
+              >
+                <div className="p-4">
+                  <h3 className="text-xl font-bold mb-2">{event.eventName}</h3>
+                  <p className="text-sm text-gray-300 mb-2">
+                    {new Date(event.event_date).toLocaleDateString()}
+                  </p>
+                  <p className="text-gray-300 mb-4">{event.description}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-400">
+                      Duration: {event.durationMin} minutes
+                    </span>
+                    <span className="text-sm font-semibold">
+                      Type: {event.type}
+                    </span>
                   </div>
-                )}
-              </div>
+                  {isSupervisor && (
+                    <div className="mt-4 flex justify-end space-x-2">
+                      <button className="px-3 py-1 bg-blue-600 rounded hover:bg-blue-700 transition">
+                        Edit
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteEvent(event.eventID, event.eventName)}
+                        className="px-3 py-1 bg-red-600 rounded hover:bg-red-700 transition"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
             ))}
           </div>
         )}
 
-        {showModal && (
+        {/* Add Event Modal */}
+        {showAddEventModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-            <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full">
-              <h2 className="text-xl font-bold mb-4">
-                {editingId ? 'Edit Event' : 'Add Event'}
-              </h2>
-              <form onSubmit={handleSubmit} className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full"
+            >
+              <h2 className="text-2xl font-bold mb-4">Add New Event</h2>
+              <form onSubmit={handleAddEvent} className="space-y-4">
                 <div>
                   <label className="block mb-1">Event Name</label>
                   <input
                     type="text"
-                    value={formData.eventName}
-                    onChange={(e) => setFormData({...formData, eventName: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-700 rounded"
+                    name="eventName"
+                    value={newEvent.eventName}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600"
                     required
                   />
                 </div>
                 <div>
                   <label className="block mb-1">Description</label>
                   <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-700 rounded"
+                    name="description"
+                    value={newEvent.description}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600"
                     rows="3"
                     required
                   />
                 </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block mb-1">Date</label>
+                    <input
+                      type="date"
+                      name="event_date"
+                      value={newEvent.event_date}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-1">Duration (minutes)</label>
+                    <input
+                      type="number"
+                      name="durationMin"
+                      value={newEvent.durationMin}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600"
+                      required
+                    />
+                  </div>
+                </div>
                 <div>
-                  <label className="block mb-1">Date</label>
+                  <label className="block mb-1">Event Type</label>
                   <input
-                    type="date"
-                    value={formData.event_date}
-                    onChange={(e) => setFormData({...formData, event_date: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-700 rounded"
+                    type="text"
+                    name="type"
+                    value={newEvent.type}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600"
                     required
                   />
                 </div>
-                <div>
-                  <label className="block mb-1">Duration (minutes)</label>
-                  <input
-                    type="number"
-                    value={formData.durationMin}
-                    onChange={(e) => setFormData({...formData, durationMin: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-700 rounded"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1">Type</label>
-                  <select
-                    value={formData.type}
-                    onChange={(e) => setFormData({...formData, type: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-700 rounded"
-                    required
-                  >
-                    <option value="">Select type</option>
-                    <option value="Show">Show</option>
-                    <option value="Performance">Performance</option>
-                    <option value="Workshop">Workshop</option>
-                    <option value="Special Event">Special Event</option>
-                  </select>
-                </div>
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-end space-x-4 mt-6">
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowModal(false);
-                      setEditingId(null);
-                      setFormData({
-                        eventName: '',
-                        durationMin: '',
-                        description: '',
-                        event_date: '',
-                        type: ''
-                      });
-                    }}
-                    className="px-4 py-2 bg-gray-600 rounded hover:bg-gray-700"
+                    onClick={() => setShowAddEventModal(false)}
+                    className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-purple-600 rounded hover:bg-purple-700"
+                    className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition"
                   >
-                    {editingId ? 'Update' : 'Add'}
+                    Add Event
                   </button>
                 </div>
               </form>
-            </div>
+            </motion.div>
           </div>
         )}
       </div>
