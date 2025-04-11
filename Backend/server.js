@@ -94,7 +94,8 @@ const routeMap = {
         '/supervisor/delete-item',//make
         '/supervisor/delete-meal-plan',//make
         '/supervisor/delete-ride',//make
-        '/supervisor/HR/delete-event'
+        '/supervisor/HR/delete-event',
+        '/supervisor/HR/schedule-delete'
     ],
 };
 

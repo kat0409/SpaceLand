@@ -275,6 +275,10 @@ function routes(req, res) {
         return actions.addEmployeeSchedule(req,res);
     }
 
+    if(url.startsWith('/supervisor/HR/schedule-delete') && method === "DELETE"){
+        return actions.deleteEmployeeSchedule(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }

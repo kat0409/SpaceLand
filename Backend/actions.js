@@ -2007,6 +2007,35 @@ const addEmployeeSchedule = (req, res) => {
     });
 };  
 
+const deleteEmployeeSchedule = (req, res) => {
+    let body = "";
+    req.on("data", (chunk) => (body += chunk.toString()));
+    req.on("end", () => {
+        const { EmployeeID, scheduleDate } = JSON.parse(body);
+    
+        if (!EmployeeID || !scheduleDate) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "EmployeeID and scheduleDate are required" }));
+        }
+    
+        pool.query(queries.deleteEmployeeSchedule, [EmployeeID, scheduleDate], (err, results) => {
+            if (err) {
+            console.error("Error deleting schedule:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Internal server error" }));
+            }
+    
+            if (results.affectedRows === 0) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "No matching schedule found" }));
+            }
+    
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Schedule deleted successfully" }));
+        });
+    });
+};  
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -2072,5 +2101,6 @@ module.exports = {
     clockOut,
     getEmployeeProfile,
     getFilteredEmployees,
-    addEmployeeSchedule
+    addEmployeeSchedule,
+    deleteEmployeeSchedule
 };  

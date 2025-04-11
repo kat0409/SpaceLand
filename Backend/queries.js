@@ -455,6 +455,12 @@ const addEmployeeSchedule = `
     VALUES (?, ?, ?, ?, ?, ?)
 `;
 
+const deleteEmployeeSchedule = `
+    DELETE FROM employee_schedule
+    WHERE EmployeeID = ? AND scheduleDate = ?
+`;
+
+
 module.exports = {
     getRides,
     getEmployees,
@@ -534,7 +540,8 @@ module.exports = {
     clockOut,
     getEmployeeProfile,
     getFilteredEmployees,
-    addEmployeeSchedule
+    addEmployeeSchedule,
+    deleteEmployeeSchedule
 };
 
 //checkMerchQuantity
