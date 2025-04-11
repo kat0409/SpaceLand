@@ -78,7 +78,8 @@ const routeMap = {
         '/supervisor/update-visitor-info',//make
         '/supervisor/update-operating-hours',//make
         '/supervisor/update-event-date',//make
-        '/supervisor/maintenance/complete-request'
+        '/supervisor/maintenance/complete-request',
+        '/supervisor/HR/update-event'
     ],
     'DELETE': [
         '/supervisor/delete-employee',
