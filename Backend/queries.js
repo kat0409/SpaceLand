@@ -394,6 +394,10 @@ const getMealPlanPrice = `
     WHERE mealPlanID = ?
 `;
 
+const getEvents = `
+    SELECT * FROM parkevent ORDER BY event_date
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -462,7 +466,8 @@ module.exports = {
     getSupervisorNames,
     getDepartmentNames,
     addMealPlanTransaction,
-    getMealPlanPrice
+    getMealPlanPrice,
+    getEvents
 };
 
 //checkMerchQuantity
