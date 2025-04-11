@@ -10,6 +10,9 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onren
 export default function HRSupervisorPortal() {
     const { auth } = useContext(AuthContext)
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(true);
+
+    console.log('HRSupervisorPortal rendered with auth:', auth);
 
     const [employees, setEmployees] = useState([]);
     const [visitorRecords, setVisitorRecords] = useState([]);
@@ -22,10 +25,54 @@ export default function HRSupervisorPortal() {
     });
 
     useEffect(() => {
+        console.log('Auth effect triggered with auth:', auth);
+        
+        // Check if auth is initialized
+        if (auth.role === null) {
+            console.log('Auth not initialized yet');
+            return; // Wait for auth to be initialized
+        }
+
         if(!auth.isAuthenticated || auth.role !== "supervisor"){
+            console.log('Not authenticated or not supervisor, redirecting to login');
             navigate('/employee-login');
+        } else {
+            console.log('Authentication successful, setting loading to false');
+            setIsLoading(false);
         }
     }, [auth, navigate]);
+
+    useEffect(() => {
+        console.log('Data fetching effect triggered');
+        if (!isLoading) {
+            console.log('Fetching data because not loading');
+            fetch(`${BACKEND_URL}/supervisor/HR/employees`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log('Employees data fetched:', data);
+                    setEmployees(data);
+                })
+                .catch(err => console.error('Employees Error:', err));
+            
+            fetch(`${BACKEND_URL}/supervisor/HR/attendance-revenue`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log('Attendance data fetched:', data);
+                    setAttendanceAndRevenueReport(data);
+                })
+                .catch(err => console.error('Attendance and Revenue Report Error:', err));
+            
+            fetch(`${BACKEND_URL}/supervisor/HR/visitors`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log('Visitor data fetched:', data);
+                    setVisitorRecords(data);
+                })
+                .catch(err => console.error('Visitor Records Error:', err));
+            
+            fetchFilteredReport();
+        }
+    }, [isLoading]);
 
     const handleFilterChange = (e) => {
         setFilters({ ...filters, [e.target.name]: e.target.value });
@@ -37,30 +84,27 @@ export default function HRSupervisorPortal() {
         if (filters.endDate) params.append('endDate', filters.endDate);
         if (filters.weatherCondition) params.append('weatherCondition', filters.weatherCondition);
 
-        fetch(`${BACKEND_URL}/supervisor/HR/attendance-revenue?${params.toString()}`) //only when you need to input specific data like filtering, etc.
+        fetch(`${BACKEND_URL}/supervisor/HR/attendance-revenue?${params.toString()}`)
             .then(res => res.json())
-            .then(data => setAttendanceAndRevenueReport(data))
+            .then(data => {
+                console.log('Filtered report data fetched:', data);
+                setAttendanceAndRevenueReport(data);
+            })
             .catch(err => console.error('Attendance and Revenue Report error: ', err));
     };
 
-    const supervisorID = localStorage.getItem('supervisorID');
+    console.log('Current loading state:', isLoading);
 
-    useEffect (() => {
-        fetch(`${BACKEND_URL}/supervisor/HR/employees`)
-            .then(res => res.json())
-            .then(data => setEmployees(data))
-            .catch(err => console.error('Employees Error:', err));
-        fetch(`${BACKEND_URL}/supervisor/HR/attendance-revenue`)
-            .then(res => res.json())
-            .then(data => setAttendanceAndRevenueReport(data))
-            .catch(err => console.error('Attendance and Revenue Report Error:', err));
-        fetch(`${BACKEND_URL}/supervisor/HR/visitors`)
-            .then(res => res.json())
-            .then(data => setVisitorRecords(data))
-            .catch(err => console.error('Visitor Records Error:', err));
-        fetchFilteredReport();
-    }, []);
+    if (isLoading) {
+        console.log('Rendering loading state');
+        return (
+            <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black flex items-center justify-center">
+                <div className="text-white text-xl">Loading...</div>
+            </div>
+        );
+    }
 
+    console.log('Rendering main content');
     return (
         <>
             <Header />
@@ -202,6 +246,6 @@ export default function HRSupervisorPortal() {
                 </button>
             </section>
             <Footer />
-            </>
-        );
+        </>
+    );
 }

@@ -247,6 +247,18 @@ function routes(req, res) {
         return actions.deleteEvent(req,res);
     }
 
+    if(url.startsWith('/employee/get-schedule') && method === "GET"){
+        return actions.getEmployeeSchedule(req,res);
+    }
+
+    if (url.startsWith('/employee/time-off-request') && method === 'POST') {
+        return actions.submitTimeOffRequest(req, res);
+    }
+
+    if(url.startsWith('/employee/clock-in') && method === "POST"){
+        return actions.clockIn(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }

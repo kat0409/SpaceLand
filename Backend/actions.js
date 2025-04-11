@@ -1245,7 +1245,7 @@ const markStockArrivals = (req,res) => {
 
         if (!merchandiseID || !quantityAdded || !arrivalDate || !notesToInsert || !reorderID) {
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "merchandiseID, quantityAdded, expectedArrivalDate, status, and notes are required." }));
+            res.end(JSON.stringify({ error: "merchandiseID, quantityOrdered, expectedArrivalDate, status, and notes are required." }));
             return;
         }
 
@@ -1715,8 +1715,9 @@ const getEvents = (req,res) => {
             res.end(JSON.stringify({error: "Internal server error"}));
             return;
         }
+        const eventID = results.insertId;
         res.writeHead(200, {"Content-Type":"application/json"});
-        res.end(JSON.stringify(results));
+        res.end(JSON.stringify({message: "Events fetched successfully", eventID}));
     });
 }
 
@@ -1868,6 +1869,92 @@ const deleteEvent = (req, res) => {
     });
 };
 
+const getEmployeeSchedule = (req, res) => {
+    const employeeID = req.url.split("/").pop();
+    pool.query(queries.getEmployeeSchedule, [employeeID], (err, results) => {
+        if (err) {
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Failed to fetch schedule" }));
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
+const requestTimeOff = (req, res) => {
+    let body = "";
+    req.on("data", chunk => (body += chunk));
+    req.on("end", () => {
+        const { EmployeeID, startDate, endDate, reason } = JSON.parse(body);
+        if (!EmployeeID || !startDate || !endDate || !reason) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Missing fields" }));
+        }
+        pool.query(queries.requestTimeOff, [EmployeeID, startDate, endDate, reason], (err, results) => {
+            if (err) {
+                res.writeHead(500, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Failed to request time off" }));
+            }
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Request submitted", requestID: results.insertId }));
+        });
+    });
+};
+
+const clockIn = (req, res) => {
+    let body = "";
+    req.on("data", chunk => (body += chunk));
+    req.on("end", () => {
+        const { EmployeeID } = JSON.parse(body);
+        const date = new Date().toISOString().split("T")[0];
+        pool.query(queries.clockIn, [EmployeeID, date], (err) => {
+            if (err) {
+                res.writeHead(500, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Clock-in failed" }));
+            }
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Clocked in" }));
+        });
+    });
+};
+
+const requestTimeOff = (req, res) => {
+    let body = "";
+    req.on("data", chunk => (body += chunk));
+    req.on("end", () => {
+        const { EmployeeID, startDate, endDate, reason } = JSON.parse(body);
+        if (!EmployeeID || !startDate || !endDate || !reason) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Missing fields" }));
+        }
+        pool.query(queries.requestTimeOff, [EmployeeID, startDate, endDate, reason], (err, results) => {
+            if (err) {
+                res.writeHead(500, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Failed to request time off" }));
+            }
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Request submitted", requestID: results.insertId }));
+        });
+    });
+};
+
+const clockIn = (req, res) => {
+    let body = "";
+    req.on("data", chunk => (body += chunk));
+    req.on("end", () => {
+        const { EmployeeID } = JSON.parse(body);
+        const date = new Date().toISOString().split("T")[0];
+        pool.query(queries.clockIn, [EmployeeID, date], (err) => {
+            if (err) {
+                res.writeHead(500, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Clock-in failed" }));
+            }
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Clocked in" }));
+        });
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -1926,5 +2013,8 @@ module.exports = {
     getEvents,
     addEvent,
     updateEvent,
-    deleteEvent
+    deleteEvent,
+    getEmployeeSchedule,
+    requestTimeOff,
+    clockIn
 };  
