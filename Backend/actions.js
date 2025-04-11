@@ -1410,7 +1410,7 @@ const getEmployeesForMaintenanceRequest = (req,res) => {
         res.writeHead(200, {"Content-Type":"application/json"});
         res.end(JSON.stringify(results));
     });
-}
+};
 
 const completeMaintenanceRequest = (req, res) => {
     let body = "";
@@ -1707,6 +1707,67 @@ const getMerchandiseSalesData = (req, res) => {
     res.end(JSON.stringify(mockSalesData));
 };
 
+// Get all events
+const getEvents = (req, res) => {
+    pool.query(queries.getEvents, (err, results) => {
+        if (err) {
+            console.error("Error fetching events:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
+// Add new event
+const addEvent = (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (error) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+
+        const { name, description, date, time, location, imageUrl, capacity, price } = parsedBody;
+
+        if (!name || !description || !date || !time || !location || !imageUrl || !capacity || !price) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "All fields are required" }));
+            return;
+        }
+
+        pool.query(
+            queries.addEvent,
+            [name, description, date, time, location, imageUrl, capacity, price],
+            (err, results) => {
+                if (err) {
+                    console.error("Error adding event:", err);
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ error: "Internal server error" }));
+                    return;
+                }
+
+                res.writeHead(201, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ 
+                    message: "Event added successfully", 
+                    eventID: results.insertId 
+                }));
+            }
+        );
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -1761,5 +1822,7 @@ module.exports = {
     addMealPlanTransaction,
     deleteMerchandise,
     updateMerchandise,
-    getMerchandiseSalesData
+    getMerchandiseSalesData,
+    getEvents,
+    addEvent
 };  

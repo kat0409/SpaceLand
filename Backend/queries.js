@@ -388,6 +388,12 @@ const getMealPlanPrice = `
     WHERE mealPlanID = ?
 `;
 
+// Events Queries
+const getEvents = 'SELECT * FROM events ORDER BY date, time';
+const addEvent = 'INSERT INTO events (name, description, date, time, location, imageUrl, capacity, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+const updateEvent = 'UPDATE events SET name = ?, description = ?, date = ?, time = ?, location = ?, imageUrl = ?, capacity = ?, price = ? WHERE eventID = ?';
+const deleteEvent = 'DELETE FROM events WHERE eventID = ?';
+
 module.exports = {
     getRides,
     getEmployees,
@@ -456,7 +462,11 @@ module.exports = {
     getSupervisorNames,
     getDepartmentNames,
     addMealPlanTransaction,
-    getMealPlanPrice
+    getMealPlanPrice,
+    getEvents,
+    addEvent,
+    updateEvent,
+    deleteEvent
 };
 
 //checkMerchQuantity

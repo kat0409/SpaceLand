@@ -231,6 +231,14 @@ function routes(req, res) {
         return actions.addMealPlanTransaction(req,res);
     }
 
+    if(url.startsWith('/events') && method === 'GET'){
+        return actions.getEvents(req,res);
+    }
+
+    if(url.startsWith('/supervisor/events/add') && method === 'POST'){
+        return actions.addEvent(req,res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
