@@ -440,6 +440,16 @@ const getEmployeeProfile = `
     WHERE EmployeeID = ?
 `;
 
+const getFilteredEmployees = (conditions) => `
+    SELECT 
+        e.EmployeeID, e.FirstName, e.LastName, e.Email, e.Address, 
+        e.Department, e.username, e.employmentStatus, e.dateOfBirth,
+        s.FirstName AS SupervisorFirstName, s.LastName AS SupervisorLastName
+    FROM employee e
+    LEFT JOIN supervisors s ON e.SupervisorID = s.SupervisorID
+    ${conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : ''}
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -517,7 +527,8 @@ module.exports = {
     requestTimeOff,
     clockIn,
     clockOut,
-    getEmployeeProfile
+    getEmployeeProfile,
+    getFilteredEmployees
 };
 
 //checkMerchQuantity

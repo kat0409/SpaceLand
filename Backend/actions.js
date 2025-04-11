@@ -1948,6 +1948,42 @@ const getEmployeeProfile = (req, res) => {
     });
 };
 
+const getFilteredEmployees = (req, res) => {
+    const parsedUrl = require("url").parse(req.url, true);
+    const { name, department, status } = parsedUrl.query;
+  
+    const conditions = [];
+    const values = [];
+  
+    if (name) {
+        conditions.push("(e.FirstName LIKE CONCAT('%', ?, '%') OR e.LastName LIKE CONCAT('%', ?, '%'))");
+        values.push(name, name);
+    }
+  
+    if (department) {
+        conditions.push("e.Department = ?");
+        values.push(department);
+    }
+  
+    if (status) {
+        conditions.push("e.employmentStatus = ?");
+        values.push(status);
+    }
+  
+    const sql = queries.getFilteredEmployees(conditions);
+  
+    pool.query(sql, values, (err, results) => {
+        if (err) {
+            console.error("Error fetching employees:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Internal server error" }));
+        }
+    
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -2011,5 +2047,6 @@ module.exports = {
     requestTimeOff,
     clockIn,
     clockOut,
-    getEmployeeProfile
+    getEmployeeProfile,
+    getFilteredEmployees
 };  
