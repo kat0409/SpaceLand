@@ -389,10 +389,10 @@ const getMealPlanPrice = `
 `;
 
 // Events Queries
-const getEvents = 'SELECT * FROM events ORDER BY date, time';
-const addEvent = 'INSERT INTO events (name, description, date, time, location, imageUrl, capacity, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-const updateEvent = 'UPDATE events SET name = ?, description = ?, date = ?, time = ?, location = ?, imageUrl = ?, capacity = ?, price = ? WHERE eventID = ?';
-const deleteEvent = 'DELETE FROM events WHERE eventID = ?';
+const getEvents = 'SELECT * FROM parkevent ORDER BY event_date';
+const addEvent = 'INSERT INTO parkevent (eventName, durationMin, description, event_date, type) VALUES (?, ?, ?, ?, ?)';
+const updateEvent = 'UPDATE parkevent SET eventName = ?, durationMin = ?, description = ?, event_date = ?, type = ? WHERE eventID = ?';
+const deleteEvent = 'DELETE FROM parkevent WHERE eventID = ?';
 
 module.exports = {
     getRides,

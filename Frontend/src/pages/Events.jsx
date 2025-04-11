@@ -14,14 +14,11 @@ export default function Events() {
   const [error, setError] = useState(null);
   const [showAddEventModal, setShowAddEventModal] = useState(false);
   const [newEvent, setNewEvent] = useState({
-    name: '',
+    eventName: '',
+    durationMin: '',
     description: '',
-    date: '',
-    time: '',
-    location: '',
-    imageUrl: '',
-    capacity: '',
-    price: ''
+    event_date: '',
+    type: ''
   });
 
   useEffect(() => {
@@ -61,14 +58,11 @@ export default function Events() {
 
       setShowAddEventModal(false);
       setNewEvent({
-        name: '',
+        eventName: '',
+        durationMin: '',
         description: '',
-        date: '',
-        time: '',
-        location: '',
-        imageUrl: '',
-        capacity: '',
-        price: ''
+        event_date: '',
+        type: ''
       });
       fetchEvents();
     } catch (err) {
@@ -82,6 +76,28 @@ export default function Events() {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleDeleteEvent = async (eventID, eventName) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/supervisor/events/delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ eventID, eventName }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete event');
+      }
+
+      const data = await response.json();
+      setError(null);
+      fetchEvents();
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   const isSupervisor = auth.isAuthenticated && auth.role === 'supervisor';
@@ -121,32 +137,23 @@ export default function Events() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((event) => (
               <motion.div
-                key={event.id}
+                key={event.eventID}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="bg-gray-800/50 rounded-lg overflow-hidden"
               >
-                <div className="relative h-48">
-                  <img
-                    src={event.imageUrl || 'https://via.placeholder.com/400x200'}
-                    alt={event.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                    <h3 className="text-xl font-bold">{event.name}</h3>
-                    <p className="text-sm text-gray-300">
-                      {new Date(event.date).toLocaleDateString()} at {event.time}
-                    </p>
-                  </div>
-                </div>
                 <div className="p-4">
+                  <h3 className="text-xl font-bold mb-2">{event.eventName}</h3>
+                  <p className="text-sm text-gray-300 mb-2">
+                    {new Date(event.event_date).toLocaleDateString()}
+                  </p>
                   <p className="text-gray-300 mb-4">{event.description}</p>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-400">
-                      {event.location}
+                      Duration: {event.durationMin} minutes
                     </span>
                     <span className="text-sm font-semibold">
-                      ${event.price}
+                      Type: {event.type}
                     </span>
                   </div>
                   {isSupervisor && (
@@ -154,7 +161,10 @@ export default function Events() {
                       <button className="px-3 py-1 bg-blue-600 rounded hover:bg-blue-700 transition">
                         Edit
                       </button>
-                      <button className="px-3 py-1 bg-red-600 rounded hover:bg-red-700 transition">
+                      <button 
+                        onClick={() => handleDeleteEvent(event.eventID, event.eventName)}
+                        className="px-3 py-1 bg-red-600 rounded hover:bg-red-700 transition"
+                      >
                         Delete
                       </button>
                     </div>
@@ -179,8 +189,8 @@ export default function Events() {
                   <label className="block mb-1">Event Name</label>
                   <input
                     type="text"
-                    name="name"
-                    value={newEvent.name}
+                    name="eventName"
+                    value={newEvent.eventName}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600"
                     required
@@ -202,19 +212,19 @@ export default function Events() {
                     <label className="block mb-1">Date</label>
                     <input
                       type="date"
-                      name="date"
-                      value={newEvent.date}
+                      name="event_date"
+                      value={newEvent.event_date}
                       onChange={handleInputChange}
                       className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block mb-1">Time</label>
+                    <label className="block mb-1">Duration (minutes)</label>
                     <input
-                      type="time"
-                      name="time"
-                      value={newEvent.time}
+                      type="number"
+                      name="durationMin"
+                      value={newEvent.durationMin}
                       onChange={handleInputChange}
                       className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600"
                       required
@@ -222,50 +232,15 @@ export default function Events() {
                   </div>
                 </div>
                 <div>
-                  <label className="block mb-1">Location</label>
+                  <label className="block mb-1">Event Type</label>
                   <input
                     type="text"
-                    name="location"
-                    value={newEvent.location}
+                    name="type"
+                    value={newEvent.type}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600"
                     required
                   />
-                </div>
-                <div>
-                  <label className="block mb-1">Image URL</label>
-                  <input
-                    type="url"
-                    name="imageUrl"
-                    value={newEvent.imageUrl}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block mb-1">Capacity</label>
-                    <input
-                      type="number"
-                      name="capacity"
-                      value={newEvent.capacity}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-1">Price ($)</label>
-                    <input
-                      type="number"
-                      name="price"
-                      value={newEvent.price}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600"
-                      required
-                    />
-                  </div>
                 </div>
                 <div className="flex justify-end space-x-4 mt-6">
                   <button
