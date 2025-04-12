@@ -295,6 +295,26 @@ function routes(req, res) {
         return actions.deleteEmployee(req,res);
     }
 
+    if(url.startsWith('/supervisor/merchandise/sales-report') && method === "GET"){
+        return actions.getFilteredSalesReport(req,res);
+    }
+
+    if(url.startsWith('/supervisor/HR/employee-names') && method === "GET"){
+        return actions.getEmployeeNames(req,res);
+    }
+
+    if(url.startsWith('/supervisor/HR/get-schedule') && method === "GET"){
+        return actions.getEmployeeScheduleForSup(req,res);
+    }
+
+    if(url.startsWith('/supervisor/HR/get-specific-schedule') && method === "GET"){
+        return actions.getSpecificEmployeeSchedule(req,res);
+    }
+
+    if (url.startsWith('/supervisor/HR/shifts-with-names') && method === "GET") {
+        return actions.getSchedulesWithNames(req, res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }

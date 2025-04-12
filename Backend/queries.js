@@ -457,6 +457,12 @@ const deleteEmployeeSchedule = `
     WHERE EmployeeID = ? AND scheduleDate = ?
 `;
 
+const getSpecificEmployeeSchedule = `
+    SELECT e.scheduleDate
+    FROM employee_schedule e
+    WHERE e.EmployeeID = ?
+`;
+
 const getTimeOffRequests = `
     SELECT r.requestID, r.EmployeeID, e.FirstName, e.LastName, r.startDate, r.endDate, r.reason, r.status
     FROM employee_timeoff_request r
@@ -492,12 +498,14 @@ const salesReport = `
     SELECT
     d.transactionDate,
 
+    -- Total sales
     (
         (SELECT COUNT(*) FROM tickettransactions WHERE DATE(transactionDate) = d.transactionDate) +
         (SELECT COUNT(*) FROM mealplantransactions WHERE DATE(transactionDate) = d.transactionDate) +
         (SELECT COUNT(*) FROM merchandisetransactions WHERE DATE(transactionDate) = d.transactionDate)
     ) AS totalSales,
 
+    -- Total revenue
     (
         IFNULL((
         SELECT SUM(tix.price)
@@ -518,6 +526,7 @@ const salesReport = `
         ), 0)
     ) AS totalRevenue,
 
+    -- Average revenue per item
     (
         (
         IFNULL((SELECT SUM(tix.price)
@@ -540,57 +549,69 @@ const salesReport = `
         )
     ) AS avgRevenuePerItem,
 
-    (SELECT t2.ticketType
+        -- Best-selling ticket type
+    IFNULL((
+    SELECT t2.ticketType
     FROM tickettransactions t2
     WHERE DATE(t2.transactionDate) = d.transactionDate
     GROUP BY t2.ticketType
     ORDER BY COUNT(*) DESC
     LIMIT 1
-    ) AS bestSellingTicket,
+    ), 'N/A') AS bestSellingTicket,
 
-    (SELECT t2.ticketType
+    -- Worst-selling ticket type
+    IFNULL((
+    SELECT t2.ticketType
     FROM tickettransactions t2
     WHERE DATE(t2.transactionDate) = d.transactionDate
     GROUP BY t2.ticketType
     ORDER BY COUNT(*) ASC
     LIMIT 1
-    ) AS worstSellingTicket,
-        
-    (SELECT mp.mealPlanName
+    ), 'N/A') AS worstSellingTicket,
+
+    -- Best-selling meal plan
+    IFNULL((
+    SELECT mp.mealPlanName
     FROM mealplantransactions m2
     JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID
     WHERE DATE(m2.transactionDate) = d.transactionDate
     GROUP BY mp.mealPlanName
     ORDER BY COUNT(*) DESC
     LIMIT 1
-    ) AS bestSellingMealPlan,
+    ), 'N/A') AS bestSellingMealPlan,
 
-    (SELECT mp.mealPlanName
+    -- Worst-selling meal plan
+    IFNULL((
+    SELECT mp.mealPlanName
     FROM mealplantransactions m2
     JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID
     WHERE DATE(m2.transactionDate) = d.transactionDate
     GROUP BY mp.mealPlanName
     ORDER BY COUNT(*) ASC
     LIMIT 1
-    ) AS worstSellingMealPlan,
+    ), 'N/A') AS worstSellingMealPlan,
 
-    (SELECT m.itemName
+    -- Best-selling merch
+    IFNULL((
+    SELECT m.itemName
     FROM merchandisetransactions mt2
     JOIN merchandise m ON mt2.merchandiseID = m.merchandiseID
     WHERE DATE(mt2.transactionDate) = d.transactionDate
     GROUP BY m.itemName
     ORDER BY COUNT(*) DESC
     LIMIT 1
-    ) AS bestSellingMerch,
+    ), 'N/A') AS bestSellingMerch,
 
-    (SELECT m.itemName
+    -- Worst-selling merch
+    IFNULL((
+    SELECT m.itemName
     FROM merchandisetransactions mt2
     JOIN merchandise m ON mt2.merchandiseID = m.merchandiseID
     WHERE DATE(mt2.transactionDate) = d.transactionDate
     GROUP BY m.itemName
     ORDER BY COUNT(*) ASC
     LIMIT 1
-    ) AS worstSellingMerch
+    ), 'N/A') AS worstSellingMerch
 
     FROM (
     SELECT DISTINCT DATE(transactionDate) AS transactionDate
@@ -601,9 +622,28 @@ const salesReport = `
         UNION ALL
         SELECT transactionDate FROM merchandisetransactions
     ) AS combined
-    WHERE DATE(transactionDate) BETWEEN '2025-04-01' AND '2025-04-11'
+    WHERE DATE(transactionDate) BETWEEN ? AND ?
     ) d
     ORDER BY d.transactionDate;
+`;
+
+const getEmployeeNames = `
+    SELECT DISTINCT e.EmployeeID, CONCAT(e.FirstName, ' ', e.LastName) AS FullName
+    FROM employee e
+    JOIN employee_schedule es ON es.EmployeeID = e.EmployeeID;
+`;
+
+const getEmployeeScheduleForSup  = `
+    SELECT * FROM employee_schedule;
+`;
+
+const getSchedulesWithNames = `
+    SELECT 
+        e.EmployeeID, 
+        CONCAT(e.FirstName, ' ', e.LastName) AS FullName, 
+        es.scheduleDate
+    FROM employee_schedule es
+    JOIN employee e ON es.EmployeeID = e.EmployeeID;
 `;
 
 module.exports = {
@@ -690,7 +730,12 @@ module.exports = {
     getTimeOffRequests,
     updateTimeOffRequestStatus,
     updateEmployeeProfile,
-    archiveEmployeeData
+    archiveEmployeeData,
+    salesReport,
+    getEmployeeNames,
+    getEmployeeScheduleForSup,
+    getSpecificEmployeeSchedule,
+    getSchedulesWithNames
 };
 
 //checkMerchQuantity

@@ -24,7 +24,7 @@ export default function SupervisorPortal() {
     const [currentItem, setCurrentItem] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const {logout} = useContext(AuthContext);
-    const [filters, setFilters] = useState({
+    /*const [filters, setFilters] = useState({
         startDate: '',
         endDate: '',
         ticketType: '',
@@ -33,16 +33,45 @@ export default function SupervisorPortal() {
         maxSpent: '',
         purchaseType: '',
         merchandiseItem: ''
+    });*/
+    const [filters, setFilters] = useState({
+        startDate: "",
+        endDate: "",
+        transactionType: "",
+        bestOnly: "0"
     });
     const [notification, setNotification] = useState({ message: '', type: '' });
 
-    const fetchFilteredReport = () => {
+    /*const fetchFilteredReport = () => {
         const params = new URLSearchParams(filters);
         fetch(`${BACKEND_URL}/supervisor/merchandise/visitor-purchases?${params.toString()}`)
             .then(res => res.json())
             .then(data => setVisitorPurchasesReport(data))
             .catch(err => console.error('Filtered report error:', err));
-    };
+    };*/
+
+    const fetchFilteredReport = async () => {
+        try {
+            const params = new URLSearchParams();
+        
+            if (filters.startDate) params.append("startDate", filters.startDate);
+            if (filters.endDate) params.append("endDate", filters.endDate);
+            if (filters.transactionType) params.append("transactionType", filters.transactionType);
+            if (filters.bestOnly) params.append("bestOnly", filters.bestOnly);
+        
+            const response = await fetch(`https://spaceland.onrender.com/supervisor/merchandise/sales-report?${params.toString()}`);
+            const data = await response.json();
+        
+        if (!Array.isArray(data)) {
+            console.error("Unexpected sales data:", data);
+            return;
+        }
+
+            setSalesData(data); 
+        } catch (error) {
+            console.error("Error fetching sales report:", error);
+        }
+    };      
     
     const showNotification = (message, type = 'success') => {
         setNotification({ message, type });
@@ -165,7 +194,7 @@ export default function SupervisorPortal() {
             });
         
         // Fetch merchandise sales data for charts
-        fetch(`${BACKEND_URL}/supervisor/merchandise/sales-data`)
+        /*fetch(`${BACKEND_URL}/supervisor/merchandise/sales-data`)
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
@@ -174,10 +203,14 @@ export default function SupervisorPortal() {
                     console.error("Unexpected sales data:", data);
                 }
             })
-            .catch(err => console.error("Error fetching sales data:", err));
+            .catch(err => console.error("Error fetching sales data:", err));*/
             
         fetchFilteredReport();
     }, []);
+
+    useEffect(() => {
+        fetchFilteredReport();
+    },[filters]);
 
     return (
         <>
@@ -433,69 +466,39 @@ export default function SupervisorPortal() {
                         <MerchandiseSalesChart salesData={salesData} />
                         
                         <div className="bg-white/10 p-4 rounded-xl mb-6">
-                            <h2 className="text-lg mb-2 font-semibold">Filter Report</h2>
+                            <h2 className="text-lg mb-2 font-semibold">Sales Report Filters</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <input 
-                                    type="date" 
-                                    placeholder="Start Date" 
-                                    value={filters.startDate}
-                                    onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-                                    className="w-full p-2 rounded bg-black/50 text-white border border-gray-700"
+                                type="date" 
+                                value={filters.startDate}
+                                onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+                                className="w-full p-2 rounded bg-black/50 text-white border border-gray-700"
                                 />
                                 <input 
-                                    type="date" 
-                                    placeholder="End Date" 
-                                    value={filters.endDate}
-                                    onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-                                    className="w-full p-2 rounded bg-black/50 text-white border border-gray-700"
+                                type="date" 
+                                value={filters.endDate}
+                                onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+                                className="w-full p-2 rounded bg-black/50 text-white border border-gray-700"
                                 />
                                 <select 
-                                    value={filters.ticketType}
-                                    onChange={(e) => setFilters({ ...filters, ticketType: e.target.value })}
-                                    className="w-full p-2 rounded bg-black/50 text-white border border-gray-700"
+                                value={filters.transactionType}
+                                onChange={(e) => setFilters({ ...filters, transactionType: e.target.value })}
+                                className="w-full p-2 rounded bg-black/50 text-white border border-gray-700"
                                 >
-                                    <option value="">All Ticket Types</option>
-                                    <option value="General">General</option>
-                                    <option value="Cosmic">Cosmic</option>
+                                <option value="all">All Transactions</option>
+                                <option value="ticket">Tickets</option>
+                                <option value="mealplan">Meal Plans</option>
+                                <option value="merch">Merchandise</option>
                                 </select>
-                                <input 
-                                    type="text" 
-                                    placeholder="Visitor Name" 
-                                    value={filters.visitorName}
-                                    onChange={(e) => setFilters({ ...filters, visitorName: e.target.value })}
-                                    className="w-full p-2 rounded bg-black/50 text-white border border-gray-700"
+                                <label className="text-white">
+                                <input
+                                    type="checkbox"
+                                    checked={filters.bestOnly === "1"}
+                                    onChange={(e) => setFilters({ ...filters, bestOnly: e.target.checked ? "1" : "0" })}
+                                    className="mr-2"
                                 />
-                                <input 
-                                    type="number" 
-                                    placeholder="Min Total Spent" 
-                                    value={filters.minSpent}
-                                    onChange={(e) => setFilters({ ...filters, minSpent: e.target.value })}
-                                    className="w-full p-2 rounded bg-black/50 text-white border border-gray-700"
-                                />
-                                <input 
-                                    type="number" 
-                                    placeholder="Max Total Spent" 
-                                    value={filters.maxSpent}
-                                    onChange={(e) => setFilters({ ...filters, maxSpent: e.target.value })}
-                                    className="w-full p-2 rounded bg-black/50 text-white border border-gray-700"
-                                />
-                                <select 
-                                    value={filters.purchaseType}
-                                    onChange={(e) => setFilters({ ...filters, purchaseType: e.target.value })}
-                                    className="w-full p-2 rounded bg-black/50 text-white border border-gray-700"
-                                >
-                                    <option value="">All Purchases</option>
-                                    <option value="tickets">Tickets Only</option>
-                                    <option value="merchandise">Merchandise Only</option>
-                                    <option value="both">Both</option>
-                                </select>
-                                <input 
-                                    type="text" 
-                                    placeholder="Merchandise Item" 
-                                    value={filters.merchandiseItem}
-                                    onChange={(e) => setFilters({ ...filters, merchandiseItem: e.target.value })}
-                                    className="w-full p-2 rounded bg-black/50 text-white border border-gray-700"
-                                />
+                                Best-Sellers Only
+                                </label>
                             </div>
                             <button 
                                 className="mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded transition"
@@ -506,27 +509,55 @@ export default function SupervisorPortal() {
                         </div>
                         
                         <div className="bg-white/10 p-6 rounded-xl">
-                            <h2 className="text-2xl font-semibold mb-4">Visitor Purchases Report</h2>
+                            <h2 className="text-2xl font-semibold mb-4">Sales Report</h2>
                             <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-                                    <thead className="text-left text-purple-300">
-                                        <tr>
-                                            <th className="p-2">Visitor</th>
-                                            <th className="p-2">Ticket Type</th>
-                                            <th className="p-2">Merchandise</th>
-                                            <th className="p-2">Total Spent</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {visitorPurchasesReport.map((v, idx) => (
-                                            <tr key={idx} className="border-t border-white/10 hover:bg-white/5">
-                                                <td className="p-2">{v.Visitor_Name}</td>
-                                                <td className="p-2">{v.Ticket_Type || 'N/A'}</td>
-                                                <td className="p-2">{v.Merchandise_Bought || 'N/A'}</td>
-                                                <td className="p-2">${parseFloat(v.Merchandise_Total_Spent || 0).toFixed(2)}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
+                                <table className="w-full text-sm text-white">
+                                <thead className="text-left text-purple-300">
+                                    <tr>
+                                    <th className="p-2">Date</th>
+                                    {filters.bestOnly === "0" && <>
+                                        <th className="p-2">Total Sales</th>
+                                        <th className="p-2">Revenue</th>
+                                        <th className="p-2">Avg Revenue</th>
+                                    </>}
+                                    {["all", "ticket"].includes(filters.transactionType) && <>
+                                        <th className="p-2">Best Ticket</th>
+                                        {filters.bestOnly === "0" && <th className="p-2">Worst Ticket</th>}
+                                    </>}
+                                    {["all", "mealplan"].includes(filters.transactionType) && <>
+                                        <th className="p-2">Best Meal Plan</th>
+                                        {filters.bestOnly === "0" && <th className="p-2">Worst Meal Plan</th>}
+                                    </>}
+                                    {["all", "merch"].includes(filters.transactionType) && <>
+                                        <th className="p-2">Best Merch</th>
+                                        {filters.bestOnly === "0" && <th className="p-2">Worst Merch</th>}
+                                    </>}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {salesData.map((row, idx) => (
+                                    <tr key={idx} className="border-t border-white/10 hover:bg-white/5">
+                                        <td className="p-2">{row.transactionDate}</td>
+                                        {filters.bestOnly === "0" && <>
+                                        <td className="p-2">{row.totalSales}</td>
+                                        <td className="p-2">${parseFloat(row.totalRevenue).toFixed(2)}</td>
+                                        <td className="p-2">${parseFloat(row.avgRevenuePerItem).toFixed(2)}</td>
+                                        </>}
+                                        {["all", "ticket"].includes(filters.transactionType) && <>
+                                        <td className="p-2">{row.bestSellingTicket}</td>
+                                        {filters.bestOnly === "0" && <td className="p-2">{row.worstSellingTicket}</td>}
+                                        </>}
+                                        {["all", "mealplan"].includes(filters.transactionType) && <>
+                                        <td className="p-2">{row.bestSellingMealPlan}</td>
+                                        {filters.bestOnly === "0" && <td className="p-2">{row.worstSellingMealPlan}</td>}
+                                        </>}
+                                        {["all", "merch"].includes(filters.transactionType) && <>
+                                        <td className="p-2">{row.bestSellingMerch}</td>
+                                        {filters.bestOnly === "0" && <td className="p-2">{row.worstSellingMerch}</td>}
+                                        </>}
+                                    </tr>
+                                    ))}
+                                </tbody>
                                 </table>
                             </div>
                         </div>

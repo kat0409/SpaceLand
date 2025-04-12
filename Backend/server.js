@@ -50,7 +50,12 @@ const routeMap = {
         '/employee/get-schedule',
         '/employee/profile',
         '/supervisor/HR/get-employees-params',
-        '/supervisor/HR/time-off-request'
+        '/supervisor/HR/time-off-request',
+        '/supervisor/merchandise/sales-report',
+        '/supervisor/HR/employee-names',
+        '/supervisor/HR/get-schedule',
+        '/supervisor/HR/get-specific-schedule',
+        '/supervisor/HR/shifts-with-names'
     ],
     'POST': [
         '/supervisor/HR/add-employee', 
@@ -89,7 +94,8 @@ const routeMap = {
         '/supervisor/maintenance/complete-request',
         '/supervisor/HR/update-event',
         '/employee/clock-out',
-        '/supervisor/HR/update-time-off-request'
+        '/supervisor/HR/update-time-off-request',
+        '/supervisor/HR/update-employee-profile'
     ],
     'DELETE': [
         '/supervisor/delete-employee',
