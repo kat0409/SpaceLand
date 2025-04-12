@@ -7,6 +7,7 @@ import EmployeeManagement from './EmployeeManagement';
 import EmployeeScheduleDisplay from '../components/EmployeeScheduleDisplay';
 import DeleteScheduleForm from '../components/DeleteScheduleForm';
 import EmployeeProfileForm from '../components/EmployeeProfileUpdateForm';
+import FireEmployeeForm from '../components/FireEmployeeForm';
 import ScheduleForm from '../components/ScheduleForm';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
