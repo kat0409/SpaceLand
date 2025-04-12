@@ -655,18 +655,64 @@ const getTransactionSummaryReport = `
 const getBestWorstSellersReport = `
     SELECT
     'ticket' AS type,
-    (SELECT ticketType FROM tickettransactions WHERE DATE(transactionDate) BETWEEN ? AND ? GROUP BY ticketType ORDER BY COUNT(*) DESC LIMIT 1) AS best,
-    (SELECT ticketType FROM tickettransactions WHERE DATE(transactionDate) BETWEEN ? AND ? GROUP BY ticketType ORDER BY COUNT(*) ASC LIMIT 1) AS worst
+    (
+        SELECT ticketType
+        FROM tickettransactions
+        WHERE DATE(transactionDate) BETWEEN ? AND ?
+        GROUP BY ticketType
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) AS best,
+    (
+        SELECT ticketType
+        FROM tickettransactions
+        WHERE DATE(transactionDate) BETWEEN ? AND ?
+        GROUP BY ticketType
+        ORDER BY COUNT(*) ASC
+        LIMIT 1
+    ) AS worst
     UNION ALL
     SELECT
     'mealplan',
-    (SELECT mp.mealPlanName FROM mealplantransactions m JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID WHERE DATE(m.transactionDate) BETWEEN ? AND ? GROUP BY mp.mealPlanName ORDER BY COUNT(*) DESC LIMIT 1),
-    (SELECT mp.mealPlanName FROM mealplantransactions m JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID WHERE DATE(m.transactionDate) BETWEEN ? AND ? GROUP BY mp.mealPlanName ORDER BY COUNT(*) ASC LIMIT 1)
+    (
+        SELECT mp.mealPlanName
+        FROM mealplantransactions m
+        JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
+        WHERE DATE(m.transactionDate) BETWEEN ? AND ?
+        GROUP BY mp.mealPlanName
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ),
+    (
+        SELECT mp.mealPlanName
+        FROM mealplantransactions m
+        JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
+        WHERE DATE(m.transactionDate) BETWEEN ? AND ?
+        GROUP BY mp.mealPlanName
+        ORDER BY COUNT(*) ASC
+        LIMIT 1
+    )
     UNION ALL
     SELECT
     'merch',
-    (SELECT m.itemName FROM merchandisetransactions mt JOIN merchandise m ON mt.merchandiseID = m.merchandiseID WHERE DATE(mt.transactionDate) BETWEEN ? AND ? GROUP BY m.itemName ORDER BY COUNT(*) DESC LIMIT 1),
-    (SELECT m.itemName FROM merchandisetransactions mt JOIN merchandise m ON mt.merchandiseID = m.merchandiseID WHERE DATE(mt.transactionDate) BETWEEN ? AND ? GROUP BY m.itemName ORDER BY COUNT(*) ASC LIMIT 1);
+    (
+        SELECT m.itemName
+        FROM merchandisetransactions mt
+        JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+        WHERE DATE(mt.transactionDate) BETWEEN ? AND ?
+        GROUP BY m.itemName
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ),
+    (
+        SELECT m.itemName
+        FROM merchandisetransactions mt
+        JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+        WHERE DATE(mt.transactionDate) BETWEEN ? AND ?
+        GROUP BY m.itemName
+        ORDER BY COUNT(*) ASC
+        LIMIT 1
+    );
 `;
 
 

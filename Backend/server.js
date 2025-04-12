@@ -57,7 +57,7 @@ const routeMap = {
         '/supervisor/HR/get-specific-schedule',
         '/supervisor/HR/shifts-with-names',
         '/supervisor/merchandise/transaction-summary',
-        '/supervisor/merchandise/best-sellers'
+        '/supervisor/merchandise/best-worst'
     ],
     'POST': [
         '/supervisor/HR/add-employee', 

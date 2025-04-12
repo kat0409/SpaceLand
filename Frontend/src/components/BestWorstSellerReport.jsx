@@ -33,7 +33,7 @@ export default function BestWorstSellerReport() {
         groupBy
       }).toString();
 
-      const res = await fetch(`${BACKEND_URL}/supervisor/merchandise/best-worst-sellers?${query}`);
+      const res = await fetch(`${BACKEND_URL}/supervisor/merchandise/best-worst?${query}`);
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.error || "Failed to fetch report");
