@@ -194,6 +194,7 @@ export default function HRSupervisorPortal() {
                 {activeTab === 'employeeManagement' && (
                     <div>
                         <EmployeeProfileForm/>
+                        <FireEmployeeForm/>
                         {/* Place employee profile filtering/editing UI here */}
                     </div>
                 )}

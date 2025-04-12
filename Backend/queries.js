@@ -630,7 +630,7 @@ const salesReport = `
 const getEmployeeNames = `
     SELECT DISTINCT e.EmployeeID, CONCAT(e.FirstName, ' ', e.LastName) AS FullName
     FROM employee e
-    JOIN employee_schedule es ON es.EmployeeID = e.EmployeeID;
+    LEFT JOIN employee_schedule es ON es.EmployeeID = e.EmployeeID;
 `;
 
 const getEmployeeScheduleForSup  = `

@@ -71,19 +71,19 @@ export default function FireEmployeeForm() {
         </div>
       )}
 
-      <select
+        <select
         value={selectedEmployeeID}
         onChange={(e) => setSelectedEmployeeID(e.target.value)}
         className="w-full p-2 rounded"
         required
-      >
+        >
         <option value="">Select an Employee to Fire</option>
         {employees.map(emp => (
-          <option key={emp.EmployeeID} value={emp.EmployeeID}>
-            {emp.FirstName} {emp.LastName}
-          </option>
+            <option key={emp.EmployeeID} value={emp.EmployeeID}>
+            {emp.FullName}
+            </option>
         ))}
-      </select>
+        </select>
 
       <button
         type="submit"
