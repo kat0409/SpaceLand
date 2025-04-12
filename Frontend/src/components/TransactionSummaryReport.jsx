@@ -44,7 +44,7 @@ export default function TransactionSummaryReport() {
     });
 
     try {
-      const res = await fetch(`${BACKEND_URL}/supervisor/reports/transaction-summary?${params}`);
+      const res = await fetch(`${BACKEND_URL}/supervisor/merchandise/transaction-summary?${params}`);
       const data = await res.json();
 
       if (res.ok) {
