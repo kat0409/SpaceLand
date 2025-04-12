@@ -2202,7 +2202,7 @@ const deleteEmployee = (req, res) => {
     });
 };
 
-/*const getFilteredSalesReport = (req, res) => {
+const getFilteredSalesReport = (req, res) => {
     const { startDate, endDate, transactionType = "all", bestOnly = "0" } = url.parse(req.url, true).query;
 
     if (!startDate || !endDate) {
@@ -2386,7 +2386,7 @@ const deleteEmployee = (req, res) => {
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify(results));
     });
-};*/
+};
 
 const getTransactionSummaryReport = (req, res) => {
     const { startDate, endDate } = url.parse(req.url, true).query;

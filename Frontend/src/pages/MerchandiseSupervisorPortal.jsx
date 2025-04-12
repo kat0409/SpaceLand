@@ -8,6 +8,7 @@ import MerchandiseSalesChart from '../components/MerchandiseSalesChart';
 import InventoryOverviewChart from '../components/InventoryOverviewChart';
 import EditMerchandiseModal from '../components/EditMerchandiseModal';
 import { AuthContext } from '../components/AuthProvider';
+import TransactionSummaryReport from '../components/TransactionSummaryReport';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
@@ -462,6 +463,7 @@ export default function SupervisorPortal() {
                 {activeTab === 'sales' && (
                     <div className="space-y-6">
                         <InventoryOverviewChart inventoryData={merchandise} />
+                        <TransactionSummaryReport />
                         <div className="bg-white/10 p-4 rounded-xl mb-6">
                             <h2 className="text-lg mb-2 font-semibold">Sales Report Filters</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

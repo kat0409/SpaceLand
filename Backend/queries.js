@@ -494,7 +494,7 @@ const deleteEmployee = `
     WHERE EmployeeID = ?
 `;
 
-/*const salesReport = `
+const salesReport = `
     SELECT
     d.transactionDate,
 
@@ -625,7 +625,7 @@ const deleteEmployee = `
     WHERE DATE(transactionDate) BETWEEN ? AND ?
     ) d
     ORDER BY d.transactionDate;
-`;*/
+`;
 
 const getTransactionSummaryReport = `
     SELECT transactionDate, 'ticket' AS transactionType, SUM(tix.price) AS totalRevenue
