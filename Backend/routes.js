@@ -295,8 +295,8 @@ function routes(req, res) {
         return actions.deleteEmployee(req,res);
     }
 
-    if(url.startsWith('/supervisor/merchandise/seller-performance') && method === "GET"){
-        return 
+    if(url.startsWith('/supervisor/merchandise/sales-report') && method === "GET"){
+        return actions.getFilteredSalesReport(req,res);
     }
 
     if(url.startsWith('/supervisor/HR/employee-names') && method === "GET"){
@@ -315,11 +315,11 @@ function routes(req, res) {
         return actions.getSchedulesWithNames(req, res);
     }
 
-    if (url.startsWith('/supervisor/reports/transaction-summary') && method === "GET") {
+    if (url.startsWith('/supervisor/merchandise/transaction-summary') && method === "GET") {
         return actions.getTransactionSummaryReport(req, res);
     }
 
-    if (url.startsWith('/supervisor/reports/bestsellers') && method === "GET") {
+    if (url.startsWith('/supervisor/merchandise/bestsellers') && method === "GET") {
         return actions.getBestWorstSellersReport(req, res);
     }
 
