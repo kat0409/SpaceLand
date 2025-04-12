@@ -494,7 +494,7 @@ const deleteEmployee = `
     WHERE EmployeeID = ?
 `;
 
-const salesReport = `
+/*const salesReport = `
     SELECT
     d.transactionDate,
 
@@ -625,6 +625,30 @@ const salesReport = `
     WHERE DATE(transactionDate) BETWEEN ? AND ?
     ) d
     ORDER BY d.transactionDate;
+`;*/
+
+const getTransactionSummaryReport = `
+    SELECT transactionDate, 'ticket' AS transactionType, SUM(tix.price) AS totalRevenue
+    FROM tickettransactions t
+    JOIN tickets tix ON t.transactionID = tix.transactionID
+    WHERE DATE(transactionDate) BETWEEN ? AND ?
+    GROUP BY DATE(transactionDate)
+
+    UNION ALL
+
+    SELECT transactionDate, 'mealplan' AS transactionType, SUM(mp.price) AS totalRevenue
+    FROM mealplantransactions m
+    JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
+    WHERE DATE(transactionDate) BETWEEN ? AND ?
+    GROUP BY DATE(transactionDate)
+
+    UNION ALL
+
+    SELECT transactionDate, 'merch' AS transactionType, SUM(totalAmount) AS totalRevenue
+    FROM merchandisetransactions
+    WHERE DATE(transactionDate) BETWEEN ? AND ?
+    GROUP BY DATE(transactionDate)
+    ORDER BY transactionDate;
 `;
 
 const getEmployeeNames = `
@@ -735,7 +759,8 @@ module.exports = {
     getEmployeeNames,
     getEmployeeScheduleForSup,
     getSpecificEmployeeSchedule,
-    getSchedulesWithNames
+    getSchedulesWithNames,
+    getTransactionSummaryReport
 };
 
 //checkMerchQuantity

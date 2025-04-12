@@ -270,8 +270,6 @@ export default function SupervisorPortal() {
                 {/* Dashboard Tab */}
                 {activeTab === 'dashboard' && (
                     <div className="space-y-8">
-                        <InventoryOverviewChart inventoryData={merchandise} />
-                        
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Recent Orders */}
                             <div className="bg-white/10 p-6 rounded-xl">
@@ -463,8 +461,7 @@ export default function SupervisorPortal() {
                 {/* Sales Reports Tab */}
                 {activeTab === 'sales' && (
                     <div className="space-y-6">
-                        <MerchandiseSalesChart salesData={salesData} />
-                        
+                        <InventoryOverviewChart inventoryData={merchandise} />
                         <div className="bg-white/10 p-4 rounded-xl mb-6">
                             <h2 className="text-lg mb-2 font-semibold">Sales Report Filters</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

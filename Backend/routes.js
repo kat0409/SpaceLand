@@ -295,8 +295,8 @@ function routes(req, res) {
         return actions.deleteEmployee(req,res);
     }
 
-    if(url.startsWith('/supervisor/merchandise/sales-report') && method === "GET"){
-        return actions.getFilteredSalesReport(req,res);
+    if(url.startsWith('/supervisor/merchandise/seller-performance') && method === "GET"){
+        return 
     }
 
     if(url.startsWith('/supervisor/HR/employee-names') && method === "GET"){
@@ -313,6 +313,14 @@ function routes(req, res) {
 
     if (url.startsWith('/supervisor/HR/shifts-with-names') && method === "GET") {
         return actions.getSchedulesWithNames(req, res);
+    }
+
+    if (url.startsWith('/supervisor/reports/transaction-summary') && method === "GET") {
+        return actions.getTransactionSummaryReport(req, res);
+    }
+
+    if (url.startsWith('/supervisor/reports/bestsellers') && method === "GET") {
+        return actions.getBestWorstSellersReport(req, res);
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });

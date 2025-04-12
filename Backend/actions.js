@@ -2202,7 +2202,7 @@ const deleteEmployee = (req, res) => {
     });
 };
 
-const getFilteredSalesReport = (req, res) => {
+/*const getFilteredSalesReport = (req, res) => {
     const { startDate, endDate, transactionType = "all", bestOnly = "0" } = url.parse(req.url, true).query;
 
     if (!startDate || !endDate) {
@@ -2386,7 +2386,31 @@ const getFilteredSalesReport = (req, res) => {
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify(results));
     });
-}; 
+};*/
+
+const getTransactionSummaryReport = (req, res) => {
+    const { startDate, endDate } = url.parse(req.url, true).query;
+  
+    if (!startDate || !endDate) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ error: "Missing date range" }));
+    }
+  
+    pool.query(
+      queries.getTransactionSummaryReport,
+      [startDate, endDate, startDate, endDate, startDate, endDate],
+      (err, results) => {
+        if (err) {
+          console.error("Transaction summary error:", err);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          return res.end(JSON.stringify({ error: "Internal server error" }));
+        }
+  
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+      }
+    );
+  };  
 
 const getEmployeeNames = (req,res) => {
     pool.query(queries.getEmployeeNames, (err, results) => {
@@ -2520,5 +2544,6 @@ module.exports = {
     getEmployeeNames,
     getEmployeeScheduleForSup,
     getSpecificEmployeeSchedule,
-    getSchedulesWithNames
+    getSchedulesWithNames,
+    getTransactionSummaryReport
 };  
