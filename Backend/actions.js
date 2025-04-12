@@ -2411,33 +2411,39 @@ const getEmployeeScheduleForSup = (req,res) => {
 };
 
 const getSpecificEmployeeSchedule = (req, res) => {
-    let body = "";
-    req.on("data", (chunk) => (body += chunk.toString()));
-    req.on("end", () => {
-        try {
-            const { EmployeeID } = JSON.parse(body);
+    const urlObj = new URL(req.url, `http://${req.headers.host}`);
+    const EmployeeID = urlObj.searchParams.get("EmployeeID");
 
-            if (!EmployeeID) {
-                res.writeHead(400, { "Content-Type": "application/json" });
-                return res.end(JSON.stringify({ error: "EmployeeID is required" }));
-            }
+    if (!EmployeeID) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ error: "EmployeeID is required" }));
+    }
 
-            pool.query(queries.getSpecificEmployeeSchedule, [EmployeeID], (err, results) => {
-                if (err) {
-                    console.error(err);
-                    res.writeHead(500, { "Content-Type": "application/json" });
-                    return res.end(JSON.stringify({ error: "Failed to fetch schedule" }));
-                }
-
-                res.writeHead(200, { "Content-Type": "application/json" });
-                res.end(JSON.stringify(results));
-            });
-        } catch (err) {
-            res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Invalid JSON" }));
+    pool.query(queries.getSpecificEmployeeSchedule, [EmployeeID], (err, results) => {
+        if (err) {
+            console.error(err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Failed to fetch schedule" }));
         }
+
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
     });
 };
+
+const getSchedulesWithNames = (req, res) => {
+    pool.query(queries.getSchedulesWithNames, (err, results) => {
+        if (err) {
+            console.error("Error fetching schedules:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Failed to fetch schedules" }));
+        }
+
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
 
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
@@ -2513,5 +2519,6 @@ module.exports = {
     getFilteredSalesReport,
     getEmployeeNames,
     getEmployeeScheduleForSup,
-    getSpecificEmployeeSchedule
+    getSpecificEmployeeSchedule,
+    getSchedulesWithNames
 };  

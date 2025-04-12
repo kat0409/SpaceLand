@@ -311,6 +311,10 @@ function routes(req, res) {
         return actions.getSpecificEmployeeSchedule(req,res);
     }
 
+    if (url.startsWith('/supervisor/HR/shifts-with-names') && method === "GET") {
+        return actions.getSchedulesWithNames(req, res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
