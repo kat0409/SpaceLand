@@ -319,7 +319,7 @@ function routes(req, res) {
         return actions.getTransactionSummaryReport(req, res);
     }
 
-    if (url.startsWith('/supervisor/merchandise/bestsellers') && method === "GET") {
+    if (url.startsWith('/supervisor/merchandise/best-sellers') && method === "GET") {
         return actions.getBestWorstSellersReport(req, res);
     }
 

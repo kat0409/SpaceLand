@@ -2567,5 +2567,6 @@ module.exports = {
     getEmployeeScheduleForSup,
     getSpecificEmployeeSchedule,
     getSchedulesWithNames,
-    getTransactionSummaryReport
+    getTransactionSummaryReport,
+    getBestWorstSellersReport
 };  
