@@ -2420,9 +2420,73 @@ const getTransactionSummaryReport = (req, res) => {
       return res.end(JSON.stringify({ error: "Missing date range" }));
     }
   
-    const params = Array(3).fill([startDate, endDate]).flat(); // total 12 params
+    const start = mysql.escape(startDate);
+    const end = mysql.escape(endDate);
   
-    pool.query(queries.getBestWorstSellersReport, params, (err, results) => {
+    const sql = `
+      SELECT
+        'ticket' AS type,
+        (
+          SELECT ticketType
+          FROM tickettransactions
+          WHERE DATE(transactionDate) BETWEEN ${start} AND ${end}
+          GROUP BY ticketType
+          ORDER BY COUNT(*) DESC
+          LIMIT 1
+        ) AS best,
+        (
+          SELECT ticketType
+          FROM tickettransactions
+          WHERE DATE(transactionDate) BETWEEN ${start} AND ${end}
+          GROUP BY ticketType
+          ORDER BY COUNT(*) ASC
+          LIMIT 1
+        ) AS worst
+      UNION ALL
+      SELECT
+        'mealplan',
+        (
+          SELECT mp.mealPlanName
+          FROM mealplantransactions m
+          JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
+          WHERE DATE(m.transactionDate) BETWEEN ${start} AND ${end}
+          GROUP BY mp.mealPlanName
+          ORDER BY COUNT(*) DESC
+          LIMIT 1
+        ),
+        (
+          SELECT mp.mealPlanName
+          FROM mealplantransactions m
+          JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
+          WHERE DATE(m.transactionDate) BETWEEN ${start} AND ${end}
+          GROUP BY mp.mealPlanName
+          ORDER BY COUNT(*) ASC
+          LIMIT 1
+        )
+      UNION ALL
+      SELECT
+        'merch',
+        (
+          SELECT m.itemName
+          FROM merchandisetransactions mt
+          JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+          WHERE DATE(mt.transactionDate) BETWEEN ${start} AND ${end}
+          GROUP BY m.itemName
+          ORDER BY COUNT(*) DESC
+          LIMIT 1
+        ),
+        (
+          SELECT m.itemName
+          FROM merchandisetransactions mt
+          JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+          WHERE DATE(mt.transactionDate) BETWEEN ${start} AND ${end}
+          GROUP BY m.itemName
+          ORDER BY COUNT(*) ASC
+          LIMIT 1
+        );
+    `;
+  
+    pool.query(sql, (err, results) => {
       if (err) {
         console.error("Bestsellers report error:", err);
         res.writeHead(500, { "Content-Type": "application/json" });
@@ -2432,7 +2496,7 @@ const getTransactionSummaryReport = (req, res) => {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(results));
     });
-  };  
+  };
 
 const getEmployeeNames = (req,res) => {
     pool.query(queries.getEmployeeNames, (err, results) => {
