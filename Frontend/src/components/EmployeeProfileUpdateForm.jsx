@@ -46,27 +46,44 @@ export default function EmployeeProfileUpdateForm() {
         e.preventDefault();
         setIsLoading(true);
         setMessage({ text: '', type: '' });
-
+    
         try {
-            // Convert employmentStatus to 1 or 0 for the backend
+            if (!formData.EmployeeID) {
+                setMessage({ text: 'Employee ID is required', type: 'error' });
+                return;
+            }
+    
+            // Build object only with fields that were actually filled
             const dataToSend = {
-                ...formData,
+                EmployeeID: formData.EmployeeID,
+                ...(formData.FirstName && { FirstName: formData.FirstName }),
+                ...(formData.LastName && { LastName: formData.LastName }),
+                ...(formData.Email && { Email: formData.Email }),
+                ...(formData.Address && { Address: formData.Address }),
+                ...(formData.username && { username: formData.username }),
+                ...(formData.password && { password: formData.password }),
+                ...(formData.Department && { Department: formData.Department }),
+                ...(formData.SupervisorID && { SupervisorID: formData.SupervisorID }),
                 employmentStatus: formData.employmentStatus ? 1 : 0
             };
-
+    
+            // Check if only EmployeeID was provided
+            const keys = Object.keys(dataToSend);
+            if (keys.length === 1 && keys[0] === 'EmployeeID') {
+                setMessage({ text: 'Please provide at least one field to update', type: 'error' });
+                return;
+            }
+    
             const response = await fetch(`${BACKEND_URL}/supervisor/HR/update-employee-profile`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(dataToSend)
             });
-
+    
             const data = await response.json();
-
+    
             if (response.ok) {
                 setMessage({ text: 'Employee profile updated successfully!', type: 'success' });
-                // Clear form except for EmployeeID
                 setFormData(prev => ({
                     ...prev,
                     FirstName: '',
@@ -83,12 +100,12 @@ export default function EmployeeProfileUpdateForm() {
                 setMessage({ text: data.error || 'Failed to update employee profile', type: 'error' });
             }
         } catch (error) {
-            setMessage({ text: 'An error occurred while updating the profile', type: 'error' });
-            console.error('Error:', error);
+            console.error('Update error:', error);
+            setMessage({ text: 'An unexpected error occurred.', type: 'error' });
         } finally {
             setIsLoading(false);
         }
-    };
+    };    
 
     return (
         <div className="bg-white/10 rounded-xl p-6 shadow-lg">

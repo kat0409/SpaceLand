@@ -7,7 +7,9 @@ import EmployeeManagement from './EmployeeManagement';
 import EmployeeScheduleDisplay from '../components/EmployeeScheduleDisplay';
 import DeleteScheduleForm from '../components/DeleteScheduleForm';
 import EmployeeProfileForm from '../components/EmployeeProfileUpdateForm';
-import ScheduleForm from '../components/ScheduleForm'; 
+import FireEmployeeForm from '../components/FireEmployeeForm';
+import TimeOffRequestReviewForm from '../components/TimeOffRequestReviewForm';
+import ScheduleForm from '../components/ScheduleForm';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
@@ -187,12 +189,14 @@ export default function HRSupervisorPortal() {
                         <ScheduleForm onScheduleAdded={() => setRefreshKey(Date.now())} />
                         <DeleteScheduleForm onScheduleDeleted={() => setRefreshKey(Date.now())} />
                         <EmployeeScheduleDisplay refreshKey={refreshKey} />
+                        <TimeOffRequestReviewForm/>
                     </div>
                 )}
 
                 {activeTab === 'employeeManagement' && (
                     <div>
                         <EmployeeProfileForm/>
+                        <FireEmployeeForm/>
                         {/* Place employee profile filtering/editing UI here */}
                     </div>
                 )}
