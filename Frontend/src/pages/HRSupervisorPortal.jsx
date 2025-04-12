@@ -8,6 +8,7 @@ import EmployeeScheduleDisplay from '../components/EmployeeScheduleDisplay';
 import DeleteScheduleForm from '../components/DeleteScheduleForm';
 import EmployeeProfileForm from '../components/EmployeeProfileUpdateForm';
 import FireEmployeeForm from '../components/FireEmployeeForm';
+import TimeOffRequestReviewForm from '../components/TimeOffRequestReviewForm';
 import ScheduleForm from '../components/ScheduleForm';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
@@ -188,6 +189,7 @@ export default function HRSupervisorPortal() {
                         <ScheduleForm onScheduleAdded={() => setRefreshKey(Date.now())} />
                         <DeleteScheduleForm onScheduleDeleted={() => setRefreshKey(Date.now())} />
                         <EmployeeScheduleDisplay refreshKey={refreshKey} />
+                        <TimeOffRequestReviewForm/>
                     </div>
                 )}
 
