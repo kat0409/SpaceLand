@@ -1,7 +1,7 @@
 const { stringify } = require('qs');
 const pool = require('./db.js');
 const queries = require('./queries.js');
-const nodemailer = require('nodemailer');
+const mysql = require("mysql2");
 
 //Fetch all rides
 const getRides = (request, response) => {

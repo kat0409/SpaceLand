@@ -761,8 +761,7 @@ module.exports = {
     getEmployeeScheduleForSup,
     getSpecificEmployeeSchedule,
     getSchedulesWithNames,
-    getTransactionSummaryReport,
-    getBestWorstSellersReport
+    getTransactionSummaryReport
 };
 
 //checkMerchQuantity
