@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import EmployeeManagement from './EmployeeManagement';
 import EmployeeScheduleDisplay from '../components/EmployeeScheduleDisplay';
 import DeleteScheduleForm from '../components/DeleteScheduleForm';
+import EmployeeProfileForm from '../components/EmployeeProfileUpdateForm';
 import ScheduleForm from '../components/ScheduleForm';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
@@ -191,6 +192,7 @@ export default function HRSupervisorPortal() {
 
                 {activeTab === 'employeeManagement' && (
                     <div>
+                        <EmployeeProfileForm/>
                         {/* Place employee profile filtering/editing UI here */}
                     </div>
                 )}
