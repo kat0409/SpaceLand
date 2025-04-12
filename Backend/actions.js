@@ -2413,78 +2413,114 @@ const getTransactionSummaryReport = (req, res) => {
   };  
 
   const getBestWorstSellersReport = (req, res) => {
-    const { startDate, endDate } = url.parse(req.url, true).query;
+    const { startDate, endDate, groupBy = 'month', transactionType = 'all' } = url.parse(req.url, true).query;
   
     if (!startDate || !endDate) {
       res.writeHead(400, { "Content-Type": "application/json" });
       return res.end(JSON.stringify({ error: "Missing date range" }));
     }
   
-    const start = mysql.escape(startDate);
-    const end = mysql.escape(endDate);
+    const groupExpr = groupBy === 'week'
+      ? "YEARWEEK(transactionDate)"
+      : "DATE_FORMAT(transactionDate, '%Y-%m')";
   
-    const sql = `
-      SELECT
-        'ticket' AS type,
-        (
-          SELECT ticketType
+    const queries = [];
+  
+    if (transactionType === 'all' || transactionType === 'ticket') {
+      queries.push(`
+        SELECT period, 'ticket' AS type,
+          (
+            SELECT ticketType
+            FROM tickettransactions t2
+            WHERE DATE(t2.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+            AND ${groupExpr.replace(/transactionDate/g, 't2.transactionDate')} = period
+            GROUP BY ticketType
+            ORDER BY COUNT(*) DESC
+            LIMIT 1
+          ) AS best,
+          (
+            SELECT ticketType
+            FROM tickettransactions t3
+            WHERE DATE(t3.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+            AND ${groupExpr.replace(/transactionDate/g, 't3.transactionDate')} = period
+            GROUP BY ticketType
+            ORDER BY COUNT(*) ASC
+            LIMIT 1
+          ) AS worst
+        FROM (
+          SELECT ${groupExpr} AS period
           FROM tickettransactions
-          WHERE DATE(transactionDate) BETWEEN ${start} AND ${end}
-          GROUP BY ticketType
-          ORDER BY COUNT(*) DESC
-          LIMIT 1
-        ) AS best,
-        (
-          SELECT ticketType
-          FROM tickettransactions
-          WHERE DATE(transactionDate) BETWEEN ${start} AND ${end}
-          GROUP BY ticketType
-          ORDER BY COUNT(*) ASC
-          LIMIT 1
-        ) AS worst
-      UNION ALL
-      SELECT
-        'mealplan',
-        (
-          SELECT mp.mealPlanName
-          FROM mealplantransactions m
-          JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
-          WHERE DATE(m.transactionDate) BETWEEN ${start} AND ${end}
-          GROUP BY mp.mealPlanName
-          ORDER BY COUNT(*) DESC
-          LIMIT 1
-        ),
-        (
-          SELECT mp.mealPlanName
-          FROM mealplantransactions m
-          JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
-          WHERE DATE(m.transactionDate) BETWEEN ${start} AND ${end}
-          GROUP BY mp.mealPlanName
-          ORDER BY COUNT(*) ASC
-          LIMIT 1
-        )
-      UNION ALL
-      SELECT
-        'merch',
-        (
-          SELECT m.itemName
-          FROM merchandisetransactions mt
-          JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
-          WHERE DATE(mt.transactionDate) BETWEEN ${start} AND ${end}
-          GROUP BY m.itemName
-          ORDER BY COUNT(*) DESC
-          LIMIT 1
-        ),
-        (
-          SELECT m.itemName
-          FROM merchandisetransactions mt
-          JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
-          WHERE DATE(mt.transactionDate) BETWEEN ${start} AND ${end}
-          GROUP BY m.itemName
-          ORDER BY COUNT(*) ASC
-          LIMIT 1
-        );
-    `;
+          WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+          GROUP BY ${groupExpr}
+        ) t
+      `);
+    }
+  
+    if (transactionType === 'all' || transactionType === 'mealplan') {
+      queries.push(`
+        SELECT period, 'mealplan' AS type,
+          (
+            SELECT mp.mealPlanName
+            FROM mealplantransactions m2
+            JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID
+            WHERE DATE(m2.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+            AND ${groupExpr.replace(/transactionDate/g, 'm2.transactionDate')} = period
+            GROUP BY mp.mealPlanName
+            ORDER BY COUNT(*) DESC
+            LIMIT 1
+          ) AS best,
+          (
+            SELECT mp.mealPlanName
+            FROM mealplantransactions m3
+            JOIN mealplans mp ON m3.mealPlanID = mp.mealPlanID
+            WHERE DATE(m3.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+            AND ${groupExpr.replace(/transactionDate/g, 'm3.transactionDate')} = period
+            GROUP BY mp.mealPlanName
+            ORDER BY COUNT(*) ASC
+            LIMIT 1
+          ) AS worst
+        FROM (
+          SELECT ${groupExpr} AS period
+          FROM mealplantransactions
+          WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+          GROUP BY ${groupExpr}
+        ) m
+      `);
+    }
+  
+    if (transactionType === 'all' || transactionType === 'merch') {
+      queries.push(`
+        SELECT period, 'merch' AS type,
+          (
+            SELECT m.itemName
+            FROM merchandisetransactions mt2
+            JOIN merchandise m ON mt2.merchandiseID = m.merchandiseID
+            WHERE DATE(mt2.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+            AND ${groupExpr.replace(/transactionDate/g, 'mt2.transactionDate')} = period
+            GROUP BY m.itemName
+            ORDER BY COUNT(*) DESC
+            LIMIT 1
+          ) AS best,
+          (
+            SELECT m.itemName
+            FROM merchandisetransactions mt3
+            JOIN merchandise m ON mt3.merchandiseID = m.merchandiseID
+            WHERE DATE(mt3.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+            AND ${groupExpr.replace(/transactionDate/g, 'mt3.transactionDate')} = period
+            GROUP BY m.itemName
+            ORDER BY COUNT(*) ASC
+            LIMIT 1
+          ) AS worst
+        FROM (
+          SELECT ${groupExpr} AS period
+          FROM merchandisetransactions
+          WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+          GROUP BY ${groupExpr}
+        ) mt
+      `);
+    }
+  
+    const sql = queries.join('\nUNION ALL\n');
   
     pool.query(sql, (err, results) => {
       if (err) {
@@ -2496,7 +2532,7 @@ const getTransactionSummaryReport = (req, res) => {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(results));
     });
-  };
+  };  
 
 const getEmployeeNames = (req,res) => {
     pool.query(queries.getEmployeeNames, (err, results) => {

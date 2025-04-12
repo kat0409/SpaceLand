@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
@@ -114,7 +114,6 @@ export default function BestWorstSellerReport() {
           <table className="w-full text-white text-sm bg-white/5 rounded-lg">
             <thead className="bg-purple-800 text-white">
               <tr>
-                <th className="p-3">Period</th>
                 <th className="p-3">Transaction Type</th>
                 <th className="p-3">Best Seller</th>
                 <th className="p-3">Worst Seller</th>
@@ -123,10 +122,9 @@ export default function BestWorstSellerReport() {
             <tbody>
               {reportData.map((entry, idx) => (
                 <tr key={idx} className="text-center border-b border-gray-700">
-                  <td className="p-3">{entry.period}</td>
-                  <td className="p-3 capitalize">{entry.transactionType}</td>
-                  <td className="p-3">{entry.bestSeller}</td>
-                  <td className="p-3">{entry.worstSeller}</td>
+                  <td className="p-3 capitalize">{entry.type}</td>
+                  <td className="p-3">{entry.best}</td>
+                  <td className="p-3">{entry.worst}</td>
                 </tr>
               ))}
             </tbody>
