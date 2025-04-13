@@ -5,6 +5,7 @@ import { AuthContext } from '../components/AuthProvider';
 import { motion } from 'framer-motion';
 import MaintenanceRequestForm from "./MaintenanceRequestForm";
 import MarkMaintenanceCompletionForm from "./MarkMaintenanceCompletionForm";
+import RideMaintenanceReport from "../components/RideMaintenanceReport";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
@@ -211,8 +212,7 @@ export default function MaintenanceSupervisorPortal() {
 
         {activeTab === 'report' && (
           <div className="bg-gray-800/50 rounded-lg p-6 text-center">
-            <h2 className="text-2xl font-bold mb-4">Ride Maintenance Report</h2>
-            <p className="text-gray-400">This section will display detailed reports for each ride's maintenance history and performance.</p>
+            <RideMaintenanceReport />
           </div>
         )}
 

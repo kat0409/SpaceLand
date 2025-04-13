@@ -8,7 +8,7 @@ export default function RideMaintenanceReport() {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
     useEffect(() => {
-        fetch(`${BACKEND_URL}/supervisor/maintenance/ride-report`)
+        fetch(`${BACKEND_URL}/supervisor/maintenance/ride-maintenance`)
             .then(res => {
                 if (!res.ok) throw new Error("Failed to fetch report");
                 return res.json();
@@ -20,7 +20,7 @@ export default function RideMaintenanceReport() {
 
     return (
         <div className="bg-gray-800/50 rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-4">📊 Ride Maintenance Report</h2>
+            <h2 className="text-2xl font-bold mb-4">Ride Maintenance Report</h2>
             {loading && <p>Loading...</p>}
             {error && <p className="text-red-400">Error: {error}</p>}
             {!loading && !error && report.length === 0 && <p>No maintenance records found.</p>}
