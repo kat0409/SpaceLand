@@ -673,9 +673,11 @@ const maintenanceEmployeePerformanceReport = `
         CONCAT(e.FirstName, ' ', e.LastName) AS EmployeeName,
         COUNT(IF(rm.maintenanceID IS NOT NULL, 1, NULL)) AS TotalTasks,
         IFNULL(SUM(CASE WHEN rm.status = 'completed' THEN 1 ELSE 0 END), 0) AS CompletedTasks,
-        IFNULL(AVG(
+        IFNULL(ROUND(AVG(
             CASE 
-                WHEN rm.status = 'completed' AND rm.MaintenanceEndDate IS NOT NULL AND rm.MaintenanceEndDate IS NOT NULL 
+                WHEN rm.status = 'completed' 
+                AND rm.MaintenanceStartDate IS NOT NULL 
+                AND rm.MaintenanceEndDate IS NOT NULL
                 THEN TIMESTAMPDIFF(DAY, rm.MaintenanceStartDate, rm.MaintenanceEndDate)
                 ELSE NULL
             END
