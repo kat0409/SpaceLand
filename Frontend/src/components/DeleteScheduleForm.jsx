@@ -11,7 +11,7 @@ export default function DeleteScheduleForm({ onScheduleDeleted }) {
 
     // Load employee names and IDs for dropdown
     useEffect(() => {
-        fetch(`${BACKEND_URL}/supervisor/HR/employee-names`)
+        fetch(`${BACKEND_URL}/supervisor/HR/all-employee-names`)
         .then(res => res.json())
         .then(data => setEmployees(data))
         .catch(err => console.error("Failed to fetch employees:", err));
@@ -66,7 +66,7 @@ export default function DeleteScheduleForm({ onScheduleDeleted }) {
 
     return (
         <div className="bg-gray-800/50 rounded-xl p-6">
-            <h2 className="text-xl font-bold mb-4 text-white">🗑️ Delete Employee Schedule</h2>
+            <h2 className="text-xl font-bold mb-4 text-white">Delete Employee Schedule</h2>
 
             {/* Employee Dropdown */}
             <div className="mb-4">
@@ -110,7 +110,7 @@ export default function DeleteScheduleForm({ onScheduleDeleted }) {
             {/* Delete Button */}
             <button
                 disabled={!selectedEmployeeID || !selectedScheduleDate}
-                onClick={handleDelete}
+                onClick={handleSubmit}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded disabled:opacity-40"
             >
                 Delete Schedule
