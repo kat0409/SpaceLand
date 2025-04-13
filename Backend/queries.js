@@ -454,9 +454,9 @@ const deleteEmployeeSchedule = `
 `;
 
 const getSpecificEmployeeSchedule = `
-    SELECT e.scheduleDate
-    FROM employee_schedule e
-    WHERE e.EmployeeID = ?
+    SELECT scheduleDate 
+    FROM employee_schedule 
+    WHERE EmployeeID = ?;
 `;
 
 const getTimeOffRequests = `

@@ -38,6 +38,8 @@ export default function DeleteScheduleForm() {
             return;
         }
 
+        const formattedDate = new Date(selectedScheduleDate).toISOString().split("T")[0];
+
         try{
             const res = await fetch(`${BACKEND_URL}/supervisor/HR/schedule-delete`, {
                 method: 'DELETE',
@@ -55,7 +57,7 @@ export default function DeleteScheduleForm() {
                 setScheduleDates(prev => prev.filter(date => date !== selectedScheduleDate));
                 setSelectedScheduleDate("");
             } else {
-                setMessage(`Error: ${result.error || "Unknown error"}`);
+                setMessage(`Error: ${data.error || "Unknown error"}`);
             }
         }
         catch(error){

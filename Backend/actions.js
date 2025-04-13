@@ -2588,12 +2588,11 @@ const getEmployeeScheduleForSup = (req,res) => {
 };
 
 const getSpecificEmployeeSchedule = (req, res) => {
-    const urlObj = new URL(req.url, `http://${req.headers.host}`);
-    const EmployeeID = urlObj.searchParams.get("EmployeeID");
+    const parsedUrl = url.parse(req.url, true);
+    const { EmployeeID } = parsedUrl.query;
 
     if (!EmployeeID) {
-        res.writeHead(400, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify({ error: "EmployeeID is required" }));
+        return res.status(400).json({ error: "EmployeeID is required" });
     }
 
     pool.query(queries.getSpecificEmployeeSchedule, [EmployeeID], (err, results) => {
