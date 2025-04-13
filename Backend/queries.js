@@ -191,15 +191,7 @@ const rideMaintenanceReport = `
         rm.reason,
         DATE(rm.MaintenanceStartDate) AS StartDate,
         DATE(rm.MaintenanceEndDate) AS EndDate,
-
-        IFNULL(TIMESTAMPDIFF(DAY, rm.MaintenanceStartDate, rm.MaintenanceEndDate), 0) AS DaysTaken,
-
-        IFNULL((
-            SELECT AVG(TIMESTAMPDIFF(DAY, rm2.MaintenanceStartDate, rm2.MaintenanceEndDate))
-            FROM ridemaintenance rm2
-            WHERE rm2.rideID = rm.rideID AND rm2.status = 'completed'
-        ), 0) AS AvgFixTimeForRide
-
+        IFNULL(TIMESTAMPDIFF(DAY, rm.MaintenanceStartDate, rm.MaintenanceEndDate), 0) AS DaysTaken
     FROM ridemaintenance rm
     JOIN rides r ON rm.rideID = r.RideID
     LEFT JOIN employee e ON rm.MaintenanceEmployeeID = e.EmployeeID

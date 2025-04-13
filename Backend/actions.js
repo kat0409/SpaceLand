@@ -670,6 +670,11 @@ const rideMaintenanceReport = (req,res) => {
             res.end(JSON.stringify({ error: "Internal server error" }));
             return;
         }
+        if (!results || results.length === 0) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "No maintenance data found" }));
+            return;
+        }
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify(results));
     });
