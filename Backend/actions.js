@@ -663,7 +663,9 @@ const getVisitorRecords = (req, res) => {
 
 //Reports
 const rideMaintenanceReport = (req, res) => {
-    const { startDate, endDate, rideID } = req.query;
+    //const { startDate, endDate, rideID } = req.query;
+    const parsedUrl = url.parse(req.url, true);
+    let { startDate, endDate, rideID } = parsedUrl.query || {};
 
     startDate = startDate || '1970-01-01';
     endDate = endDate || '2100-01-01';

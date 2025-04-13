@@ -20,11 +20,13 @@ export default function RideMaintenanceReport() {
 
     const fetchReport = () => {
         setLoading(true);
-        let url = `${BACKEND_URL}/supervisor/maintenance/ride-report?`;
+        
+        const params = new URLSearchParams();
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        if (selectedRide) params.append('rideID', selectedRide);
 
-        if (startDate) url += `startDate=${startDate}&`;
-        if (endDate) url += `endDate=${endDate}&`;
-        if (selectedRide) url += `rideID=${selectedRide}`;
+        const url = `${BACKEND_URL}/supervisor/maintenance/ride-maintenance?${params.toString()}`;
 
         fetch(url)
             .then(res => {
