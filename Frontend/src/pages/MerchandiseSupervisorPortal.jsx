@@ -8,6 +8,8 @@ import MerchandiseSalesChart from '../components/MerchandiseSalesChart';
 import InventoryOverviewChart from '../components/InventoryOverviewChart';
 import EditMerchandiseModal from '../components/EditMerchandiseModal';
 import { AuthContext } from '../components/AuthProvider';
+import TransactionSummaryReport from '../components/TransactionSummaryReport';
+import BestWorstSellerReport from "../components/BestWorstSellerReport";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
@@ -59,7 +61,7 @@ export default function SupervisorPortal() {
             if (filters.transactionType) params.append("transactionType", filters.transactionType);
             if (filters.bestOnly) params.append("bestOnly", filters.bestOnly);
         
-            const response = await fetch(`https://spaceland.onrender.com/supervisor/merchandise/sales-report?${params.toString()}`);
+            const response = await fetch(`https://spacelandmark.onrender.com/supervisor/merchandise/sales-report?${params.toString()}`);
             const data = await response.json();
         
         if (!Array.isArray(data)) {
@@ -270,8 +272,6 @@ export default function SupervisorPortal() {
                 {/* Dashboard Tab */}
                 {activeTab === 'dashboard' && (
                     <div className="space-y-8">
-                        <InventoryOverviewChart inventoryData={merchandise} />
-                        
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Recent Orders */}
                             <div className="bg-white/10 p-6 rounded-xl">
@@ -463,8 +463,9 @@ export default function SupervisorPortal() {
                 {/* Sales Reports Tab */}
                 {activeTab === 'sales' && (
                     <div className="space-y-6">
-                        <MerchandiseSalesChart salesData={salesData} />
-                        
+                        <InventoryOverviewChart inventoryData={merchandise} />
+                        <TransactionSummaryReport />
+                        <BestWorstSellerReport />
                         <div className="bg-white/10 p-4 rounded-xl mb-6">
                             <h2 className="text-lg mb-2 font-semibold">Sales Report Filters</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

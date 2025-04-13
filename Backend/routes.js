@@ -61,11 +61,11 @@ function routes(req, res) {
 
     if (url.startsWith('/supervisor/maintenance-requests') && method === 'GET') {
         return actions.getMaintenanceRequests(req, res);
-    }//wont work anymore
+    }
 
-    /*if (url.startsWith('/supervisor/update-maintenance-status') && method === 'POST') {
+    if (url.startsWith('/supervisor/update-maintenance-status') && method === 'POST') {
         return actions.updateMaintenanceStatus(req, res);
-    }*/
+    }
 
     if (url.startsWith('/supervisor/merchandise/low-stock') && method === 'GET') {
         return actions.getLowStockMerchandise(req, res);
@@ -129,7 +129,7 @@ function routes(req, res) {
 
     if(url.startsWith('/supervisor/merchandise/notifications') && method == 'GET'){
         return actions.sendLowStockNotifications(req,res);
-    }//change route
+    }
 
     if(url.startsWith('/supervisor/maintenance/insert-ride-maintenance') && method == 'POST'){
         return actions.insertRideMaintenance(req,res);
@@ -313,6 +313,18 @@ function routes(req, res) {
 
     if (url.startsWith('/supervisor/HR/shifts-with-names') && method === "GET") {
         return actions.getSchedulesWithNames(req, res);
+    }
+
+    if (url.startsWith('/supervisor/merchandise/transaction-summary') && method === "GET") {
+        return actions.getTransactionSummaryReport(req, res);
+    }
+
+    if (url.startsWith('/supervisor/merchandise/best-worst') && method === "GET") {
+        return actions.getBestWorstSellersReport(req, res);
+    }
+
+    if (url.startsWith('/supervisor/maintenance/employee-performance') && method === "GET") {
+        return actions.maintenanceEmployeePerformanceReport(req, res);
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
