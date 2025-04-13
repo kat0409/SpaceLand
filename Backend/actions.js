@@ -1,7 +1,7 @@
 const { stringify } = require('qs');
 const pool = require('./db.js');
 const queries = require('./queries.js');
-const nodemailer = require('nodemailer');
+const mysql = require("mysql2");
 
 //Fetch all rides
 const getRides = (request, response) => {
@@ -662,17 +662,36 @@ const getVisitorRecords = (req, res) => {
 };
 
 //Reports
-const rideMaintenanceReport = (req,res) => {
-    pool.query(queries.rideMaintenanceReport, (error, results) => {
-        if (error) {
-            console.error("Error fetching ride maintenance report:", error);
-            res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Internal server error" }));
-            return;
+const rideMaintenanceReport = (req, res) => {
+    //const { startDate, endDate, rideID } = req.query;
+    const parsedUrl = url.parse(req.url, true);
+    let { startDate, endDate, rideID } = parsedUrl.query || {};
+
+    startDate = startDate || '1970-01-01';
+    endDate = endDate || '2100-01-01';
+    rideID = parseInt(rideID) || 0;
+
+    pool.query(
+        queries.rideMaintenanceReport,
+        [startDate, endDate, rideID, rideID],
+        (error, results) => {
+            if (error) {
+                console.error("Error fetching ride maintenance report:", error);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+
+            if (!results || results.length === 0) {
+                res.writeHead(404, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ message: "No maintenance data found" }));
+                return;
+            }
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(results));
         }
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(results));
-    });
+    );
 };
 
 const visitorPurchasesReport = (req,res) => {
@@ -2386,7 +2405,153 @@ const getFilteredSalesReport = (req, res) => {
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify(results));
     });
-}; 
+};
+
+const getTransactionSummaryReport = (req, res) => {
+    const { startDate, endDate } = url.parse(req.url, true).query;
+  
+    if (!startDate || !endDate) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ error: "Missing date range" }));
+    }
+  
+    pool.query(
+      queries.getTransactionSummaryReport,
+      [startDate, endDate, startDate, endDate, startDate, endDate],
+      (err, results) => {
+        if (err) {
+          console.error("Transaction summary error:", err);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          return res.end(JSON.stringify({ error: "Internal server error" }));
+        }
+  
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+      }
+    );
+  };  
+
+  const getBestWorstSellersReport = (req, res) => {
+    const { startDate, endDate, groupBy = 'month', transactionType = 'all' } = url.parse(req.url, true).query;
+  
+    if (!startDate || !endDate) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ error: "Missing date range" }));
+    }
+  
+    const groupExpr = groupBy === 'week'
+      ? "YEARWEEK(transactionDate)"
+      : "DATE_FORMAT(transactionDate, '%Y-%m')";
+  
+    const queries = [];
+  
+    if (transactionType === 'all' || transactionType === 'ticket') {
+      queries.push(`
+        SELECT period, 'ticket' AS type,
+          (
+            SELECT ticketType
+            FROM tickettransactions t2
+            WHERE DATE(t2.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+            AND ${groupExpr.replace(/transactionDate/g, 't2.transactionDate')} = period
+            GROUP BY ticketType
+            ORDER BY COUNT(*) DESC
+            LIMIT 1
+          ) AS best,
+          (
+            SELECT ticketType
+            FROM tickettransactions t3
+            WHERE DATE(t3.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+            AND ${groupExpr.replace(/transactionDate/g, 't3.transactionDate')} = period
+            GROUP BY ticketType
+            ORDER BY COUNT(*) ASC
+            LIMIT 1
+          ) AS worst
+        FROM (
+          SELECT ${groupExpr} AS period
+          FROM tickettransactions
+          WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+          GROUP BY ${groupExpr}
+        ) t
+      `);
+    }
+  
+    if (transactionType === 'all' || transactionType === 'mealplan') {
+      queries.push(`
+        SELECT period, 'mealplan' AS type,
+          (
+            SELECT mp.mealPlanName
+            FROM mealplantransactions m2
+            JOIN mealplans mp ON m2.mealPlanID = mp.mealPlanID
+            WHERE DATE(m2.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+            AND ${groupExpr.replace(/transactionDate/g, 'm2.transactionDate')} = period
+            GROUP BY mp.mealPlanName
+            ORDER BY COUNT(*) DESC
+            LIMIT 1
+          ) AS best,
+          (
+            SELECT mp.mealPlanName
+            FROM mealplantransactions m3
+            JOIN mealplans mp ON m3.mealPlanID = mp.mealPlanID
+            WHERE DATE(m3.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+            AND ${groupExpr.replace(/transactionDate/g, 'm3.transactionDate')} = period
+            GROUP BY mp.mealPlanName
+            ORDER BY COUNT(*) ASC
+            LIMIT 1
+          ) AS worst
+        FROM (
+          SELECT ${groupExpr} AS period
+          FROM mealplantransactions
+          WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+          GROUP BY ${groupExpr}
+        ) m
+      `);
+    }
+  
+    if (transactionType === 'all' || transactionType === 'merch') {
+      queries.push(`
+        SELECT period, 'merch' AS type,
+          (
+            SELECT m.itemName
+            FROM merchandisetransactions mt2
+            JOIN merchandise m ON mt2.merchandiseID = m.merchandiseID
+            WHERE DATE(mt2.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+            AND ${groupExpr.replace(/transactionDate/g, 'mt2.transactionDate')} = period
+            GROUP BY m.itemName
+            ORDER BY COUNT(*) DESC
+            LIMIT 1
+          ) AS best,
+          (
+            SELECT m.itemName
+            FROM merchandisetransactions mt3
+            JOIN merchandise m ON mt3.merchandiseID = m.merchandiseID
+            WHERE DATE(mt3.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+            AND ${groupExpr.replace(/transactionDate/g, 'mt3.transactionDate')} = period
+            GROUP BY m.itemName
+            ORDER BY COUNT(*) ASC
+            LIMIT 1
+          ) AS worst
+        FROM (
+          SELECT ${groupExpr} AS period
+          FROM merchandisetransactions
+          WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+          GROUP BY ${groupExpr}
+        ) mt
+      `);
+    }
+  
+    const sql = queries.join('\nUNION ALL\n');
+  
+    pool.query(sql, (err, results) => {
+      if (err) {
+        console.error("Bestsellers report error:", err);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ error: "Internal server error" }));
+      }
+  
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(results));
+    });
+  };  
 
 const getEmployeeNames = (req,res) => {
     pool.query(queries.getEmployeeNames, (err, results) => {
@@ -2444,6 +2609,29 @@ const getSchedulesWithNames = (req, res) => {
     });
 };
 
+const maintenanceEmployeePerformanceReport = (req, res) => {
+    const parsedUrl = url.parse(req.url, true);
+    let { employeeID } = parsedUrl.query || {};
+    employeeID = employeeID ? parseInt(employeeID) : 0;
+
+    pool.query(queries.maintenanceEmployeePerformanceReport, [employeeID, employeeID], (error, results) => {
+        if (error) {
+            console.error("Error fetching employee performance report:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+
+        if (!results || results.length === 0) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "No performance data found" }));
+            return;
+        }
+
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
 
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
@@ -2520,5 +2708,8 @@ module.exports = {
     getEmployeeNames,
     getEmployeeScheduleForSup,
     getSpecificEmployeeSchedule,
-    getSchedulesWithNames
+    getSchedulesWithNames,
+    getTransactionSummaryReport,
+    getBestWorstSellersReport,
+    maintenanceEmployeePerformanceReport
 };  

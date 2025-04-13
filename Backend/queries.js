@@ -191,18 +191,14 @@ const rideMaintenanceReport = `
         rm.reason,
         DATE(rm.MaintenanceStartDate) AS StartDate,
         DATE(rm.MaintenanceEndDate) AS EndDate,
-
-        IFNULL(TIMESTAMPDIFF(DAY, rm.MaintenanceStartDate, rm.MaintenanceEndDate), 0) AS DaysTaken,
-
-        IFNULL((
-            SELECT AVG(TIMESTAMPDIFF(DAY, rm2.MaintenanceStartDate, rm2.MaintenanceEndDate))
-            FROM ridemaintenance rm2
-            WHERE rm2.rideID = rm.rideID AND rm2.status = 'completed'
-        ), 0) AS AvgFixTimeForRide
-
+        IFNULL(TIMESTAMPDIFF(DAY, rm.MaintenanceStartDate, rm.MaintenanceEndDate), 0) AS DaysTaken
     FROM ridemaintenance rm
     JOIN rides r ON rm.rideID = r.RideID
     LEFT JOIN employee e ON rm.MaintenanceEmployeeID = e.EmployeeID
+    WHERE 
+        rm.MaintenanceStartDate >= ? AND
+        rm.MaintenanceEndDate <= ? AND
+        (? = 0 OR rm.rideID = ?)
     ORDER BY rm.MaintenanceStartDate DESC;
 `;
 
@@ -627,10 +623,35 @@ const salesReport = `
     ORDER BY d.transactionDate;
 `;
 
+const getTransactionSummaryReport = `
+    SELECT DATE(transactionDate) AS transactionDate, 'ticket' AS transactionType, SUM(tix.price) AS totalRevenue
+    FROM tickettransactions t
+    JOIN tickets tix ON t.transactionID = tix.transactionID
+    WHERE DATE(transactionDate) BETWEEN ? AND ?
+    GROUP BY DATE(transactionDate)
+
+    UNION ALL
+
+    SELECT DATE(transactionDate) AS transactionDate, 'mealplan' AS transactionType, SUM(mp.price) AS totalRevenue
+    FROM mealplantransactions m
+    JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
+    WHERE DATE(transactionDate) BETWEEN ? AND ?
+    GROUP BY DATE(transactionDate)
+
+    UNION ALL
+
+    SELECT DATE(transactionDate) AS transactionDate, 'merch' AS transactionType, SUM(totalAmount) AS totalRevenue
+    FROM merchandisetransactions
+    WHERE DATE(transactionDate) BETWEEN ? AND ?
+    GROUP BY DATE(transactionDate)
+
+    ORDER BY transactionDate;
+`;
+
 const getEmployeeNames = `
     SELECT DISTINCT e.EmployeeID, CONCAT(e.FirstName, ' ', e.LastName) AS FullName
     FROM employee e
-    JOIN employee_schedule es ON es.EmployeeID = e.EmployeeID;
+    LEFT JOIN employee_schedule es ON es.EmployeeID = e.EmployeeID;
 `;
 
 const getEmployeeScheduleForSup  = `
@@ -644,6 +665,30 @@ const getSchedulesWithNames = `
         es.scheduleDate
     FROM employee_schedule es
     JOIN employee e ON es.EmployeeID = e.EmployeeID;
+`;
+
+const maintenanceEmployeePerformanceReport = `
+    SELECT 
+        e.EmployeeID,
+        CONCAT(e.FirstName, ' ', e.LastName) AS EmployeeName,
+        COUNT(IF(rm.maintenanceID IS NOT NULL, 1, NULL)) AS TotalTasks,
+        IFNULL(SUM(CASE WHEN rm.status = 'completed' THEN 1 ELSE 0 END), 0) AS CompletedTasks,
+        IFNULL(ROUND(AVG(
+            CASE 
+                WHEN rm.status = 'completed' 
+                AND rm.MaintenanceStartDate IS NOT NULL 
+                AND rm.MaintenanceEndDate IS NOT NULL
+                THEN TIMESTAMPDIFF(DAY, rm.MaintenanceStartDate, rm.MaintenanceEndDate)
+                ELSE NULL
+            END
+        ), 2), 0) AS AvgDaysToComplete
+    FROM employee e
+    LEFT JOIN ridemaintenance rm ON e.EmployeeID = rm.MaintenanceEmployeeID
+    WHERE
+        e.Department = 'maintenance' AND
+        (? = 0 OR e.EmployeeID = ?)
+    GROUP BY e.EmployeeID
+    ORDER BY TotalTasks DESC;
 `;
 
 module.exports = {
@@ -735,7 +780,9 @@ module.exports = {
     getEmployeeNames,
     getEmployeeScheduleForSup,
     getSpecificEmployeeSchedule,
-    getSchedulesWithNames
+    getSchedulesWithNames,
+    getTransactionSummaryReport,
+    maintenanceEmployeePerformanceReport
 };
 
 //checkMerchQuantity

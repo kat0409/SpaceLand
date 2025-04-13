@@ -3,6 +3,9 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { AuthContext } from '../components/AuthProvider';
 import { motion } from 'framer-motion';
+import MaintenanceRequestForm from "./MaintenanceRequestForm";
+import MarkMaintenanceCompletionForm from "./MarkMaintenanceCompletionForm";
+import RideMaintenanceReport from "../components/RideMaintenanceReport";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
@@ -14,6 +17,7 @@ export default function MaintenanceSupervisorPortal() {
   const [error, setError] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showRequestDetails, setShowRequestDetails] = useState(false);
+  const [activeTab, setActiveTab] = useState('Dashboard');
 
   useEffect(() => {
     if (auth.isAuthenticated && auth.role === 'supervisor' && localStorage.getItem('department') === 'maintenance') {
@@ -121,55 +125,105 @@ export default function MaintenanceSupervisorPortal() {
           Maintenance Supervisor Portal
         </motion.h1>
 
+        <div className="flex justify-center mb-10 space-x-4">
+          {[
+            { key: 'dashboard', label: 'Dashboard' },
+            { key: 'report', label: 'Ride Maintenance Report' },
+            { key: 'performance', label: 'Employee Performance' },
+          ].map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`px-4 py-2 rounded-full transition ${
+                activeTab === tab.key
+                  ? 'text-purple-400 border-b-2 border-purple-400'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         {error && (
           <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6">
             {error}
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Maintenance Requests Section */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-gray-800/50 rounded-lg p-6"
-          >
-            <h2 className="text-2xl font-bold mb-4">Maintenance Requests</h2>
-            {loading ? (
-              <p>Loading maintenance requests...</p>
-            ) : (
-              <div className="space-y-4">
-                {maintenanceRequests.length > 0 ? (
-                  maintenanceRequests.map((request, index) => (
-                    <div 
-                      key={request.RequestID || request.requestID || index}
-                      className="bg-gray-700/50 rounded-lg p-4 hover:bg-gray-700/70 transition cursor-pointer"
-                      onClick={() => handleViewRequestDetails(request)}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="font-semibold">{request.RideName || request.rideName}</h3>
-                          <p className="text-sm text-gray-400">
-                            Status: {request.Status || request.status}
-                          </p>
-                        </div>
-                        <span className={`px-2 py-1 rounded text-sm ${
-                          (request.Priority || request.priority) === 'High' ? 'bg-red-500/20 text-red-300' :
-                          (request.Priority || request.priority) === 'Medium' ? 'bg-yellow-500/20 text-yellow-300' :
-                          'bg-green-500/20 text-green-300'
-                        }`}>
-                          {request.Priority || request.priority || 'Normal'}
-                        </span>
-                      </div>
-                    </div>
-                  ))
+        {activeTab === 'dashboard' && (
+          <>
+            {/* Maintenance Request Form (optional) */}
+            <div className="mb-10">
+              <MaintenanceRequestForm />
+            </div>
+            {/* Mark Maintenance Completion Form */}
+            <div className="mb-10">
+              <MarkMaintenanceCompletionForm />
+            </div>
+            {/* Dashboard grid view */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Maintenance Request Status Section */}
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-gray-800/50 rounded-lg p-6"
+              >
+                <h2 className="text-2xl font-bold mb-4">Maintenance Request Status</h2>
+                {loading ? (
+                  <p>Loading maintenance requests...</p>
                 ) : (
-                  <p>No maintenance requests found</p>
+                  <div className="space-y-4">
+                    {maintenanceRequests.length > 0 ? (
+                      maintenanceRequests.map((request, index) => (
+                        <div 
+                          key={request.RequestID || request.requestID || index}
+                          className="bg-gray-700/50 rounded-lg p-4 hover:bg-gray-700/70 transition cursor-pointer"
+                          onClick={() => handleViewRequestDetails(request)}
+                        >
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h3 className="font-semibold">{request.RideName || request.rideName}</h3>
+                              <p className="text-sm text-gray-400">
+                                Status: {request.Status || request.status}
+                              </p>
+                            </div>
+                            <span className={`px-2 py-1 rounded text-sm ${
+                              (request.Priority || request.priority) === 'High' ? 'bg-red-500/20 text-red-300' :
+                              (request.Priority || request.priority) === 'Medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                              'bg-green-500/20 text-green-300'
+                            }`}>
+                              {request.Priority || request.priority || 'Normal'}
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p>No maintenance requests found</p>
+                    )}
+                  </div>
                 )}
-              </div>
-            )}
-          </motion.div>
+              </motion.div>
 
+              {/* Add a second panel here if needed (like ride status or performance preview) */}
+            </div>
+          </>
+        )}
+
+        {activeTab === 'report' && (
+          <div className="bg-gray-800/50 rounded-lg p-6 text-center">
+            <RideMaintenanceReport />
+          </div>
+        )}
+
+        {activeTab === 'performance' && (
+          <div className="bg-gray-800/50 rounded-lg p-6 text-center">
+            <h2 className="text-2xl font-bold mb-4">Employee Performance</h2>
+            <p className="text-gray-400">This section will analyze performance metrics of maintenance employees.</p>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Ride Status Overview */}
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
@@ -270,4 +324,3 @@ export default function MaintenanceSupervisorPortal() {
     </div>
   );
 }
-
