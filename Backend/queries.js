@@ -667,6 +667,26 @@ const getSchedulesWithNames = `
     JOIN employee e ON es.EmployeeID = e.EmployeeID;
 `;
 
+const maintenanceEmployeePerformanceReport = `
+    SELECT 
+        e.EmployeeID,
+        CONCAT(e.FirstName, ' ', e.LastName) AS EmployeeName,
+        COUNT(rm.maintenanceID) AS TotalTasks,
+        SUM(CASE WHEN rm.status = 'completed' THEN 1 ELSE 0 END) AS CompletedTasks,
+        AVG(
+            CASE 
+                WHEN rm.status = 'completed' AND rm.MaintenanceEndDate IS NOT NULL 
+                THEN TIMESTAMPDIFF(DAY, rm.MaintenanceStartDate, rm.MaintenanceEndDate)
+                ELSE NULL
+            END
+        ) AS AvgDaysToComplete
+    FROM employee e
+    LEFT JOIN ridemaintenance rm ON e.EmployeeID = rm.MaintenanceEmployeeID
+    WHERE (? = 0 OR e.EmployeeID = ?)
+    GROUP BY e.EmployeeID
+    ORDER BY TotalTasks DESC;
+`;
+
 module.exports = {
     getRides,
     getEmployees,
