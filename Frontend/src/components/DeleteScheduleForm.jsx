@@ -46,7 +46,7 @@ export default function DeleteScheduleForm() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     EmployeeID: parseInt(selectedEmployeeID),
-                    scheduleDate: selectedScheduleDate
+                    scheduleDate: formattedDate
                 }),
             });
 
