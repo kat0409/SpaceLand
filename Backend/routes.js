@@ -61,11 +61,11 @@ function routes(req, res) {
 
     if (url.startsWith('/supervisor/maintenance-requests') && method === 'GET') {
         return actions.getMaintenanceRequests(req, res);
-    }//wont work anymore
+    }
 
-    /*if (url.startsWith('/supervisor/update-maintenance-status') && method === 'POST') {
+    if (url.startsWith('/supervisor/update-maintenance-status') && method === 'POST') {
         return actions.updateMaintenanceStatus(req, res);
-    }*/
+    }
 
     if (url.startsWith('/supervisor/merchandise/low-stock') && method === 'GET') {
         return actions.getLowStockMerchandise(req, res);
