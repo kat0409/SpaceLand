@@ -196,9 +196,9 @@ const rideMaintenanceReport = `
     JOIN rides r ON rm.rideID = r.RideID
     LEFT JOIN employee e ON rm.MaintenanceEmployeeID = e.EmployeeID
     WHERE 
-        (? IS NULL OR rm.MaintenanceStartDate >= ?) AND
-        (? IS NULL OR rm.MaintenanceEndDate <= ?) AND
-        (? IS NULL OR rm.rideID = ?)
+        rm.MaintenanceStartDate >= ? AND
+        rm.MaintenanceEndDate <= ? AND
+        (? = 0 OR rm.rideID = ?)
     ORDER BY rm.MaintenanceStartDate DESC;
 `;
 

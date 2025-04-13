@@ -662,22 +662,34 @@ const getVisitorRecords = (req, res) => {
 };
 
 //Reports
-const rideMaintenanceReport = (req,res) => {
-    pool.query(queries.rideMaintenanceReport, (error, results) => {
-        if (error) {
-            console.error("Error fetching ride maintenance report:", error);
-            res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Internal server error" }));
-            return;
+const rideMaintenanceReport = (req, res) => {
+    const { startDate, endDate, rideID } = req.query;
+
+    startDate = startDate || '1970-01-01';
+    endDate = endDate || '2100-01-01';
+    rideID = parseInt(rideID) || 0;
+
+    pool.query(
+        queries.rideMaintenanceReport,
+        [startDate, endDate, rideID, rideID],
+        (error, results) => {
+            if (error) {
+                console.error("Error fetching ride maintenance report:", error);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+
+            if (!results || results.length === 0) {
+                res.writeHead(404, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ message: "No maintenance data found" }));
+                return;
+            }
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(results));
         }
-        if (!results || results.length === 0) {
-            res.writeHead(404, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ message: "No maintenance data found" }));
-            return;
-        }
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(results));
-    });
+    );
 };
 
 const visitorPurchasesReport = (req,res) => {
