@@ -4,23 +4,75 @@ export default function RideMaintenanceReport() {
     const [report, setReport] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [rides, setRides] = useState([]);
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [selectedRide, setSelectedRide] = useState('');
 
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
     useEffect(() => {
-        fetch(`${BACKEND_URL}/supervisor/maintenance/ride-maintenance`)
+        fetch(`${BACKEND_URL}/supervisor/maintenance/rides`)
+            .then(res => res.json())
+            .then(setRides)
+            .catch(console.error);
+    }, []);
+
+    const fetchReport = () => {
+        setLoading(true);
+        let url = `${BACKEND_URL}/supervisor/maintenance/ride-report?`;
+
+        if (startDate) url += `startDate=${startDate}&`;
+        if (endDate) url += `endDate=${endDate}&`;
+        if (selectedRide) url += `rideID=${selectedRide}`;
+
+        fetch(url)
             .then(res => {
                 if (!res.ok) throw new Error("Failed to fetch report");
                 return res.json();
             })
-            .then(data => setReport(data))
+            .then(setReport)
             .catch(err => setError(err.message))
             .finally(() => setLoading(false));
+    };
+
+    useEffect(() => {
+        fetchReport();
     }, []);
 
     return (
         <div className="bg-gray-800/50 rounded-lg p-6">
             <h2 className="text-2xl font-bold mb-4">Ride Maintenance Report</h2>
+            {/* Filters */}
+            <div className="flex flex-wrap gap-4 mb-6">
+                <input
+                    type="date"
+                    value={startDate}
+                    onChange={e => setStartDate(e.target.value)}
+                    className="p-2 rounded bg-black text-white"
+                />
+                <input
+                    type="date"
+                    value={endDate}
+                    onChange={e => setEndDate(e.target.value)}
+                    className="p-2 rounded bg-black text-white"
+                />
+                <select
+                    value={selectedRide}
+                    onChange={e => setSelectedRide(e.target.value)}
+                    className="p-2 rounded bg-black text-white"
+                >
+                    <option value="">All Rides</option>
+                    {rides.map(ride => (
+                        <option key={ride.RideID} value={ride.RideID}>
+                            {ride.RideName}
+                        </option>
+                    ))}
+                </select>
+                <button onClick={fetchReport} className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded text-white">
+                    Apply Filters
+                </button>
+            </div>
             {loading && <p>Loading...</p>}
             {error && <p className="text-red-400">Error: {error}</p>}
             {!loading && !error && report.length === 0 && <p>No maintenance records found.</p>}
@@ -29,8 +81,8 @@ export default function RideMaintenanceReport() {
                     <table className="w-full text-sm">
                         <thead className="text-purple-300">
                             <tr>
-                                <th className="text-left">Ride</th>
-                                <th className="text-left">Assigned Employee</th>
+                                <th>Ride</th>
+                                <th>Assigned Employee</th>
                                 <th>Status</th>
                                 <th>Reason</th>
                                 <th>Start Date</th>
