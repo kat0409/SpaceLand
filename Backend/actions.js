@@ -2611,8 +2611,8 @@ const getSchedulesWithNames = (req, res) => {
 
 const maintenanceEmployeePerformanceReport = (req, res) => {
     const parsedUrl = url.parse(req.url, true);
-    let { employeeID } = parsedUrl.query || {};
-    employeeID = employeeID ? parseInt(employeeID) : 0;
+    let employeeID = parsedUrl.query.employeeID || parsedUrl.query.EmployeeID || "0";
+    employeeID = parseInt(employeeID) || 0
 
     pool.query(queries.maintenanceEmployeePerformanceReport, [employeeID, employeeID], (error, results) => {
         if (error) {

@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import MaintenanceRequestForm from "./MaintenanceRequestForm";
 import MarkMaintenanceCompletionForm from "./MarkMaintenanceCompletionForm";
 import RideMaintenanceReport from "../components/RideMaintenanceReport";
+import MaintenanceEmployeePerformanceReport from "../components/MaintenanceEmployeePerformanceReport";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
@@ -219,7 +220,7 @@ export default function MaintenanceSupervisorPortal() {
         {activeTab === 'performance' && (
           <div className="bg-gray-800/50 rounded-lg p-6 text-center">
             <h2 className="text-2xl font-bold mb-4">Employee Performance</h2>
-            <p className="text-gray-400">This section will analyze performance metrics of maintenance employees.</p>
+            <MaintenanceEmployeePerformanceReport />
           </div>
         )}
 
