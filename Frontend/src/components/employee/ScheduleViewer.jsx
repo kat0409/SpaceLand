@@ -19,7 +19,7 @@ export default function ScheduleViewer({ employeeID }) {
       try {
         const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
         const response = await fetch(
-          `${BACKEND_URL}/employee/schedule?employeeID=${employeeID}&startDate=${selectedWeek.toISOString()}`
+          `${BACKEND_URL}/employee/schedule?EmployeeID=${employeeID}&startDate=${selectedWeek.toISOString()}`
         );
         
         if (!response.ok) {

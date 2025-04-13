@@ -2564,6 +2564,18 @@ const getEmployeeNames = (req,res) => {
     });
 };
 
+const getAllEmployees = (req, res) => {
+    pool.query(queries.getALLEmployees, (err, results) => {
+        if (err) {
+            console.error("Error fetching employees:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Failed to fetch employees" }));
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
 const getEmployeeScheduleForSup = (req,res) => {
     pool.query(queries.getEmployeeScheduleForSup, (err, results) => {
         if (err) {
@@ -2711,5 +2723,6 @@ module.exports = {
     getSchedulesWithNames,
     getTransactionSummaryReport,
     getBestWorstSellersReport,
-    maintenanceEmployeePerformanceReport
+    maintenanceEmployeePerformanceReport,
+    getAllEmployees
 };  

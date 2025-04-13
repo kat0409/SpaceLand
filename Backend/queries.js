@@ -654,6 +654,10 @@ const getEmployeeNames = `
     LEFT JOIN employee_schedule es ON es.EmployeeID = e.EmployeeID;
 `;
 
+const getAllEmployees = `
+    SELECT EmployeeID, FirstName, LastName FROM employee
+`;
+
 const getEmployeeScheduleForSup  = `
     SELECT * FROM employee_schedule;
 `;
@@ -782,7 +786,8 @@ module.exports = {
     getSpecificEmployeeSchedule,
     getSchedulesWithNames,
     getTransactionSummaryReport,
-    maintenanceEmployeePerformanceReport
+    maintenanceEmployeePerformanceReport,
+    getAllEmployees
 };
 
 //checkMerchQuantity
