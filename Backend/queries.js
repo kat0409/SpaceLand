@@ -777,7 +777,8 @@ module.exports = {
     getEmployeeScheduleForSup,
     getSpecificEmployeeSchedule,
     getSchedulesWithNames,
-    getTransactionSummaryReport
+    getTransactionSummaryReport,
+    maintenanceEmployeePerformanceReport
 };
 
 //checkMerchQuantity

@@ -2609,6 +2609,29 @@ const getSchedulesWithNames = (req, res) => {
     });
 };
 
+const maintenanceEmployeePerformanceReport = (req, res) => {
+    const parsedUrl = url.parse(req.url, true);
+    let { employeeID } = parsedUrl.query || {};
+    employeeID = employeeID ? parseInt(employeeID) : 0;
+
+    pool.query(queries.maintenanceEmployeePerformanceReport, [employeeID, employeeID], (error, results) => {
+        if (error) {
+            console.error("Error fetching employee performance report:", error);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+
+        if (!results || results.length === 0) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "No performance data found" }));
+            return;
+        }
+
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
 
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
@@ -2687,5 +2710,6 @@ module.exports = {
     getSpecificEmployeeSchedule,
     getSchedulesWithNames,
     getTransactionSummaryReport,
-    getBestWorstSellersReport
+    getBestWorstSellersReport,
+    maintenanceEmployeePerformanceReport
 };  
