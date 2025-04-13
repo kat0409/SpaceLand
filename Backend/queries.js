@@ -682,7 +682,9 @@ const maintenanceEmployeePerformanceReport = `
         ) AS AvgDaysToComplete
     FROM employee e
     LEFT JOIN ridemaintenance rm ON e.EmployeeID = rm.MaintenanceEmployeeID
-    WHERE (? = 0 OR e.EmployeeID = ?)
+    WHERE
+        e.Department = 'maintenance' AND
+        (? = 0 OR e.EmployeeID = ?)
     GROUP BY e.EmployeeID
     ORDER BY TotalTasks DESC;
 `;
