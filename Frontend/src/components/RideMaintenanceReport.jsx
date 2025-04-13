@@ -33,7 +33,17 @@ export default function RideMaintenanceReport() {
                 if (!res.ok) throw new Error("Failed to fetch report");
                 return res.json();
             })
-            .then(setReport)
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setReport(data);
+                    setError(null);
+                } else if (data.message === "No maintenance data found") {
+                    setReport([]);
+                    setError(null);
+                } else {
+                    throw new Error("Unexpected response format");
+                }
+            })
             .catch(err => setError(err.message))
             .finally(() => setLoading(false));
     };
