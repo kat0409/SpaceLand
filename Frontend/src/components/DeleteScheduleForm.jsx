@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
-export default function DeleteScheduleForm({ onScheduleDeleted }) {
+export default function DeleteScheduleForm() {
     const [employees, setEmployees] = useState([]);
     const [scheduleDates, setScheduleDates] = useState([]);
     const [selectedEmployeeID, setSelectedEmployeeID] = useState('');

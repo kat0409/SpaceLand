@@ -2565,7 +2565,7 @@ const getEmployeeNames = (req,res) => {
 };
 
 const getAllEmployees = (req, res) => {
-    pool.query(queries.getALLEmployees, (err, results) => {
+    pool.query(queries.getAllEmployees, (err, results) => {
         if (err) {
             console.error("Error fetching employees:", err);
             res.writeHead(500, { "Content-Type": "application/json" });
