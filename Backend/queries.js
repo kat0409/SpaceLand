@@ -671,15 +671,15 @@ const maintenanceEmployeePerformanceReport = `
     SELECT 
         e.EmployeeID,
         CONCAT(e.FirstName, ' ', e.LastName) AS EmployeeName,
-        COUNT(rm.maintenanceID) AS TotalTasks,
-        SUM(CASE WHEN rm.status = 'completed' THEN 1 ELSE 0 END) AS CompletedTasks,
-        AVG(
+        COUNT(IF(rm.maintenanceID IS NOT NULL, 1, NULL)) AS TotalTasks,
+        IFNULL(SUM(CASE WHEN rm.status = 'completed' THEN 1 ELSE 0 END), 0) AS CompletedTasks,
+        IFNULL(AVG(
             CASE 
-                WHEN rm.status = 'completed' AND rm.MaintenanceEndDate IS NOT NULL 
+                WHEN rm.status = 'completed' AND rm.MaintenanceEndDate IS NOT NULL AND rm.MaintenanceEndDate IS NOT NULL 
                 THEN TIMESTAMPDIFF(DAY, rm.MaintenanceStartDate, rm.MaintenanceEndDate)
                 ELSE NULL
             END
-        ) AS AvgDaysToComplete
+        ), 2), 0) AS AvgDaysToComplete
     FROM employee e
     LEFT JOIN ridemaintenance rm ON e.EmployeeID = rm.MaintenanceEmployeeID
     WHERE
