@@ -25,7 +25,7 @@ export default function TimeOffRequest({ employeeID }) {
     setStatus({ type: '', message: '' });
 
     try {
-      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
       const response = await fetch(`${BACKEND_URL}/employee/time-off-request`, {
         method: 'POST',
         headers: {

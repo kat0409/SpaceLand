@@ -10,8 +10,10 @@ import EmployeeProfileForm from '../components/EmployeeProfileUpdateForm';
 import FireEmployeeForm from '../components/FireEmployeeForm';
 import TimeOffRequestReviewForm from '../components/TimeOffRequestReviewForm';
 import ScheduleForm from '../components/ScheduleForm';
+import CalendarView from '../components/HRCalendarView';
+import AttendanceReport from '../components/AttendanceReport';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
 export default function HRSupervisorPortal() {
     const { auth } = useContext(AuthContext)
@@ -19,60 +21,18 @@ export default function HRSupervisorPortal() {
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("scheduling");
     const [refreshKey, setRefreshKey] = useState(Date.now());
+    const [schedules, setSchedules] = useState([]);
 
     console.log('HRSupervisorPortal rendered with auth:', auth);
 
     const [employees, setEmployees] = useState([]);
     const [visitorRecords, setVisitorRecords] = useState([]);
-    const [attendanceAndRevenueReport, setAttendanceAndRevenueReport] = useState([]);
     const {logout} = useContext(AuthContext);
     const [filters, setFilters] = useState({
         startDate: '',
         endDate: '',
         weatherCondition: ''
     });
-
-    const ScheduleForm = ({ onScheduleAdded }) => {
-        const [form, setForm] = useState({
-            EmployeeID: '',
-            Department: '',
-            scheduleDate: '',
-            shiftStart: '',
-            shiftEnd: '',
-            isRecurring: false,
-        });
-
-        const handleSubmit = async (e) => {
-            e.preventDefault();
-            const res = await fetch(`${BACKEND_URL}/supervisor/HR/schedule`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form)
-            });
-            const data = await res.json();
-            if (res.ok) {
-                onScheduleAdded(); // refresh
-            } else {
-                alert(data.error || 'Failed to add schedule');
-            }
-        };
-
-        return (
-            <form onSubmit={handleSubmit} className="space-y-2 bg-white/10 p-4 rounded-xl mb-4">
-                <h3 className="font-bold text-lg">Create Employee Schedule</h3>
-                <input placeholder="Employee ID" value={form.EmployeeID} onChange={e => setForm({ ...form, EmployeeID: e.target.value })} className="w-full p-2 rounded" required />
-                <input placeholder="Department" value={form.Department} onChange={e => setForm({ ...form, Department: e.target.value })} className="w-full p-2 rounded" required />
-                <input type="date" value={form.scheduleDate} onChange={e => setForm({ ...form, scheduleDate: e.target.value })} className="w-full p-2 rounded" required />
-                <input type="time" value={form.shiftStart} onChange={e => setForm({ ...form, shiftStart: e.target.value })} className="w-full p-2 rounded" required />
-                <input type="time" value={form.shiftEnd} onChange={e => setForm({ ...form, shiftEnd: e.target.value })} className="w-full p-2 rounded" required />
-                <label className="flex items-center space-x-2">
-                <input type="checkbox" checked={form.isRecurring} onChange={e => setForm({ ...form, isRecurring: e.target.checked })} />
-                <span>Recurring?</span>
-                </label>
-                <button className="bg-purple-600 px-4 py-2 rounded text-white">Submit</button>
-            </form>
-        );
-    };
 
     useEffect(() => {
         console.log('Auth effect triggered with auth:', auth);
@@ -91,6 +51,19 @@ export default function HRSupervisorPortal() {
             setIsLoading(false);
         }
     }, [auth, navigate]);
+
+    useEffect(() => {
+        fetch(`${BACKEND_URL}/supervisor/HR/get-schedule`)
+            .then(res => res.json())
+            .then(data => {
+                setSchedules(data);
+                setIsLoading(false);
+            })
+            .catch(err => {
+                console.error("Failed to fetch schedule:", err);
+                setIsLoading(false);
+            });
+    }, [refreshKey]);
 
     useEffect(() => {
         console.log('Data fetching effect triggered');
@@ -186,6 +159,7 @@ export default function HRSupervisorPortal() {
 
                 {activeTab === 'scheduling' && (
                     <div className="space-y-6">
+                        <CalendarView schedule={schedules} />
                         <ScheduleForm onScheduleAdded={() => setRefreshKey(Date.now())} />
                         <DeleteScheduleForm onScheduleDeleted={() => setRefreshKey(Date.now())} />
                         <EmployeeScheduleDisplay refreshKey={refreshKey} />
@@ -197,109 +171,50 @@ export default function HRSupervisorPortal() {
                     <div>
                         <EmployeeProfileForm/>
                         <FireEmployeeForm/>
+                        {/* Employee List */}
+                        <div className="space-y-12">
+                        <h2 className="text-2xl font-semibold mb-4">Employee List</h2>
+                        <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
+                            <table className="w-full text-sm">
+                            <thead className="text-left text-purple-300">
+                                <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>Username</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {employees.map((emp) => (
+                                <tr key={emp.EmployeeID} className="border-t border-white/10">
+                                    <td>{emp.EmployeeID}</td>
+                                    <td>{emp.FirstName} {emp.LastName}</td>
+                                    <td>{emp.Email}</td>
+                                    <td>{emp.Address}</td>
+                                    <td>{emp.username}</td>
+                                    <td>{emp.Department}</td>
+                                    <td>{emp.employmentStatus ? 1 : 0}</td>
+                                </tr>
+                                ))}
+                            </tbody>
+                            </table>
+                        </div>
+                        </div>
+                        <div className="p-6">
+                            <EmployeeManagement />
+                        </div>
                         {/* Place employee profile filtering/editing UI here */}
                     </div>
                 )}
 
                 {activeTab === 'attendance' && (
                     <div>
-                        {/* Place attendance and revenue report UI here */}
+                        <AttendanceReport/>
                     </div>
                 )}
-        
-                {/* Employee List */}
-                <div className="space-y-12">
-                <h2 className="text-2xl font-semibold mb-4">Employee List</h2>
-                <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
-                    <table className="w-full text-sm">
-                    <thead className="text-left text-purple-300">
-                        <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Address</th>
-                        <th>Username</th>
-                        <th>Department</th>
-                        <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {employees.map((emp) => (
-                        <tr key={emp.EmployeeID} className="border-t border-white/10">
-                            <td>{emp.EmployeeID}</td>
-                            <td>{emp.FirstName} {emp.LastName}</td>
-                            <td>{emp.Email}</td>
-                            <td>{emp.Address}</td>
-                            <td>{emp.username}</td>
-                            <td>{emp.Department}</td>
-                            <td>{emp.employmentStatus ? 1 : 0}</td>
-                        </tr>
-                        ))}
-                    </tbody>
-                    </table>
-                </div>
-                </div>
-                <div className="p-6">
-                    <EmployeeManagement />
-                </div>
-                <div className="mb-4 space-x-4">
-                    <input
-                        type="date"
-                        name="startDate"
-                        value={filters.startDate}
-                        onChange={handleFilterChange}
-                        className="bg-white/20 text-white p-2 rounded"
-                    />
-                    <input
-                        type="date"
-                        name="endDate"
-                        value={filters.endDate}
-                        onChange={handleFilterChange}
-                        className="bg-white/20 text-white p-2 rounded"
-                    />
-                    <select
-                        name="weatherCondition"
-                        value={filters.weatherCondition}
-                        onChange={handleFilterChange}
-                        className="bg-white/20 text-white p-2 rounded"
-                    >
-                        <option value="">All Weather</option>
-                        <option value="Sunny">Sunny</option>
-                        <option value="Cloudy">Cloudy</option>
-                        <option value="Rainy">Rainy</option>
-                        <option value="Stormy">Stormy</option>
-                    </select>
-                    <button onClick={fetchFilteredReport} className="bg-purple-600 text-white p-2 rounded">
-                        Apply Filters
-                    </button>
-                </div>
-
-                {/* VISITOR RECORDS */}
-                <div>
-                    <h2 className="text-2xl font-semibold mb-4">📋 Visitor Records</h2>
-                    <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead className="text-left text-purple-300">
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Username</th>
-                            <th>Military</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {visitorRecords.map(visitor => (
-                            <tr key={visitor.VisitorID} className="border-t border-white/10">
-                            <td>{visitor.FirstName} {visitor.LastName}</td>
-                            <td>{visitor.Email}</td>
-                            <td>{visitor.Username}</td>
-                            <td>{visitor.MilitaryStatus ? 'Yes' : 'No'}</td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                    </div>
-                </div>
                 <button
                     onClick={() => {
                         logout();

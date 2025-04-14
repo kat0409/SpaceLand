@@ -388,7 +388,7 @@ const getMealPlanPrice = `
 `;
 
 const getEvents = `
-    SELECT * FROM parkevent ORDER BY event_date
+    SELECT * FROM parkevent ORDER BY event_date DESC
 `;
 
 const addEvent = `
@@ -454,9 +454,9 @@ const deleteEmployeeSchedule = `
 `;
 
 const getSpecificEmployeeSchedule = `
-    SELECT e.scheduleDate
-    FROM employee_schedule e
-    WHERE e.EmployeeID = ?
+    SELECT scheduleDate 
+    FROM employee_schedule 
+    WHERE EmployeeID = ?;
 `;
 
 const getTimeOffRequests = `
@@ -654,6 +654,10 @@ const getEmployeeNames = `
     LEFT JOIN employee_schedule es ON es.EmployeeID = e.EmployeeID;
 `;
 
+const getAllEmployees = `
+    SELECT EmployeeID, FirstName, LastName FROM employee
+`;
+
 const getEmployeeScheduleForSup  = `
     SELECT * FROM employee_schedule;
 `;
@@ -689,6 +693,28 @@ const maintenanceEmployeePerformanceReport = `
         (? = 0 OR e.EmployeeID = ?)
     GROUP BY e.EmployeeID
     ORDER BY TotalTasks DESC;
+`;
+
+const getDepartmentByEmployeeID = `
+    SELECT Department FROM employee WHERE EmployeeID = ?
+`;
+
+const getAttendanceReport = `
+    SELECT 
+        ea.EmployeeID,
+        CONCAT(e.FirstName, ' ', e.LastName) AS FullName,
+        e.Department,
+        ea.date,
+        ea.clockIn,
+        ea.clockOut,
+        ROUND(TIMESTAMPDIFF(MINUTE, ea.clockIn, ea.clockOut) / 60.0, 2) AS HoursWorked
+    FROM employee_attendance ea
+    JOIN employee e ON ea.EmployeeID = e.EmployeeID
+    WHERE 1 = 1
+        AND ea.date BETWEEN ? AND ?
+        AND (? = 'all' OR e.Department = ?)
+        AND (? = 0 OR ea.EmployeeID = ?)
+    ORDER BY ea.date DESC
 `;
 
 module.exports = {
@@ -782,7 +808,10 @@ module.exports = {
     getSpecificEmployeeSchedule,
     getSchedulesWithNames,
     getTransactionSummaryReport,
-    maintenanceEmployeePerformanceReport
+    maintenanceEmployeePerformanceReport,
+    getAllEmployees,
+    getDepartmentByEmployeeID,
+    getAttendanceReport
 };
 
 //checkMerchQuantity

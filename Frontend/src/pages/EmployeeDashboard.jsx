@@ -8,15 +8,18 @@ import { useNavigate } from 'react-router-dom';
 import EmployeeProfile from '../components/employee/EmployeeProfile';
 import ScheduleViewer from '../components/employee/ScheduleViewer';
 import TimeOffRequest from '../components/employee/TimeOffRequest';
+import EmployeeCalendarView from '../components/EmployeeCalendarView';
+import ClockInOutForm from '../components/ClockInOutForm';
 
 export default function EmployeeDashboard() {
   const { auth } = useContext(AuthContext);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
+  const [schedule, setSchedule] = useState([]);
 
   const [employee, setEmployee] = useState(null);
   const [error, setError] = useState('');
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
   useEffect(() => {
     if (!auth.isAuthenticated || auth.role !== "employee") {
@@ -105,7 +108,12 @@ export default function EmployeeDashboard() {
             )}
 
             {activeTab === 'schedule' && auth.userID && (
-              <ScheduleViewer employeeID={auth.userID} />
+              <>
+                <EmployeeCalendarView schedule={schedule} />
+                <ScheduleViewer employeeID={auth.userID} />
+                <ClockInOutForm employeeID={auth.userID} />
+              </>            
+            
             )}
 
             {activeTab === 'timeoff' && auth.userID && (
