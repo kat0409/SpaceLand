@@ -19,10 +19,6 @@ const ScheduleForm = ({ onScheduleAdded }) => {
             .then(res => res.json())
             .then(data => setEmployeeList(data))
             .catch(err => console.error("Failed to fetch employee names", err));
-        fetch(`${BACKEND_URL}/supervisor/HR/get-departments`)
-            .then(res => res.json())
-            .then(data => setDepartmentList(data))
-            .catch(err => console.error("Failed to fetch department names", err));
     }, []);    
 
     const handleChange = (e) => {
@@ -72,8 +68,8 @@ const ScheduleForm = ({ onScheduleAdded }) => {
                             setForm(prev => ({ ...prev, Department: '' }));
                         }
                         } catch (err) {
-                        console.error("Failed to fetch department", err);
-                        setForm(prev => ({ ...prev, Department: '' }));
+                            console.error("Failed to fetch department", err);
+                            setForm(prev => ({ ...prev, Department: '' }));
                         }
                     }}
                     className="p-2 rounded bg-black/50 text-white border border-gray-700"

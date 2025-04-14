@@ -2646,7 +2646,8 @@ const maintenanceEmployeePerformanceReport = (req, res) => {
 };
 
 const getDepartmentByEmployeeID = (req, res) => {
-    const { EmployeeID } = req.query;
+    const parsedUrl = url.parse(req.url,true);
+    const { EmployeeID } = parsedUrl.query;
 
     if (!EmployeeID) {
         res.writeHead(400, { "Content-Type": "application/json" });
