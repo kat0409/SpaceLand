@@ -10,7 +10,7 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
           {/* Column 1: Brand/Info */}
           <div>
-            <h3 className="text-2xl font-bold mb-2">Spaceland 🚀</h3>
+            <h3 className="text-2xl font-bold mb-2">Spaceland </h3>
             <p className="text-sm text-gray-400">
               A cosmic rollercoaster experience like no other.
               Located in the heart of Houston, TX.
@@ -27,14 +27,9 @@ export default function Footer() {
             </ul>
           </div>
   
-          {/* Column 3: Social Links & Employee Login */}
+          {/* Column 3: Follow Us & Employee Login */}
           <div>
             <h4 className="text-lg font-semibold mb-2">Follow Us</h4>
-            <div className="flex gap-4 mb-4">
-              <a href="#" className="hover:text-purple-400 transition duration-300">Facebook</a>
-              <a href="#" className="hover:text-purple-400 transition duration-300">Twitter</a>
-              <a href="#" className="hover:text-purple-400 transition duration-300">Instagram</a>
-            </div>
             <div className="flex gap-2">
               {/*GitHub Button*/}
               <a className="mb-4" href="https://github.com/kat0409/SpaceLand.git">
