@@ -148,31 +148,42 @@ const routeMap = {
 });*/
 
 const server = http.createServer((req, res) => {
-    // Handle uploads directory access for image files
+    // Simple file serving
     if (req.url.startsWith('/uploads/')) {
         const filePath = path.join(__dirname, req.url);
+        console.log("Serving file from:", filePath);
         
         fs.readFile(filePath, (err, data) => {
             if (err) {
+                console.error("File read error:", err);
                 res.writeHead(404);
                 res.end('File not found');
                 return;
             }
             
-            // Determine content type based on file extension
-            const ext = path.extname(filePath).toLowerCase();
-            const contentType = {
-                '.jpg': 'image/jpeg',
-                '.jpeg': 'image/jpeg',
-                '.png': 'image/png',
-                '.gif': 'image/gif',
-                '.webp': 'image/webp'
-            }[ext] || 'application/octet-stream';
-            
-            res.writeHead(200, { 'Content-Type': contentType });
+            res.writeHead(200, { 'Content-Type': 'image/jpeg' });
             res.end(data);
             return;
         });
+        return;
+    }
+    
+    // Simple test endpoint
+    if (req.url === '/test-upload' && req.method === 'GET') {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(`
+            <html><body>
+                <h1>Upload Test</h1>
+                <form action="/supervisor/merchandise/update-item" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="merchandiseID" value="10" />
+                    <input type="hidden" name="itemName" value="Test Item" />
+                    <input type="hidden" name="price" value="9.99" />
+                    <input type="hidden" name="quantity" value="5" />
+                    <input type="file" name="image" />
+                    <button type="submit">Upload</button>
+                </form>
+            </body></html>
+        `);
         return;
     }
     
