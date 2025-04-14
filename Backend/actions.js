@@ -2673,22 +2673,51 @@ const getDepartmentByEmployeeID = (req, res) => {
 
 const getAttendanceReport = (req, res) => {
     const parsedUrl = url.parse(req.url, true);
-    const { startDate, endDate, department = 'all', employeeID = 0 } = parsedUrl.query;
-  
-    pool.query(
-      queries.getAttendanceReport,
-      [startDate, endDate, department, department, parseInt(employeeID), parseInt(employeeID)],
-      (err, results) => {
+    const { startDate, endDate, department, employeeID } = parsedUrl.query;
+
+    let baseQuery = `
+        SELECT 
+            ea.EmployeeID,
+            CONCAT(e.FirstName, ' ', e.LastName) AS FullName,
+            e.Department,
+            ea.date,
+            ea.clockIn,
+            ea.clockOut,
+            TIMESTAMPDIFF(MINUTE, ea.clockIn, ea.clockOut) / 60.0 AS HoursWorked
+        FROM employee_attendance ea
+        JOIN employee e ON ea.EmployeeID = e.EmployeeID
+        WHERE 1 = 1
+    `;
+
+    const params = [];
+
+    if (startDate && endDate) {
+        baseQuery += " AND ea.date BETWEEN ? AND ?";
+        params.push(startDate, endDate);
+    }
+
+    if (department && department !== 'all') {
+        baseQuery += " AND e.Department = ?";
+        params.push(department);
+    }
+
+    if (employeeID && employeeID !== 'all') {
+        baseQuery += " AND ea.EmployeeID = ?";
+        params.push(employeeID);
+    }
+
+    baseQuery += " ORDER BY ea.date DESC";
+
+    pool.query(baseQuery, params, (err, results) => {
         if (err) {
-          console.error("Attendance report error:", err);
-          res.writeHead(500, { "Content-Type": "application/json" });
-          return res.end(JSON.stringify({ error: "Failed to generate report" }));
+            console.error("Attendance report error:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Database error" }));
         }
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify(results));
-      }
-    );
-  };
+    });
+};
 
 //Check to see if you need to make a module.exports function here as well
 module.exports = {

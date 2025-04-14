@@ -11,6 +11,7 @@ import FireEmployeeForm from '../components/FireEmployeeForm';
 import TimeOffRequestReviewForm from '../components/TimeOffRequestReviewForm';
 import ScheduleForm from '../components/ScheduleForm';
 import CalendarView from '../components/HRCalendarView';
+import AttendanceReport from '../components/AttendanceReport';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
@@ -177,7 +178,7 @@ export default function HRSupervisorPortal() {
 
                 {activeTab === 'attendance' && (
                     <div>
-                        {/* Place attendance and revenue report UI here */}
+                        <AttendanceReport/>
                     </div>
                 )}
         
