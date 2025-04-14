@@ -1669,7 +1669,11 @@ const deleteMerchandise = (req, res) => {
 };
 
 const updateMerchandise = (req, res) => {
+    console.log("Starting updateMerchandise function");
+    console.log("Request body (before multer):", req.body);
+    
     upload.single('image')(req, res, function (err) {
+        console.log("Inside multer callback");
         if (err) {
             console.error("File upload error:", err);
             res.writeHead(400, { "Content-Type": "application/json" });
@@ -1677,15 +1681,26 @@ const updateMerchandise = (req, res) => {
             return;
         }
 
+        console.log("Request body (after multer):", req.body);
+        console.log("Uploaded file:", req.file);
+
         const { merchandiseID, itemName, price, quantity, giftShopName, description } = req.body;
+        console.log("Extracted values:", { merchandiseID, itemName, price, quantity, giftShopName, description });
         
         // Get the image path if a file was uploaded
         const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+        console.log("Image URL:", imageUrl);
 
         if (!merchandiseID || !itemName || price === undefined || quantity === undefined) {
+            console.log("Missing required fields");
             // If a file was uploaded but validation failed, delete it
             if (req.file) {
-                fs.unlinkSync(req.file.path);
+                try {
+                    fs.unlinkSync(req.file.path);
+                    console.log("Deleted uploaded file due to validation failure");
+                } catch (error) {
+                    console.error("Error deleting file:", error);
+                }
             }
             res.writeHead(400, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ error: "Missing required fields" }));
@@ -1693,20 +1708,34 @@ const updateMerchandise = (req, res) => {
         }
 
         // Get the current item data to check if there's an existing image
+        console.log("Querying database for existing item");
         pool.query('SELECT imageUrl FROM merchandise WHERE merchandiseID = ?', [merchandiseID], (err, results) => {
             if (err) {
                 console.error("Error fetching existing merchandise:", err);
                 if (req.file) {
-                    fs.unlinkSync(req.file.path);
+                    try {
+                        fs.unlinkSync(req.file.path);
+                        console.log("Deleted uploaded file due to database error");
+                    } catch (error) {
+                        console.error("Error deleting file:", error);
+                    }
                 }
                 res.writeHead(500, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({ error: "Internal server error" }));
                 return;
             }
 
+            console.log("Query results:", results);
+
             if (results.length === 0) {
+                console.log("Merchandise not found");
                 if (req.file) {
-                    fs.unlinkSync(req.file.path);
+                    try {
+                        fs.unlinkSync(req.file.path);
+                        console.log("Deleted uploaded file because merchandise not found");
+                    } catch (error) {
+                        console.error("Error deleting file:", error);
+                    }
                 }
                 res.writeHead(404, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({ error: "Merchandise not found" }));
@@ -1714,13 +1743,18 @@ const updateMerchandise = (req, res) => {
             }
 
             const existingImageUrl = results[0].imageUrl;
+            console.log("Existing image URL:", existingImageUrl);
             
             // If there's a new image and there's an existing image, delete the old one
             if (imageUrl && existingImageUrl) {
                 try {
                     const oldImagePath = path.join(__dirname, existingImageUrl);
+                    console.log("Old image path:", oldImagePath);
                     if (fs.existsSync(oldImagePath)) {
                         fs.unlinkSync(oldImagePath);
+                        console.log("Deleted old image file");
+                    } else {
+                        console.log("Old image file does not exist");
                     }
                 } catch (error) {
                     console.error("Error deleting old image:", error);
@@ -1738,20 +1772,36 @@ const updateMerchandise = (req, res) => {
                 params = [itemName, price, quantity, giftShopName || null, description || null, merchandiseID];
             }
 
+            console.log("Update query:", query);
+            console.log("Update parameters:", params);
+
             pool.query(query, params, (error, results) => {
                 if (error) {
                     console.error("Error updating merchandise:", error);
                     if (req.file) {
-                        fs.unlinkSync(req.file.path);
+                        try {
+                            fs.unlinkSync(req.file.path);
+                            console.log("Deleted uploaded file due to update error");
+                        } catch (fileError) {
+                            console.error("Error deleting file:", fileError);
+                        }
                     }
                     res.writeHead(500, { "Content-Type": "application/json" });
                     res.end(JSON.stringify({ error: "Internal server error" }));
                     return;
                 }
                 
+                console.log("Update results:", results);
+
                 if (results.affectedRows === 0) {
+                    console.log("No rows affected by update");
                     if (req.file) {
-                        fs.unlinkSync(req.file.path);
+                        try {
+                            fs.unlinkSync(req.file.path);
+                            console.log("Deleted uploaded file because no rows were affected");
+                        } catch (fileError) {
+                            console.error("Error deleting file:", fileError);
+                        }
                     }
                     res.writeHead(404, { "Content-Type": "application/json" });
                     res.end(JSON.stringify({ error: "Merchandise not found" }));
@@ -1759,7 +1809,16 @@ const updateMerchandise = (req, res) => {
                 }
                 
                 // Fetch the updated item to return in the response
+                console.log("Fetching updated item");
                 pool.query('SELECT * FROM merchandise WHERE merchandiseID = ?', [merchandiseID], (err, updatedItem) => {
+                    if (err) {
+                        console.error("Error fetching updated item:", err);
+                        res.writeHead(500, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ error: "Error fetching updated item" }));
+                        return;
+                    }
+
+                    console.log("Updated item:", updatedItem);
                     res.writeHead(200, { "Content-Type": "application/json" });
                     res.end(JSON.stringify({ 
                         message: "Merchandise updated successfully",
