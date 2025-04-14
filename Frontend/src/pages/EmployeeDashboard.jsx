@@ -8,11 +8,13 @@ import { useNavigate } from 'react-router-dom';
 import EmployeeProfile from '../components/employee/EmployeeProfile';
 import ScheduleViewer from '../components/employee/ScheduleViewer';
 import TimeOffRequest from '../components/employee/TimeOffRequest';
+import EmployeeCalendarView from '../components/EmployeeCalendarView';
 
 export default function EmployeeDashboard() {
   const { auth } = useContext(AuthContext);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
+  const [schedule, setSchedule] = useState([]);
 
   const [employee, setEmployee] = useState(null);
   const [error, setError] = useState('');
@@ -105,7 +107,11 @@ export default function EmployeeDashboard() {
             )}
 
             {activeTab === 'schedule' && auth.userID && (
-              <ScheduleViewer employeeID={auth.userID} />
+              <>
+                <EmployeeCalendarView schedule={schedule} />
+                <ScheduleViewer employeeID={auth.userID} />
+              </>            
+            
             )}
 
             {activeTab === 'timeoff' && auth.userID && (
