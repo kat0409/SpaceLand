@@ -12,30 +12,25 @@ export default function Events() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetchEvents();
-    }, []);
-
-    const fetchEvents = async () => {
-        try {
-            setLoading(true);
-        const response = await fetch(`${BACKEND_URL}/get-events`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch events');
-        }
-        const data = await response.json();
-        if (Array.isArray(data)) {
-            setEvents(data);
-        } else {
-            console.error("Invalid response format:", data);
-            setEvents([]);
-        }
-        } catch (err) {
+        fetch(`${BACKEND_URL}/get-events`)
+        .then(res => {
+            if (!res.ok) throw new Error('Failed to fetch events');
+            return res.json();
+        })
+        .then(data => {
+            if (Array.isArray(data)) {
+                setEvents(data);
+            } else {
+                console.error("Invalid response format:", data);
+                setEvents([]);
+            }
+        })
+        .catch(err => {
             setError(err.message);
             setEvents([]);
-        } finally {
-            setLoading(false);
-        }
-    };
+        })
+        .finally(() => setLoading(false));
+    }, []);
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
@@ -59,7 +54,7 @@ export default function Events() {
             <p className="text-center">Loading events...</p>
             ) : Array.isArray(events) && events.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {events.map((event) => (
+                {events.map(event => (
                 <motion.div
                     key={event.eventID}
                     initial={{ opacity: 0, scale: 0.9 }}
