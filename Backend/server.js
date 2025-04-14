@@ -1,21 +1,29 @@
+const express = require('express');
 const http = require('http');
 const url = require('url');
 const cors = require('cors');
 const eRoutes = require('./routes');
 const path = require('path');
 const fs = require('fs');
-const express = require('express');
 
-//If you are calling a getter function, use GET
-//If you are calling an add function, use POST
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    console.log('Created uploads directory');
+}
 
-const corsMiddleWare = cors();
+// Create Express app
+const app = express();
 
-//GET: fetch data from the database
-//POST: add data to the database
-//PUT: update data in the database
+// Apply middlewares
+app.use(cors());
+app.use(express.json());
 
-// Define route handlers in a map for efficiency
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Define your route handlers
 const routeMap = {
     'GET': [
         '/rides', 
@@ -120,113 +128,31 @@ const routeMap = {
     ],
 };
 
-//connect shopping cart with ticket transactions and tickets
-//add a trigger to email the maintenance employees of a ride that needs maintenance when it is marked as 1 in its maintenance need
+// Handle routes
+app.all('*', (req, res) => {
+    const pathname = req.path;
+    const method = req.method;
 
-/*const server = http.createServer((req, res) => {
-    corsMiddleWare(req, res, () => {
-        const parsedUrl = url.parse(req.url, true);
-        const {pathname} = parsedUrl;
-        const method = req.method;
-
-        if(pathname === '/'){
-            res.writeHead(200, {"Content-Type":"application/json"});
-            res.end(JSON.stringify("From backend side"));
-            return;
-        }
-
-        const isMatch  = (routeMap[method] || []).some(route =>
-            pathname.startsWith(route)
-        );
-
-        if(isMatch){
-            return eRoutes(req,res);
-        }
-
-        res.writeHead(404, {"Content-Type": "application/json"});
-        res.end(JSON.stringify({error: "Route not found"}));
-    });
-});*/
-
-const server = http.createServer((req, res) => {
-    // Simple file serving
-    if (req.url.startsWith('/uploads/')) {
-        const filePath = path.join(__dirname, req.url);
-        console.log("Serving file from:", filePath);
-        
-        fs.readFile(filePath, (err, data) => {
-            if (err) {
-                console.error("File read error:", err);
-                res.writeHead(404);
-                res.end('File not found');
-                return;
-            }
-            
-            res.writeHead(200, { 'Content-Type': 'image/jpeg' });
-            res.end(data);
-            return;
-        });
+    if (pathname === '/') {
+        res.json("From backend side");
         return;
     }
-    
-    // Simple test endpoint
-    if (req.url === '/test-upload' && req.method === 'GET') {
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end(`
-            <html><body>
-                <h1>Upload Test</h1>
-                <form action="/supervisor/merchandise/update-item" method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="merchandiseID" value="10" />
-                    <input type="hidden" name="itemName" value="Test Item" />
-                    <input type="hidden" name="price" value="9.99" />
-                    <input type="hidden" name="quantity" value="5" />
-                    <input type="file" name="image" />
-                    <button type="submit">Upload</button>
-                </form>
-            </body></html>
-        `);
-        return;
-    }
-    
-    res.setHeader("Access-Control-Allow-Origin", "*"); // OR better: "http://localhost:5173"
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-    if (req.method === "OPTIONS") {
-      res.writeHead(204);
-      res.end();
-      return;
-    }
-  
-    corsMiddleWare(req, res, () => {
-      const parsedUrl = url.parse(req.url, true);
-      const { pathname } = parsedUrl;
-      const method = req.method;
-  
-      if (pathname === "/") {
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify("From backend side"));
-        return;
-      }
-  
-      const isMatch = (routeMap[method] || []).some(route =>
+    const isMatch = (routeMap[method] || []).some(route =>
         pathname.startsWith(route)
-      );
-  
-      if (isMatch) {
+    );
+
+    if (isMatch) {
         return eRoutes(req, res);
-      }
-  
-      res.writeHead(404, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Route not found" }));
-    });
-  });
+    }
 
-const PORT  = process.env.PORT || 3000 //check if there is an environment variable
-
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    res.status(404).json({ error: "Route not found" });
 });
 
-// In Backend/server.js
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Set port
+const PORT = process.env.PORT || 3000;
+
+// Start server
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
