@@ -113,18 +113,21 @@ export default function SupervisorPortal() {
         }
     };
     
-    const handleSaveEdit = async (updatedItem) => {
+    const handleSaveEdit = async (formData) => {
         try {
+            // Note: When using FormData, don't set Content-Type header
             const response = await fetch(`${BACKEND_URL}/supervisor/merchandise/update-item`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedItem)
+                body: formData
             });
             
             if (!response.ok) {
                 const data = await response.json();
                 throw new Error(data.error || 'Failed to update item');
             }
+            
+            // Get the updated item data from the response
+            const updatedItem = await response.json();
             
             // Update the item in the state
             setMerchandise(prev => 

@@ -2,6 +2,8 @@ const http = require('http');
 const url = require('url');
 const cors = require('cors');
 const eRoutes = require('./routes');
+const path = require('path');
+const fs = require('fs');
 
 //If you are calling a getter function, use GET
 //If you are calling an add function, use POST
@@ -145,6 +147,34 @@ const routeMap = {
 });*/
 
 const server = http.createServer((req, res) => {
+    // Handle uploads directory access for image files
+    if (req.url.startsWith('/uploads/')) {
+        const filePath = path.join(__dirname, req.url);
+        
+        fs.readFile(filePath, (err, data) => {
+            if (err) {
+                res.writeHead(404);
+                res.end('File not found');
+                return;
+            }
+            
+            // Determine content type based on file extension
+            const ext = path.extname(filePath).toLowerCase();
+            const contentType = {
+                '.jpg': 'image/jpeg',
+                '.jpeg': 'image/jpeg',
+                '.png': 'image/png',
+                '.gif': 'image/gif',
+                '.webp': 'image/webp'
+            }[ext] || 'application/octet-stream';
+            
+            res.writeHead(200, { 'Content-Type': contentType });
+            res.end(data);
+            return;
+        });
+        return;
+    }
+    
     res.setHeader("Access-Control-Allow-Origin", "*"); // OR better: "http://localhost:5173"
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");

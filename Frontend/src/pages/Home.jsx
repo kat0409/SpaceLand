@@ -3,6 +3,7 @@ import Hero from '../components/Hero';
 import RidesPreview from '../components/RidesPreview';
 import DiningSection from '../components/DiningSection';
 import PricingSection from '../components/PricingSection';
+import OperatingHours from '../components/OperatingHours';
 import Footer from '../components/Footer';
 import SidebarMenu from '../components/SidebarMenu';
 import { useEffect, useState } from 'react';
@@ -39,6 +40,7 @@ export default function Home() {
       <Hero />
       <RidesPreview />
       <DiningSection />
+      <OperatingHours />
       <PricingSection />
       <Footer />
     </>
