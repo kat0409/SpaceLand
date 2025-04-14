@@ -699,6 +699,24 @@ const getDepartmentByEmployeeID = `
     SELECT Department FROM employee WHERE EmployeeID = ?
 `;
 
+const getAttendanceReport = `
+    SELECT 
+        ea.EmployeeID,
+        CONCAT(e.FirstName, ' ', e.LastName) AS FullName,
+        e.Department,
+        ea.date,
+        ea.clockIn,
+        ea.clockOut,
+        ROUND(TIMESTAMPDIFF(MINUTE, ea.clockIn, ea.clockOut) / 60.0, 2) AS HoursWorked
+    FROM employee_attendance ea
+    JOIN employee e ON ea.EmployeeID = e.EmployeeID
+    WHERE 1 = 1
+        AND ea.date BETWEEN ? AND ?
+        AND (? = 'all' OR e.Department = ?)
+        AND (? = 0 OR ea.EmployeeID = ?)
+    ORDER BY ea.date DESC
+`;
+
 module.exports = {
     getRides,
     getEmployees,
