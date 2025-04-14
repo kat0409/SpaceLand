@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { motion } from "framer-motion";
 import Home from "./pages/Home";
 import Rides from "./pages/Rides";
-import Events from "./components/EventsForSupervisor";
+import Events from "./pages/Events";
 import Auth from "./pages/Auth";
 import UserPortal from "./pages/UserPortal";
 import EmployeeLogin from "./pages/EmployeeLogin";

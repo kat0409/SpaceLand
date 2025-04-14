@@ -165,7 +165,7 @@ export default function HRSupervisorPortal() {
                         <DeleteScheduleForm onScheduleDeleted={() => setRefreshKey(Date.now())} />
                         <EmployeeScheduleDisplay refreshKey={refreshKey} />
                         <TimeOffRequestReviewForm/>
-                        <EventsForSupervisor />
+                        <EventsForSupervisor/>
                     </div>
                 )}
 
