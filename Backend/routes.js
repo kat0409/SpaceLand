@@ -259,7 +259,7 @@ function routes(req, res) {
         return actions.clockIn(req,res);
     }
 
-    if(url.startsWith('/employee/clock-out') && method === "PUT"){
+    if(url.startsWith('/employee/clock-out') && method === "POST"){
         return actions.clockOut(req,res);
     }
 

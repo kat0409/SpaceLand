@@ -84,6 +84,7 @@ const routeMap = {
         '/supervisor/HR/add-events',
         '/employee/time-off-request',
         '/employee/clock-in',
+        '/employee/clock-out',
         '/supervisor/HR/schedule',
         '/supervisor/HR/fire-employee'
     ],
@@ -100,7 +101,7 @@ const routeMap = {
         '/supervisor/HR/update-event',
         '/employee/clock-out',
         '/supervisor/HR/update-time-off-request',
-        '/supervisor/HR/update-employee-profile'
+        '/supervisor/HR/update-employee-profile',
     ],
     'DELETE': [
         '/supervisor/delete-employee',

@@ -9,6 +9,7 @@ import EmployeeProfile from '../components/employee/EmployeeProfile';
 import ScheduleViewer from '../components/employee/ScheduleViewer';
 import TimeOffRequest from '../components/employee/TimeOffRequest';
 import EmployeeCalendarView from '../components/EmployeeCalendarView';
+import ClockInOutForm from '../components/ClockInOutForm';
 
 export default function EmployeeDashboard() {
   const { auth } = useContext(AuthContext);
@@ -110,6 +111,7 @@ export default function EmployeeDashboard() {
               <>
                 <EmployeeCalendarView schedule={schedule} />
                 <ScheduleViewer employeeID={auth.userID} />
+                <ClockInOutForm employeeID={auth.userID} />
               </>            
             
             )}
