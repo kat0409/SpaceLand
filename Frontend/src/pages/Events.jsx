@@ -28,14 +28,20 @@ export default function Events() {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${BACKEND_URL}/events`);
+      const response = await fetch(`${BACKEND_URL}/get-events`);
       if (!response.ok) {
         throw new Error('Failed to fetch events');
       }
       const data = await response.json();
-      setEvents(data);
+      if (Array.isArray(data)) {
+        setEvents(data);
+      } else {
+        console.error("Invalid response format:", data);
+        setEvents([]);
+      }
     } catch (err) {
       setError(err.message);
+      setEvents([]);
     } finally {
       setLoading(false);
     }
@@ -131,49 +137,51 @@ export default function Events() {
           </div>
         )}
 
-        {loading ? (
-          <p className="text-center">Loading events...</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((event) => (
-              <motion.div
-                key={event.eventID}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-gray-800/50 rounded-lg overflow-hidden"
-              >
-                <div className="p-4">
-                  <h3 className="text-xl font-bold mb-2">{event.eventName}</h3>
-                  <p className="text-sm text-gray-300 mb-2">
-                    {new Date(event.event_date).toLocaleDateString()}
-                  </p>
-                  <p className="text-gray-300 mb-4">{event.description}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-400">
-                      Duration: {event.durationMin} minutes
-                    </span>
-                    <span className="text-sm font-semibold">
-                      Type: {event.type}
-                    </span>
-                  </div>
-                  {isSupervisor && (
-                    <div className="mt-4 flex justify-end space-x-2">
-                      <button className="px-3 py-1 bg-blue-600 rounded hover:bg-blue-700 transition">
-                        Edit
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteEvent(event.eventID, event.eventName)}
-                        className="px-3 py-1 bg-red-600 rounded hover:bg-red-700 transition"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            ))}
+{loading ? (
+    <p className="text-center">Loading events...</p>
+  ) : Array.isArray(events) && events.length > 0 ? (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {events.map((event) => (
+        <motion.div
+          key={event.eventID}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-gray-800/50 rounded-lg overflow-hidden"
+        >
+          <div className="p-4">
+            <h3 className="text-xl font-bold mb-2">{event.eventName}</h3>
+            <p className="text-sm text-gray-300 mb-2">
+              {new Date(event.event_date).toLocaleDateString()}
+            </p>
+            <p className="text-gray-300 mb-4">{event.description}</p>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-400">
+                Duration: {event.durationMin} minutes
+              </span>
+              <span className="text-sm font-semibold">
+                Type: {event.type}
+              </span>
+            </div>
+            {isSupervisor && (
+              <div className="mt-4 flex justify-end space-x-2">
+                <button className="px-3 py-1 bg-blue-600 rounded hover:bg-blue-700 transition">
+                  Edit
+                </button>
+                <button 
+                  onClick={() => handleDeleteEvent(event.eventID, event.eventName)}
+                  className="px-3 py-1 bg-red-600 rounded hover:bg-red-700 transition"
+                >
+                  Delete
+                </button>
+              </div>
+            )}
           </div>
-        )}
+        </motion.div>
+      ))}
+    </div>
+  ) : (
+    <p className="text-center text-gray-400">No events found.</p>
+  )}
 
         {/* Add Event Modal */}
         {showAddEventModal && (

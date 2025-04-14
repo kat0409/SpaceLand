@@ -388,7 +388,7 @@ const getMealPlanPrice = `
 `;
 
 const getEvents = `
-    SELECT * FROM parkevent ORDER BY event_date
+    SELECT * FROM parkevent ORDER BY event_date DESC
 `;
 
 const addEvent = `

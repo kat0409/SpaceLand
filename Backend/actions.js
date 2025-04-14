@@ -1726,19 +1726,17 @@ const getMerchandiseSalesData = (req, res) => {
     res.end(JSON.stringify(mockSalesData));
 };
 
-const getEvents = (req,res) => {
-    pool.query(queries.getEvents, (error, results) => {
-        if(error){
-            console.log("Error fetching events:", error);
-            res.writeHead(500, {"Content-Type":"application/json"});
-            res.end(JSON.stringify({error: "Internal server error"}));
-            return;
+const getEvents = (req, res) => {
+    pool.query(queries.getEvents, (err, results) => {
+        if (err) {
+            console.error("Failed to fetch events:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Failed to fetch events" }));
         }
-        const eventID = results.insertId;
-        res.writeHead(200, {"Content-Type":"application/json"});
-        res.end(JSON.stringify({message: "Events fetched successfully", eventID}));
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
     });
-}
+};  
 
 const addEvent = (req,res) => {
     let body = "";
