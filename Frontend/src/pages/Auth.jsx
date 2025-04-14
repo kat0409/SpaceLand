@@ -1,5 +1,3 @@
-// ✅ FRONTEND: Auth.jsx — Cleaned & Mapped Signup/Login POST Requests
-
 import { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -17,8 +15,8 @@ export default function Auth() {
   const [successMessage, setSuccessMessage] = useState('');
 
   // Optional: use .env for backend URL
-  //const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://spaceland.onrender.com";
-  const BACKEND_URL = "https://spacelandmark.onrender.com"; // Change this if backend is deployed
+  //const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://spacelandmark.onrender.com";
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com'; // Change this if backend is deployed
 
   console.log(BACKEND_URL);
 
@@ -54,7 +52,7 @@ export default function Auth() {
     };
 
     try {
-      const res = await fetch(`https://spacelandmark.onrender.com/add-visitor`, {
+      const res = await fetch(`${BACKEND_URL}/add-visitor`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -64,7 +62,9 @@ export default function Auth() {
       console.log("Signup Response:", data);
 
       if (res.ok) {
-        localStorage.setItem("visitorID", data.VisitorID || data.visitorID);
+        localStorage.setItem("VisitorID", data.VisitorID || data.visitorID);
+        localStorage.setItem("role", "visitor");
+        localStorage.setItem("userID", data.VisitorID || data.visitorID);
         setSuccessMessage("Signup successful!");
         setTimeout(() => (window.location.href = "/portal"), 1500);
       } else {
@@ -91,7 +91,9 @@ export default function Auth() {
       const data = await res.json();
 
       if (res.ok && data.visitorID) {
-        localStorage.setItem("visitorID", data.visitorID);
+        localStorage.setItem("VisitorID", data.visitorID);
+        localStorage.setItem("role", "visitor");
+        localStorage.setItem("userID", data.visitorID);
         setSuccessMessage("Login successful!");
         setTimeout(() => (window.location.href = "/portal"), 1000);
       } else {
@@ -168,47 +170,4 @@ export default function Auth() {
     </>
   );
 }
-
-const registerVisitor = async (visitorData) => {
-  try {
-    const response = await fetch('https://spacelandmark.onrender.com-visitor', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(visitorData)
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      console.log('Registration Successful:', data);
-    } else {
-      console.error('Error:', data.error);
-    }
-  } catch (error) {
-    console.error('Request failed:', error);
-  }
-};
-
-const loginVisitor = async (username, password) => {
-  try {
-    const response = await fetch('https://spacelandmark.onrender.com/login-visitor', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ username, password })
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      console.log('Login Successful:', data);
-      localStorage.setItem('visitorID', data.visitorID); // Save session
-    } else {
-      console.error('Error:', data.error);
-    }
-  } catch (error) {
-    console.error('Request failed:', error);
-  }
-};
 

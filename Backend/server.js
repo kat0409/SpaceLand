@@ -16,7 +16,7 @@ const corsMiddleWare = cors();
 const routeMap = {
     'GET': [
         '/rides', 
-        '/employees', 
+        '/supervisor/HR/employees', 
         '/merchandise', 
         '/maintenance', 
         '/merchandise-transactions', 
@@ -25,18 +25,47 @@ const routeMap = {
         '/supervisor/merchandise/low-stock',
         '/supervisor/sales-report',
         '/supervisor/merchandise/ticket-sales',
-        '/supervisor/visitors',
+        '/supervisor/HR/visitors',
         '/supervisor/merchandise/visitor-purchases',
         '/supervisor/maintenance/ride-maintenance',
-        '/supervisor/attendance-revenue',
+        '/supervisor/HR/attendance-revenue',
         '/employee/account-info',
         '/supervisor/account-info',
         '/account-info',
-        '/supervisor/notifications'
+        '/supervisor/merchandise/notifications',
+        '/supervisor/merchandise/items',
+        '/supervisor/merchandise/pending-orders',
+        '/supervisor/merchandise/merch',
+        '/supervisor/merchandise/orders',
+        '/supervisor/maintenance/rides',
+        '/supervisor/maintenance/employee-maintenance-request',
+        '/supervisor/maintenance/ridemaintenance-pending',
+        '/supervisor/maintenance/get-maintenance-requests',
+        '/purchase-history',
+        '/ticket-history',
+        '/alerts',
+        '/supervisor/HR/get-supervisors',
+        '/supervisor/HR/get-departments',
+        '/get-events',
+        '/employee/get-schedule',
+        '/employee/profile',
+        '/supervisor/HR/get-employees-params',
+        '/supervisor/HR/time-off-request',
+        '/supervisor/merchandise/sales-report',
+        '/supervisor/HR/employee-names',
+        '/supervisor/HR/get-schedule',
+        '/supervisor/HR/get-specific-schedule',
+        '/supervisor/HR/shifts-with-names',
+        '/supervisor/merchandise/transaction-summary',
+        '/supervisor/merchandise/best-worst',
+        '/supervisor/maintenance/employee-performance',
+        '/supervisor/HR/all-employee-names',
+        '/supervisor/HR/get-employee-department',
+        '/supervisor/HR/attendance-report',
+        "/get-merchandise"
     ],
     'POST': [
-        '/add-employee', 
-        '/add-maintenance',
+        '/supervisor/HR/add-employee', 
         '/add-merchandise-transaction',
         '/login',
         '/add-visitor',
@@ -48,7 +77,18 @@ const routeMap = {
         '/supervisor/login',
         '/employee-login',
         '/supervisor/maintenance/insert-ride-maintenance',
-        '/supervisor/maintenance/update-ride-maintenance-status'
+        '/supervisor/maintenance/update-ride-maintenance-status',
+        '/supervisor/merchandise/reorders',
+        '/supervisor/merchandise/stock-arrivals',
+        '/supervisor/merchandise/add-merch',
+        '/supervisor/maintenance/maintenance-request',
+        '/meal-plan-purchase',
+        '/supervisor/HR/add-events',
+        '/employee/time-off-request',
+        '/employee/clock-in',
+        '/employee/clock-out',
+        '/supervisor/HR/schedule',
+        '/supervisor/HR/fire-employee'
     ],
     'PUT': [
         '/update-employee', 
@@ -58,14 +98,21 @@ const routeMap = {
         '/supervisor/update-employee-info',//make
         '/supervisor/update-visitor-info',//make
         '/supervisor/update-operating-hours',//make
-        '/supervisor/update-event-date'//make
+        '/supervisor/update-event-date',//make
+        '/supervisor/maintenance/complete-request',
+        '/supervisor/HR/update-event',
+        '/employee/clock-out',
+        '/supervisor/HR/update-time-off-request',
+        '/supervisor/HR/update-employee-profile',
     ],
     'DELETE': [
         '/supervisor/delete-employee',
         '/supervisor/delete-maintenance', 
         '/supervisor/delete-item',//make
         '/supervisor/delete-meal-plan',//make
-        '/supervisor/delete-ride'//make
+        '/supervisor/delete-ride',//make
+        '/supervisor/HR/delete-event',
+        '/supervisor/HR/schedule-delete'
     ],
 };
 
@@ -98,7 +145,6 @@ const routeMap = {
 });*/
 
 const server = http.createServer((req, res) => {
-    // ✅ Allow CORS manually
     res.setHeader("Access-Control-Allow-Origin", "*"); // OR better: "http://localhost:5173"
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");

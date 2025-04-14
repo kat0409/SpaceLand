@@ -1,88 +1,88 @@
-// src/pages/Auth.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { motion } from 'framer-motion';
 
-export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
-  const handleToggle = () => setIsLogin(!isLogin);
+export default function Events() {
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  return (
-    <>
-      <Header />
-      <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black px-6 py-20 text-white">
-        <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl shadow-lg p-10 w-full max-w-md space-y-6">
-          <h2 className="text-3xl font-bold text-center">
-            {isLogin ? "🚀 Log In to Spaceland" : "🪐 Create Your Account"}
-          </h2>
+    useEffect(() => {
+        fetch(`${BACKEND_URL}/get-events`)
+        .then(res => {
+            if (!res.ok) throw new Error('Failed to fetch events');
+            return res.json();
+        })
+        .then(data => {
+            if (Array.isArray(data)) {
+                setEvents(data);
+            } else {
+                console.error("Invalid response format:", data);
+                setEvents([]);
+            }
+        })
+        .catch(err => {
+            setError(err.message);
+            setEvents([]);
+        })
+        .finally(() => setLoading(false));
+    }, []);
 
-          {/* FORM */}
-          <form className="space-y-5">
-            {!isLogin && (
-              <div>
-                <label className="block mb-1 text-sm">Full Name</label>
-                <input
-                  type="text"
-                  placeholder="Jane Astro"
-                  className="w-full px-4 py-2 rounded-lg bg-black/20 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-            )}
-
-            <div>
-              <label className="block mb-1 text-sm">Email</label>
-              <input
-                type="email"
-                placeholder="you@spacemail.com"
-                className="w-full px-4 py-2 rounded-lg bg-black/20 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
-            </div>
-
-            <div>
-              <label className="block mb-1 text-sm">Password</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                className="w-full px-4 py-2 rounded-lg bg-black/20 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 transition-all font-semibold py-2 rounded-lg shadow"
+    return (
+        <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
+        <Header />
+        <div className="container mx-auto px-4 py-20">
+            <motion.h1 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl font-bold mb-8 text-center"
             >
-              {isLogin ? "Log In" : "Sign Up"}
-            </button>
-          </form>
+            SpaceLand Events
+            </motion.h1>
 
-          {/* TOGGLE BUTTON */}
-          <p className="text-sm text-center text-gray-300">
-            {isLogin ? (
-              <>
-                Don't have an account?{" "}
-                <button
-                  onClick={handleToggle}
-                  className="text-purple-400 hover:underline"
-                >
-                  Sign up here
-                </button>
-              </>
-            ) : (
-              <>
-                Already have an account?{" "}
-                <button
-                  onClick={handleToggle}
-                  className="text-purple-400 hover:underline"
-                >
-                  Log in here
-                </button>
-              </>
+            {error && (
+            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6">
+                {error}
+            </div>
             )}
-          </p>
+
+            {loading ? (
+            <p className="text-center">Loading events...</p>
+            ) : Array.isArray(events) && events.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {events.map(event => (
+                <motion.div
+                    key={event.eventID}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-gray-800/50 rounded-lg overflow-hidden"
+                >
+                    <div className="p-4">
+                    <h3 className="text-xl font-bold mb-2">{event.eventName}</h3>
+                    <p className="text-sm text-gray-300 mb-2">
+                        {new Date(event.event_date).toLocaleDateString()}
+                    </p>
+                    <p className="text-gray-300 mb-4">{event.description}</p>
+                    <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-400">
+                        Duration: {event.durationMin} minutes
+                        </span>
+                        <span className="text-sm font-semibold">
+                        Type: {event.type}
+                        </span>
+                    </div>
+                    </div>
+                </motion.div>
+                ))}
+            </div>
+            ) : (
+            <p className="text-center text-gray-400">No events found.</p>
+            )}
         </div>
-      </section>
-      <Footer />
-    </>
-  );
+        <Footer />
+        </div>
+    );
 }

@@ -1,19 +1,39 @@
 // src/components/Header.jsx
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { User } from "lucide-react"; // ✅ Lucide User Icon
+import { User } from "lucide-react";
+import { AuthContext } from '../components/AuthProvider';
+import { useNavigate } from 'react-router-dom';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const { auth, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Rides', href: '/rides' },
     { name: 'Events', href: '/events' },
     { name: 'Dining', href: '/dining' },
+    { name: 'Shopping', href: '/shopping' },
     { name: 'Pricing', href: '/pricing' },
     { name: 'Contact', href: '#footer' },
   ];
+
+  const handleProfileClick = () => {
+    if(auth.role === 'employee'){//employees
+      navigate('/employee-dashboard');
+    }
+    else if(auth.role === 'supervisor'){//supervisors
+      const dept = localStorage.getItem('department')?.toLowerCase();
+      if(dept === 'maintenance') navigate('/supervisor/maintenance');
+      else if(dept === 'merchandise') navigate('/supervisor/merchandise');
+      else if (dept === 'management') navigate('/supervisor/HR');
+    }
+    else{//visitors
+      navigate('/portal')
+    }
+  };
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-black/60 backdrop-blur-md border-b border-white/10">
@@ -63,23 +83,35 @@ export default function Header() {
 </Link>
 
           {/* 👤 User Icon Button */}
-          <Link
-            to="/auth"
-            className="flex items-center justify-center w-[38px] h-[38px] bg-gradient-to-r from-purple-600 to-indigo-500 text-white rounded-full hover:from-purple-700 hover:to-indigo-600 shadow-md transition"
-          >
-            <User size={18} />
-          </Link>
-        </nav>
-
-        {/* 📱 Mobile Hamburger Button */}
-        <button
-          className="md:hidden text-white text-xl"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          ☰
-        </button>
+          {auth.isAuthenticated ? (
+            <button
+              onClick={() => {
+                if (auth.role === "employee") {
+                  navigate("/employee-dashboard");
+                } else if (auth.role === "supervisor") {
+                  const dept = localStorage.getItem("department")?.toLowerCase();
+                  if (dept === "merchandise") navigate("/supervisor/merchandise");
+                  else if (dept === "maintenance") navigate("/supervisor/maintenance");
+                  else if (dept === "management") navigate("/supervisor/HR");
+                  else navigate("/supervisor-portal");
+                } else if (auth.role === "visitor") {
+                  navigate("/portal");
+                }
+              }}
+              className="flex items-center justify-center w-[38px] h-[38px] bg-purple-600 text-white rounded-full hover:bg-purple-700 transition"
+            >
+              <User size={18} />
+            </button>
+          ) : (
+            <Link
+              to="/auth"
+              className="flex items-center justify-center w-[38px] h-[38px] bg-gradient-to-r from-purple-600 to-indigo-500 text-white rounded-full hover:from-purple-700 hover:to-indigo-600 shadow-md transition"
+            >
+              <User size={18} />
+            </Link>
+          )}
+      </nav>
       </div>
-
       {/* 📱 Mobile Navigation Dropdown */}
       {isOpen && (
         <div className="md:hidden bg-black/90 px-6 pb-4">
