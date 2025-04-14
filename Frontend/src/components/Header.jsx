@@ -15,6 +15,7 @@ export default function Header() {
     { name: 'Rides', href: '/rides' },
     { name: 'Events', href: '/events' },
     { name: 'Dining', href: '/dining' },
+    { name: 'Shopping', href: '/shopping' },
     { name: 'Pricing', href: '/pricing' },
     { name: 'Contact', href: '#footer' },
   ];
