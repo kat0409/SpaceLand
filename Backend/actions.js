@@ -2,6 +2,9 @@ const { stringify } = require('qs');
 const pool = require('./db.js');
 const queries = require('./queries.js');
 const mysql = require("mysql2");
+const upload = require('./fileUpload');
+const fs = require('fs');
+const path = require('path');
 
 //Fetch all rides
 const getRides = (request, response) => {
@@ -1322,46 +1325,56 @@ const getMerchandiseReordersTable = (req, res) => {
     });
 };
 
-const addMerchandise = (req,res) => {
-    let body = "";
-
-    req.on("data", (chunk) => {
-        body += chunk.toString();
-    });
-
-    req.on('end', () => {
-        let parsedBody;
-
-        try {
-            parsedBody = JSON.parse(body);
-        } catch (error) {
+const addMerchandise = (req, res) => {
+    // Use multer middleware to handle the file upload
+    upload.single('image')(req, res, function (err) {
+        if (err) {
+            console.error("File upload error:", err);
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            res.end(JSON.stringify({ error: err.message || "File upload error" }));
             return;
         }
 
-        const {itemName,price,quantity} = parsedBody;
-
+        const { itemName, price, quantity } = req.body;
         const giftShopName = 'Andromeda Galaxy Gift Shop';
         const departmentNumber = 5;
+        
+        // Get the image path if a file was uploaded
+        const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-        if (!itemName || !price || !quantity || !giftShopName || !departmentNumber) {
+        if (!itemName || !price || !quantity) {
+            // If a file was uploaded but validation failed, delete it
+            if (req.file) {
+                fs.unlinkSync(req.file.path);
+            }
             res.writeHead(400, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ error: "itemName, price, and quantity are required." }));
             return;
         }
 
-        pool.query(queries.addMerchandise, [itemName, price, quantity, giftShopName, departmentNumber], (error, results) => {
-            if (error) {
-                        console.error("Error adding merchandise:", error);
-                        res.writeHead(500, { "Content-Type": "application/json" });
-                        res.end(JSON.stringify({ error: "Internal server error" }));
-                        return;
+        pool.query(
+            'INSERT INTO merchandise (itemName, price, quantity, giftShopName, departmentNumber, imageUrl) VALUES (?, ?, ?, ?, ?, ?)', 
+            [itemName, price, quantity, giftShopName, departmentNumber, imageUrl],
+            (error, results) => {
+                if (error) {
+                    console.error("Error adding merchandise:", error);
+                    // Delete the uploaded file if there was a database error
+                    if (req.file) {
+                        fs.unlinkSync(req.file.path);
                     }
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ error: "Internal server error" }));
+                    return;
+                }
 
-                    res.writeHead(201, { "Content-Type": "application/json" });
-                    res.end(JSON.stringify({ message: "New item added successfully", merchandiseID: results.insertId}));
-        });
+                res.writeHead(201, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ 
+                    message: "New item added successfully", 
+                    merchandiseID: results.insertId,
+                    imageUrl: imageUrl
+                }));
+            }
+        );
     });
 };
 
@@ -1656,51 +1669,105 @@ const deleteMerchandise = (req, res) => {
 };
 
 const updateMerchandise = (req, res) => {
-    let body = '';
-    
-    req.on('data', (chunk) => {
-        body += chunk.toString();
-    });
-    
-    req.on('end', () => {
-        let parsedBody;
-        try {
-            parsedBody = JSON.parse(body);
-        } catch (err) {
+    upload.single('image')(req, res, function (err) {
+        if (err) {
+            console.error("File upload error:", err);
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            res.end(JSON.stringify({ error: err.message || "File upload error" }));
             return;
         }
+
+        const { merchandiseID, itemName, price, quantity, giftShopName, description } = req.body;
         
-        const { merchandiseID, itemName, price, quantity, giftShopName, description } = parsedBody;
-        
+        // Get the image path if a file was uploaded
+        const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
         if (!merchandiseID || !itemName || price === undefined || quantity === undefined) {
+            // If a file was uploaded but validation failed, delete it
+            if (req.file) {
+                fs.unlinkSync(req.file.path);
+            }
             res.writeHead(400, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ error: "Missing required fields" }));
             return;
         }
-        
-        pool.query(
-            'UPDATE merchandise SET itemName = ?, price = ?, quantity = ?, giftShopName = ?, description = ? WHERE merchandiseID = ?',
-            [itemName, price, quantity, giftShopName || null, description || null, merchandiseID],
-            (error, results) => {
+
+        // Get the current item data to check if there's an existing image
+        pool.query('SELECT imageUrl FROM merchandise WHERE merchandiseID = ?', [merchandiseID], (err, results) => {
+            if (err) {
+                console.error("Error fetching existing merchandise:", err);
+                if (req.file) {
+                    fs.unlinkSync(req.file.path);
+                }
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal server error" }));
+                return;
+            }
+
+            if (results.length === 0) {
+                if (req.file) {
+                    fs.unlinkSync(req.file.path);
+                }
+                res.writeHead(404, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Merchandise not found" }));
+                return;
+            }
+
+            const existingImageUrl = results[0].imageUrl;
+            
+            // If there's a new image and there's an existing image, delete the old one
+            if (imageUrl && existingImageUrl) {
+                try {
+                    const oldImagePath = path.join(__dirname, existingImageUrl);
+                    if (fs.existsSync(oldImagePath)) {
+                        fs.unlinkSync(oldImagePath);
+                    }
+                } catch (error) {
+                    console.error("Error deleting old image:", error);
+                    // Continue with the update even if the old image can't be deleted
+                }
+            }
+
+            // Update query based on whether a new image was uploaded
+            let query, params;
+            if (imageUrl) {
+                query = 'UPDATE merchandise SET itemName = ?, price = ?, quantity = ?, giftShopName = ?, description = ?, imageUrl = ? WHERE merchandiseID = ?';
+                params = [itemName, price, quantity, giftShopName || null, description || null, imageUrl, merchandiseID];
+            } else {
+                query = 'UPDATE merchandise SET itemName = ?, price = ?, quantity = ?, giftShopName = ?, description = ? WHERE merchandiseID = ?';
+                params = [itemName, price, quantity, giftShopName || null, description || null, merchandiseID];
+            }
+
+            pool.query(query, params, (error, results) => {
                 if (error) {
                     console.error("Error updating merchandise:", error);
+                    if (req.file) {
+                        fs.unlinkSync(req.file.path);
+                    }
                     res.writeHead(500, { "Content-Type": "application/json" });
                     res.end(JSON.stringify({ error: "Internal server error" }));
                     return;
                 }
                 
                 if (results.affectedRows === 0) {
+                    if (req.file) {
+                        fs.unlinkSync(req.file.path);
+                    }
                     res.writeHead(404, { "Content-Type": "application/json" });
                     res.end(JSON.stringify({ error: "Merchandise not found" }));
                     return;
                 }
                 
-                res.writeHead(200, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ message: "Merchandise updated successfully" }));
-            }
-        );
+                // Fetch the updated item to return in the response
+                pool.query('SELECT * FROM merchandise WHERE merchandiseID = ?', [merchandiseID], (err, updatedItem) => {
+                    res.writeHead(200, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ 
+                        message: "Merchandise updated successfully",
+                        item: updatedItem[0] || {}
+                    }));
+                });
+            });
+        });
     });
 };
 
