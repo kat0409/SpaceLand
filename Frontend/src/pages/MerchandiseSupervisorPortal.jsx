@@ -211,24 +211,7 @@ export default function SupervisorPortal() {
             .catch(err => console.error("Error fetching sales data:", err));*/
             
         fetchFilteredReport();
-
-        // Check URL parameters to see if we should open the edit modal
-        const urlParams = new URLSearchParams(window.location.search);
-        const editItemId = urlParams.get('editItem');
-        
-        if (editItemId) {
-            // Find the item in the merchandise array
-            const itemToEdit = merchandise.find(item => item.merchandiseID === parseInt(editItemId));
-            if (itemToEdit) {
-                setCurrentItem(itemToEdit);
-                setEditModalOpen(true);
-                
-                // Clear the URL parameter without refreshing the page
-                const newUrl = window.location.pathname;
-                window.history.replaceState({}, document.title, newUrl);
-            }
-        }
-    }, [merchandise]);
+    }, []);
 
     useEffect(() => {
         fetchFilteredReport();

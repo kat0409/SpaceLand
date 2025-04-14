@@ -2,9 +2,6 @@ const { stringify } = require('qs');
 const pool = require('./db.js');
 const queries = require('./queries.js');
 const mysql = require("mysql2");
-const upload = require('./fileUpload');
-const fs = require('fs');
-const path = require('path');
 
 //Fetch all rides
 const getRides = (request, response) => {
@@ -1325,56 +1322,46 @@ const getMerchandiseReordersTable = (req, res) => {
     });
 };
 
-const addMerchandise = (req, res) => {
-    // Use multer middleware to handle the file upload
-    upload.single('image')(req, res, function (err) {
-        if (err) {
-            console.error("File upload error:", err);
+const addMerchandise = (req,res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', () => {
+        let parsedBody;
+
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (error) {
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: err.message || "File upload error" }));
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
             return;
         }
 
-        const { itemName, price, quantity } = req.body;
+        const {itemName,price,quantity} = parsedBody;
+
         const giftShopName = 'Andromeda Galaxy Gift Shop';
         const departmentNumber = 5;
-        
-        // Get the image path if a file was uploaded
-        const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-        if (!itemName || !price || !quantity) {
-            // If a file was uploaded but validation failed, delete it
-            if (req.file) {
-                fs.unlinkSync(req.file.path);
-            }
+        if (!itemName || !price || !quantity || !giftShopName || !departmentNumber) {
             res.writeHead(400, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ error: "itemName, price, and quantity are required." }));
             return;
         }
 
-        pool.query(
-            'INSERT INTO merchandise (itemName, price, quantity, giftShopName, departmentNumber, imageUrl) VALUES (?, ?, ?, ?, ?, ?)', 
-            [itemName, price, quantity, giftShopName, departmentNumber, imageUrl],
-            (error, results) => {
-                if (error) {
-                    console.error("Error adding merchandise:", error);
-                    // Delete the uploaded file if there was a database error
-                    if (req.file) {
-                        fs.unlinkSync(req.file.path);
+        pool.query(queries.addMerchandise, [itemName, price, quantity, giftShopName, departmentNumber], (error, results) => {
+            if (error) {
+                        console.error("Error adding merchandise:", error);
+                        res.writeHead(500, { "Content-Type": "application/json" });
+                        res.end(JSON.stringify({ error: "Internal server error" }));
+                        return;
                     }
-                    res.writeHead(500, { "Content-Type": "application/json" });
-                    res.end(JSON.stringify({ error: "Internal server error" }));
-                    return;
-                }
 
-                res.writeHead(201, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ 
-                    message: "New item added successfully", 
-                    merchandiseID: results.insertId,
-                    imageUrl: imageUrl
-                }));
-            }
-        );
+                    res.writeHead(201, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ message: "New item added successfully", merchandiseID: results.insertId}));
+        });
     });
 };
 
@@ -1669,112 +1656,52 @@ const deleteMerchandise = (req, res) => {
 };
 
 const updateMerchandise = (req, res) => {
-    console.log("Starting updateMerchandise function");
+    let body = '';
     
-    try {
-        // Use single as a promise instead of a callback for cleaner error handling
-        upload.single('image')(req, res, function (err) {
-            if (err) {
-                console.error("File upload error:", err);
-                res.writeHead(400, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ error: err.message || "File upload error" }));
-                return;
-            }
-            
-            try {
-                console.log("Request body after multer:", req.body);
-                console.log("File details:", req.file);
-                
-                const merchandiseID = req.body.merchandiseID;
-                const itemName = req.body.itemName;
-                const price = req.body.price;
-                const quantity = req.body.quantity;
-                const giftShopName = req.body.giftShopName || null;
-                const description = req.body.description || null;
-                
-                // Important: Convert values to appropriate types
-                const numericID = parseInt(merchandiseID, 10);
-                const numericPrice = parseFloat(price);
-                const numericQuantity = parseInt(quantity, 10);
-                
-                console.log("Processed values:", {
-                    merchandiseID: numericID,
-                    itemName, 
-                    price: numericPrice, 
-                    quantity: numericQuantity,
-                    giftShopName,
-                    description
-                });
-                
-                // Get the image path if a file was uploaded
-                const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
-                console.log("Image URL to be saved:", imageUrl);
-                
-                // Input validation
-                if (!numericID || isNaN(numericID) || !itemName || isNaN(numericPrice) || isNaN(numericQuantity)) {
-                    console.error("Validation error:", { numericID, itemName, numericPrice, numericQuantity });
-                    // Clean up file if uploaded
-                    if (req.file) {
-                        try {
-                            fs.unlinkSync(req.file.path);
-                            console.log("Deleted uploaded file due to validation failure");
-                        } catch (err) {
-                            console.error("Error deleting file:", err);
-                        }
-                    }
-                    res.writeHead(400, { "Content-Type": "application/json" });
-                    res.end(JSON.stringify({ error: "Missing or invalid required fields" }));
+    req.on('data', (chunk) => {
+        body += chunk.toString();
+    });
+    
+    req.on('end', () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (err) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid JSON format" }));
+            return;
+        }
+        
+        const { merchandiseID, itemName, price, quantity, giftShopName, description } = parsedBody;
+        
+        if (!merchandiseID || !itemName || price === undefined || quantity === undefined) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Missing required fields" }));
+            return;
+        }
+        
+        pool.query(
+            'UPDATE merchandise SET itemName = ?, price = ?, quantity = ?, giftShopName = ?, description = ? WHERE merchandiseID = ?',
+            [itemName, price, quantity, giftShopName || null, description || null, merchandiseID],
+            (error, results) => {
+                if (error) {
+                    console.error("Error updating merchandise:", error);
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ error: "Internal server error" }));
                     return;
                 }
                 
-                // Use a simplified query first just to see if the basic update works
-                let query, params;
-                if (imageUrl) {
-                    query = 'UPDATE merchandise SET itemName = ?, price = ?, quantity = ?, imageUrl = ? WHERE merchandiseID = ?';
-                    params = [itemName, numericPrice, numericQuantity, imageUrl, numericID];
-                } else {
-                    query = 'UPDATE merchandise SET itemName = ?, price = ?, quantity = ? WHERE merchandiseID = ?';
-                    params = [itemName, numericPrice, numericQuantity, numericID];
+                if (results.affectedRows === 0) {
+                    res.writeHead(404, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ error: "Merchandise not found" }));
+                    return;
                 }
                 
-                console.log("SQL Query:", query);
-                console.log("SQL Parameters:", params);
-                
-                pool.query(query, params, (error, results) => {
-                    if (error) {
-                        console.error("Database error:", error);
-                        if (req.file) {
-                            try {
-                                fs.unlinkSync(req.file.path);
-                            } catch (err) {
-                                console.error("Error deleting file after DB error:", err);
-                            }
-                        }
-                        res.writeHead(500, { "Content-Type": "application/json" });
-                        res.end(JSON.stringify({ error: "Database error: " + error.message }));
-                        return;
-                    }
-                    
-                    console.log("Update results:", results);
-                    
-                    // Let's not fetch the updated item now - just return success
-                    res.writeHead(200, { "Content-Type": "application/json" });
-                    res.end(JSON.stringify({ 
-                        message: "Merchandise updated successfully",
-                        imageUrl: imageUrl
-                    }));
-                });
-            } catch (error) {
-                console.error("Unexpected error in updateMerchandise:", error);
-                res.writeHead(500, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ error: "Internal server error: " + error.message }));
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ message: "Merchandise updated successfully" }));
             }
-        });
-    } catch (outerError) {
-        console.error("Critical error in updateMerchandise:", outerError);
-        res.writeHead(500, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Critical server error: " + outerError.message }));
-    }
+        );
+    });
 };
 
 const getMerchandiseSalesData = (req, res) => {
