@@ -718,7 +718,7 @@ const getAttendanceReport = `
 `;
 
 const getMerchandiseItems = `
-    SELECT merchandiseID, itemName, description, price, stockQuantity, category
+    SELECT merchandiseID, itemName, price, quantity
     FROM merchandise
     ORDER BY itemName;
 `;
