@@ -717,6 +717,12 @@ const getAttendanceReport = `
     ORDER BY ea.date DESC
 `;
 
+const getMerchandiseItems = `
+    SELECT merchandiseID, itemName, description, price, stockQuantity, category
+    FROM merchandise
+    ORDER BY itemName;
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -811,7 +817,8 @@ module.exports = {
     maintenanceEmployeePerformanceReport,
     getAllEmployees,
     getDepartmentByEmployeeID,
-    getAttendanceReport
+    getAttendanceReport,
+    getMerchandiseItems
 };
 
 //checkMerchQuantity
