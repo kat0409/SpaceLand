@@ -339,7 +339,7 @@ function routes(req, res) {
         return actions.getAttendanceReport(req, res);
     }  
 
-    if (url === "/get-merchandise" && method === "GET") {
+    if (url.startsWith("/get-merchandise") && method === "GET") {
         return actions.getMerchandiseItems(req, res);
     }    
 
