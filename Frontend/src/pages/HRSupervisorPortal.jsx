@@ -27,7 +27,6 @@ export default function HRSupervisorPortal() {
 
     const [employees, setEmployees] = useState([]);
     const [visitorRecords, setVisitorRecords] = useState([]);
-    const [attendanceAndRevenueReport, setAttendanceAndRevenueReport] = useState([]);
     const {logout} = useContext(AuthContext);
     const [filters, setFilters] = useState({
         startDate: '',
@@ -172,6 +171,41 @@ export default function HRSupervisorPortal() {
                     <div>
                         <EmployeeProfileForm/>
                         <FireEmployeeForm/>
+                        {/* Employee List */}
+                        <div className="space-y-12">
+                        <h2 className="text-2xl font-semibold mb-4">Employee List</h2>
+                        <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
+                            <table className="w-full text-sm">
+                            <thead className="text-left text-purple-300">
+                                <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>Username</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {employees.map((emp) => (
+                                <tr key={emp.EmployeeID} className="border-t border-white/10">
+                                    <td>{emp.EmployeeID}</td>
+                                    <td>{emp.FirstName} {emp.LastName}</td>
+                                    <td>{emp.Email}</td>
+                                    <td>{emp.Address}</td>
+                                    <td>{emp.username}</td>
+                                    <td>{emp.Department}</td>
+                                    <td>{emp.employmentStatus ? 1 : 0}</td>
+                                </tr>
+                                ))}
+                            </tbody>
+                            </table>
+                        </div>
+                        </div>
+                        <div className="p-6">
+                            <EmployeeManagement />
+                        </div>
                         {/* Place employee profile filtering/editing UI here */}
                     </div>
                 )}
@@ -181,100 +215,6 @@ export default function HRSupervisorPortal() {
                         <AttendanceReport/>
                     </div>
                 )}
-        
-                {/* Employee List */}
-                <div className="space-y-12">
-                <h2 className="text-2xl font-semibold mb-4">Employee List</h2>
-                <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
-                    <table className="w-full text-sm">
-                    <thead className="text-left text-purple-300">
-                        <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Address</th>
-                        <th>Username</th>
-                        <th>Department</th>
-                        <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {employees.map((emp) => (
-                        <tr key={emp.EmployeeID} className="border-t border-white/10">
-                            <td>{emp.EmployeeID}</td>
-                            <td>{emp.FirstName} {emp.LastName}</td>
-                            <td>{emp.Email}</td>
-                            <td>{emp.Address}</td>
-                            <td>{emp.username}</td>
-                            <td>{emp.Department}</td>
-                            <td>{emp.employmentStatus ? 1 : 0}</td>
-                        </tr>
-                        ))}
-                    </tbody>
-                    </table>
-                </div>
-                </div>
-                <div className="p-6">
-                    <EmployeeManagement />
-                </div>
-                <div className="mb-4 space-x-4">
-                    <input
-                        type="date"
-                        name="startDate"
-                        value={filters.startDate}
-                        onChange={handleFilterChange}
-                        className="bg-white/20 text-white p-2 rounded"
-                    />
-                    <input
-                        type="date"
-                        name="endDate"
-                        value={filters.endDate}
-                        onChange={handleFilterChange}
-                        className="bg-white/20 text-white p-2 rounded"
-                    />
-                    <select
-                        name="weatherCondition"
-                        value={filters.weatherCondition}
-                        onChange={handleFilterChange}
-                        className="bg-white/20 text-white p-2 rounded"
-                    >
-                        <option value="">All Weather</option>
-                        <option value="Sunny">Sunny</option>
-                        <option value="Cloudy">Cloudy</option>
-                        <option value="Rainy">Rainy</option>
-                        <option value="Stormy">Stormy</option>
-                    </select>
-                    <button onClick={fetchFilteredReport} className="bg-purple-600 text-white p-2 rounded">
-                        Apply Filters
-                    </button>
-                </div>
-
-                {/* VISITOR RECORDS */}
-                <div>
-                    <h2 className="text-2xl font-semibold mb-4">📋 Visitor Records</h2>
-                    <div className="bg-white/10 rounded-xl p-4 overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead className="text-left text-purple-300">
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Username</th>
-                            <th>Military</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {visitorRecords.map(visitor => (
-                            <tr key={visitor.VisitorID} className="border-t border-white/10">
-                            <td>{visitor.FirstName} {visitor.LastName}</td>
-                            <td>{visitor.Email}</td>
-                            <td>{visitor.Username}</td>
-                            <td>{visitor.MilitaryStatus ? 'Yes' : 'No'}</td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                    </div>
-                </div>
                 <button
                     onClick={() => {
                         logout();
