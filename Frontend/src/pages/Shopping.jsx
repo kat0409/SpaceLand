@@ -22,9 +22,6 @@ export default function Shopping() {
                 <p className="text-sm text-gray-400 mb-2">{item.description}</p>
                 <p className="text-purple-300 font-bold mb-2">${item.price.toFixed(2)}</p>
                 <p className="text-sm text-gray-500">In Stock: {item.stockQuantity}</p>
-                <button className="mt-3 px-4 py-2 bg-purple-600 rounded hover:bg-purple-700 transition">
-                Add to Cart
-                </button>
             </div>
             ))}
         </div>
