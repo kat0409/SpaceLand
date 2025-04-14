@@ -2,44 +2,24 @@ import React, { useEffect, useState, useContext } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { AuthContext } from '../components/AuthProvider';
-import DirectImageUploadModal from "../components/DirectImageUploadModal";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
 export default function Shopping() {
     const [items, setItems] = useState([]);
     const { auth } = useContext(AuthContext);
-    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-    const [selectedItem, setSelectedItem] = useState(null);
     const isMerchandiseSupervisor = auth.isAuthenticated && auth.role === 'supervisor' && localStorage.getItem('department') === 'merchandise';
 
     useEffect(() => {
-        loadMerchandise();
-    }, []);
-
-    const loadMerchandise = () => {
         fetch(`${BACKEND_URL}/get-merchandise`)
         .then(res => res.json())
-        .then(data => {
-            setItems(data);
-        })
+        .then(setItems)
         .catch(err => console.error("Failed to load merchandise:", err));
-    };
+    }, []);
 
-    const handleEditClick = (item) => {
-        if (isMerchandiseSupervisor) {
-            setSelectedItem(item);
-            setIsUploadModalOpen(true);
-        }
-    };
-
-    const handleUploadSuccess = (updatedItem) => {
-        // Update the item in the local state
-        setItems(prev => 
-            prev.map(item => 
-                item.merchandiseID === updatedItem.merchandiseID ? updatedItem : item
-            )
-        );
+    const handleEditClick = (itemId) => {
+        // Navigate to MerchandiseSupervisorPortal with a query parameter
+        window.location.href = `/supervisor/merchandise?editItem=${itemId}`;
     };
 
     return (
@@ -51,7 +31,7 @@ export default function Shopping() {
                 {isMerchandiseSupervisor && (
                     <div className="max-w-4xl mx-auto mb-8 bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">
                         <p className="text-purple-300 text-center">
-                            You are logged in as a Merchandise Supervisor. Click on any item to add or update its image.
+                            You are logged in as a Merchandise Supervisor. Click on any item to edit its details or add an image.
                         </p>
                     </div>
                 )}
@@ -62,12 +42,12 @@ export default function Shopping() {
                     <div 
                         key={item.merchandiseID} 
                         className={`bg-white/5 p-4 rounded-lg border border-white/10 flex flex-col ${isMerchandiseSupervisor ? 'cursor-pointer hover:bg-white/10' : ''}`}
-                        onClick={isMerchandiseSupervisor ? () => handleEditClick(item) : undefined}
+                        onClick={isMerchandiseSupervisor ? () => handleEditClick(item.merchandiseID) : undefined}
                     >
                         <div className="mb-4 aspect-square overflow-hidden rounded-lg bg-gray-800 flex items-center justify-center">
                             {item.imageUrl ? (
                                 <img 
-                                    src={`${BACKEND_URL}${item.imageUrl}`} 
+                                    src={item.imageUrl} 
                                     alt={item.itemName} 
                                     className="w-full h-full object-cover"
                                 />
@@ -89,17 +69,6 @@ export default function Shopping() {
                 )}
                 </div>
             </section>
-            
-            {/* Direct Image Upload Modal */}
-            {isUploadModalOpen && selectedItem && (
-                <DirectImageUploadModal 
-                    isOpen={isUploadModalOpen}
-                    onClose={() => setIsUploadModalOpen(false)}
-                    item={selectedItem}
-                    onUploadSuccess={handleUploadSuccess}
-                />
-            )}
-            
             <Footer />
         </>
     );      

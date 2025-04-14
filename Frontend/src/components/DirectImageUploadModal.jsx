@@ -34,54 +34,35 @@ const DirectImageUploadModal = ({ isOpen, onClose, item, onUploadSuccess }) => {
     setError('');
     
     try {
-      // Log to verify we have the correct data
-      console.log("Submitting form with data:", {
-        merchandiseID: item.merchandiseID,
-        itemName: item.itemName,
-        price: item.price,
-        quantity: item.quantity,
-        image: image.name // just logging the name for verification
-      });
-      
       // Create FormData for multipart form submission
       const formData = new FormData();
       formData.append('merchandiseID', item.merchandiseID);
-      formData.append('itemName', item.itemName);
+      formData.append('itemName', item.itemName); // Include existing item data
       formData.append('price', item.price);
       formData.append('quantity', item.quantity);
       formData.append('giftShopName', item.giftShopName || '');
       formData.append('description', item.description || '');
       formData.append('image', image);
       
-      console.log("Sending request to:", `${BACKEND_URL}/supervisor/merchandise/update-item`);
-      
       const response = await fetch(`${BACKEND_URL}/supervisor/merchandise/update-item`, {
         method: 'PUT',
         body: formData
       });
       
-      const responseText = await response.text();
-      console.log("Raw response:", responseText);
-      
-      let responseData;
-      try {
-        responseData = JSON.parse(responseText);
-      } catch (e) {
-        throw new Error("Invalid JSON response: " + responseText);
-      }
-      
       if (!response.ok) {
-        throw new Error(responseData.error || 'Failed to upload image');
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to upload image');
       }
       
-      // Update was successful
+      // Get the updated item data from the response
+      const updatedItem = await response.json();
+      
       if (onUploadSuccess) {
-        onUploadSuccess(responseData.item || responseData);
+        onUploadSuccess(updatedItem.item || updatedItem);
       }
       
       onClose();
     } catch (err) {
-      console.error("Upload error:", err);
       setError(err.message || 'Failed to upload image');
     } finally {
       setIsLoading(false);
