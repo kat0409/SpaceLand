@@ -2717,6 +2717,18 @@ const getAttendanceReport = (req, res) => {
     });
 };
 
+const getMerchandiseItems = (req, res) => {
+    pool.query(queries.getMerchandiseItems, (err, results) => {
+        if (err) {
+            console.error("Error fetching merchandise:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Database error" }));
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -2798,5 +2810,6 @@ module.exports = {
     maintenanceEmployeePerformanceReport,
     getAllEmployees,
     getDepartmentByEmployeeID,
-    getAttendanceReport
+    getAttendanceReport,
+    getMerchandiseItems
 };  

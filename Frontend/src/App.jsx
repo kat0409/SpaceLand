@@ -17,6 +17,7 @@ import Purchase from "./pages/Purchase";
 import MerchandiseSupervisorPortal from './pages/MerchandiseSupervisorPortal';
 import MaintenanceSupervisorPortal from './pages/MaintenanceSupervisorPortal';
 import HRSupervisorPortal from './pages/HRSupervisorPortal';
+import Shopping from './pages/Shopping';
 
 export default function App() {
   return (
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="/auth" element={<Auth />} /> {/* Visitor Login (Keep this) */}
           <Route path="/portal" element={<UserPortal />} />
           <Route path="/dining" element={<Dining />} />
+          <Route path="/shopping" element={<Shopping />} />
           <Route path="/purchase" element={<Purchase />} />
           <Route path="/userportal" element={<UserPortal />} />
           <Route path="/supervisor/merchandise" element={<MerchandiseSupervisorPortal />} />

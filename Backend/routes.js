@@ -338,9 +338,13 @@ function routes(req, res) {
     if (url.startsWith('/supervisor/HR/attendance-report') && method === "GET") {
         return actions.getAttendanceReport(req, res);
     }  
+    if (url.startsWith("/get-merchandise") && method === "GET") {
+        return actions.getMerchandiseItems(req, res);
+    }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
+
 
 module.exports = routes;
