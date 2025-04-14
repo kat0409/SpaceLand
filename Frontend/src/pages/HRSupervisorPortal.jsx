@@ -32,48 +32,6 @@ export default function HRSupervisorPortal() {
         weatherCondition: ''
     });
 
-    const ScheduleForm = ({ onScheduleAdded }) => {
-        const [form, setForm] = useState({
-            EmployeeID: '',
-            Department: '',
-            scheduleDate: '',
-            shiftStart: '',
-            shiftEnd: '',
-            isRecurring: false,
-        });
-
-        const handleSubmit = async (e) => {
-            e.preventDefault();
-            const res = await fetch(`${BACKEND_URL}/supervisor/HR/schedule`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form)
-            });
-            const data = await res.json();
-            if (res.ok) {
-                onScheduleAdded(); // refresh
-            } else {
-                alert(data.error || 'Failed to add schedule');
-            }
-        };
-
-        return (
-            <form onSubmit={handleSubmit} className="space-y-2 bg-white/10 p-4 rounded-xl mb-4">
-                <h3 className="font-bold text-lg">Create Employee Schedule</h3>
-                <input placeholder="Employee ID" value={form.EmployeeID} onChange={e => setForm({ ...form, EmployeeID: e.target.value })} className="w-full p-2 rounded" required />
-                <input placeholder="Department" value={form.Department} onChange={e => setForm({ ...form, Department: e.target.value })} className="w-full p-2 rounded" required />
-                <input type="date" value={form.scheduleDate} onChange={e => setForm({ ...form, scheduleDate: e.target.value })} className="w-full p-2 rounded" required />
-                <input type="time" value={form.shiftStart} onChange={e => setForm({ ...form, shiftStart: e.target.value })} className="w-full p-2 rounded" required />
-                <input type="time" value={form.shiftEnd} onChange={e => setForm({ ...form, shiftEnd: e.target.value })} className="w-full p-2 rounded" required />
-                <label className="flex items-center space-x-2">
-                <input type="checkbox" checked={form.isRecurring} onChange={e => setForm({ ...form, isRecurring: e.target.checked })} />
-                <span>Recurring?</span>
-                </label>
-                <button className="bg-purple-600 px-4 py-2 rounded text-white">Submit</button>
-            </form>
-        );
-    };
-
     useEffect(() => {
         console.log('Auth effect triggered with auth:', auth);
         
