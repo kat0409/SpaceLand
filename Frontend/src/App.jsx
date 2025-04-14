@@ -40,6 +40,7 @@ export default function App() {
           <Route path="/portal" element={<UserPortal />} />
           <Route path="/dining" element={<Dining />} />
           <Route path="/purchase" element={<Purchase />} />
+          <Route path="/userportal" element={<UserPortal />} />
           <Route path="/supervisor/merchandise" element={<MerchandiseSupervisorPortal />} />
           <Route path="/supervisor/maintenance" element={<MaintenanceSupervisorPortal />} />
           <Route path="/supervisor/HR" element={<HRSupervisorPortal />} />
