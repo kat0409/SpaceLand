@@ -121,7 +121,9 @@ export default function AttendanceReport() {
                 <td className="p-2">{r.date}</td>
                 <td className="p-2">{r.clockIn}</td>
                 <td className="p-2">{r.clockOut}</td>
-                <td className="p-2">{r.HoursWorked?.toFixed(2)}</td>
+                <td className="p-2">
+                    {isNaN(Number(r.HoursWorked)) ? 'N/A' : Number(r.HoursWorked).toFixed(2)}
+                </td>
               </tr>
             ))}
           </tbody>
