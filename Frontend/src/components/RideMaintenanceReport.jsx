@@ -9,7 +9,7 @@ export default function RideMaintenanceReport() {
     const [endDate, setEndDate] = useState('');
     const [selectedRide, setSelectedRide] = useState('');
 
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
     useEffect(() => {
         fetch(`${BACKEND_URL}/supervisor/maintenance/rides`)
