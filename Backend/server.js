@@ -106,6 +106,7 @@ const routeMap = {
         '/employee/clock-out',
         '/supervisor/HR/update-time-off-request',
         '/supervisor/HR/update-employee-profile',
+        '/supervisor/merchandise/update-item'
     ],
     'DELETE': [
         '/supervisor/delete-employee',
