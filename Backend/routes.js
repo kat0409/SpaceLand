@@ -339,6 +339,10 @@ function routes(req, res) {
         return actions.getAttendanceReport(req, res);
     }  
 
+    if (url === "/get-merchandise" && method === "GET") {
+        return actions.getMerchandiseItems(req, res);
+    }    
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
