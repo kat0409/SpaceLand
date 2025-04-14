@@ -1,8 +1,8 @@
 // src/pages/Auth.jsx
 import { useState, useEffect, useContext } from "react";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-import { AuthContext } from '../components/AuthProvider';
+import Header from "./Header";
+import Footer from "./Footer";
+import { AuthContext } from './AuthProvider';
 import { motion } from 'framer-motion';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
