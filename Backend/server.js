@@ -58,7 +58,10 @@ const routeMap = {
         '/supervisor/HR/shifts-with-names',
         '/supervisor/merchandise/transaction-summary',
         '/supervisor/merchandise/best-worst',
-        '/supervisor/maintenance/employee-performance'
+        '/supervisor/maintenance/employee-performance',
+        '/supervisor/HR/all-employee-names',
+        '/supervisor/HR/get-employee-department',
+        '/supervisor/HR/attendance-report'
     ],
     'POST': [
         '/supervisor/HR/add-employee', 
@@ -82,6 +85,7 @@ const routeMap = {
         '/supervisor/HR/add-events',
         '/employee/time-off-request',
         '/employee/clock-in',
+        '/employee/clock-out',
         '/supervisor/HR/schedule',
         '/supervisor/HR/fire-employee'
     ],
@@ -98,7 +102,7 @@ const routeMap = {
         '/supervisor/HR/update-event',
         '/employee/clock-out',
         '/supervisor/HR/update-time-off-request',
-        '/supervisor/HR/update-employee-profile'
+        '/supervisor/HR/update-employee-profile',
     ],
     'DELETE': [
         '/supervisor/delete-employee',

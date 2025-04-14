@@ -7,7 +7,7 @@ import Footer from '../components/Footer';
 import SidebarMenu from '../components/SidebarMenu';
 import { useEffect, useState } from 'react';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
 export default function Home() {
   const [alerts, setAlerts] = useState([]);

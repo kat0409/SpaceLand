@@ -23,7 +23,7 @@ export default function EmployeeProfile({ employee, onUpdate }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
       const response = await fetch(`${BACKEND_URL}/employee/update-info`, {
         method: 'PUT',
         headers: {

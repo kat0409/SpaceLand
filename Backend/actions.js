@@ -1726,19 +1726,17 @@ const getMerchandiseSalesData = (req, res) => {
     res.end(JSON.stringify(mockSalesData));
 };
 
-const getEvents = (req,res) => {
-    pool.query(queries.getEvents, (error, results) => {
-        if(error){
-            console.log("Error fetching events:", error);
-            res.writeHead(500, {"Content-Type":"application/json"});
-            res.end(JSON.stringify({error: "Internal server error"}));
-            return;
+const getEvents = (req, res) => {
+    pool.query(queries.getEvents, (err, results) => {
+        if (err) {
+            console.error("Failed to fetch events:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Failed to fetch events" }));
         }
-        const eventID = results.insertId;
-        res.writeHead(200, {"Content-Type":"application/json"});
-        res.end(JSON.stringify({message: "Events fetched successfully", eventID}));
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
     });
-}
+};  
 
 const addEvent = (req,res) => {
     let body = "";
@@ -1889,7 +1887,8 @@ const deleteEvent = (req, res) => {
 };
 
 const getEmployeeSchedule = (req, res) => {
-    const employeeID = req.url.split("/").pop();
+    const parsedUrl = url.parse(req.url,true);
+    const {employeeID} = parsedUrl.query;
     pool.query(queries.getEmployeeSchedule, [employeeID], (err, results) => {
         if (err) {
             res.writeHead(500, { "Content-Type": "application/json" });
@@ -2564,6 +2563,18 @@ const getEmployeeNames = (req,res) => {
     });
 };
 
+const getAllEmployees = (req, res) => {
+    pool.query(queries.getAllEmployees, (err, results) => {
+        if (err) {
+            console.error("Error fetching employees:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Failed to fetch employees" }));
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
 const getEmployeeScheduleForSup = (req,res) => {
     pool.query(queries.getEmployeeScheduleForSup, (err, results) => {
         if (err) {
@@ -2576,12 +2587,11 @@ const getEmployeeScheduleForSup = (req,res) => {
 };
 
 const getSpecificEmployeeSchedule = (req, res) => {
-    const urlObj = new URL(req.url, `http://${req.headers.host}`);
-    const EmployeeID = urlObj.searchParams.get("EmployeeID");
+    const parsedUrl = url.parse(req.url, true);
+    const { EmployeeID } = parsedUrl.query;
 
     if (!EmployeeID) {
-        res.writeHead(400, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify({ error: "EmployeeID is required" }));
+        return res.status(400).json({ error: "EmployeeID is required" });
     }
 
     pool.query(queries.getSpecificEmployeeSchedule, [EmployeeID], (err, results) => {
@@ -2628,6 +2638,80 @@ const maintenanceEmployeePerformanceReport = (req, res) => {
             return;
         }
 
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+};
+
+const getDepartmentByEmployeeID = (req, res) => {
+    const parsedUrl = url.parse(req.url,true);
+    const { EmployeeID } = parsedUrl.query;
+
+    if (!EmployeeID) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ error: "Missing EmployeeID" }));
+    }
+
+    pool.query(queries.getDepartmentByEmployeeID, [EmployeeID], (err, results) => {
+        if (err) {
+            console.error("Error fetching department:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Database error" }));
+        }
+
+        if (results.length === 0) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Employee not found" }));
+        }
+
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results[0])); 
+    });
+};
+
+const getAttendanceReport = (req, res) => {
+    const parsedUrl = url.parse(req.url, true);
+    const { startDate, endDate, department, employeeID } = parsedUrl.query;
+
+    let baseQuery = `
+        SELECT 
+            ea.EmployeeID,
+            CONCAT(e.FirstName, ' ', e.LastName) AS FullName,
+            e.Department,
+            ea.date,
+            ea.clockIn,
+            ea.clockOut,
+            TIMESTAMPDIFF(MINUTE, ea.clockIn, ea.clockOut) / 60.0 AS HoursWorked
+        FROM employee_attendance ea
+        JOIN employee e ON ea.EmployeeID = e.EmployeeID
+        WHERE 1 = 1
+    `;
+
+    const params = [];
+
+    if (startDate && endDate) {
+        baseQuery += " AND ea.date BETWEEN ? AND ?";
+        params.push(startDate, endDate);
+    }
+
+    if (department && department !== 'all') {
+        baseQuery += " AND e.Department = ?";
+        params.push(department);
+    }
+
+    if (employeeID && employeeID !== 'all') {
+        baseQuery += " AND ea.EmployeeID = ?";
+        params.push(employeeID);
+    }
+
+    baseQuery += " ORDER BY ea.date DESC";
+
+    pool.query(baseQuery, params, (err, results) => {
+        if (err) {
+            console.error("Attendance report error:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Database error" }));
+        }
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify(results));
     });
@@ -2711,5 +2795,8 @@ module.exports = {
     getSchedulesWithNames,
     getTransactionSummaryReport,
     getBestWorstSellersReport,
-    maintenanceEmployeePerformanceReport
+    maintenanceEmployeePerformanceReport,
+    getAllEmployees,
+    getDepartmentByEmployeeID,
+    getAttendanceReport
 };  
