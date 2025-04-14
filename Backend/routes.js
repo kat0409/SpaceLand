@@ -329,7 +329,11 @@ function routes(req, res) {
 
     if (url.startsWith('/supervisor/HR/all-employee-names') && method === 'GET') {
         return actions.getAllEmployees(req, res);
-    }    
+    }   
+    
+    if(url.startsWith('/supervisor/HR/get-employee-department') && method === 'GET'){
+        return actions.getDepartmentByEmployeeID(req,res);
+    }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));

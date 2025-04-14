@@ -695,6 +695,10 @@ const maintenanceEmployeePerformanceReport = `
     ORDER BY TotalTasks DESC;
 `;
 
+const getDepartmentByEmployeeID = `
+    SELECT Department FROM employee WHERE EmployeeID = ?
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -787,7 +791,8 @@ module.exports = {
     getSchedulesWithNames,
     getTransactionSummaryReport,
     maintenanceEmployeePerformanceReport,
-    getAllEmployees
+    getAllEmployees,
+    getDepartmentByEmployeeID
 };
 
 //checkMerchQuantity

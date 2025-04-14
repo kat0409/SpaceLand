@@ -2645,6 +2645,31 @@ const maintenanceEmployeePerformanceReport = (req, res) => {
     });
 };
 
+const getDepartmentByEmployeeID = (req, res) => {
+    const { EmployeeID } = req.query;
+
+    if (!EmployeeID) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ error: "Missing EmployeeID" }));
+    }
+
+    pool.query(queries.getDepartmentByEmployeeID, [EmployeeID], (err, results) => {
+        if (err) {
+            console.error("Error fetching department:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Database error" }));
+        }
+
+        if (results.length === 0) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Employee not found" }));
+        }
+
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results[0])); 
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -2724,5 +2749,6 @@ module.exports = {
     getTransactionSummaryReport,
     getBestWorstSellersReport,
     maintenanceEmployeePerformanceReport,
-    getAllEmployees
+    getAllEmployees,
+    getDepartmentByEmployeeID
 };  

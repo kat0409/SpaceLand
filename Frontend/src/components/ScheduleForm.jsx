@@ -54,58 +54,46 @@ const ScheduleForm = ({ onScheduleAdded }) => {
         <div className="bg-white/10 p-4 rounded-xl">
             <h2 className="text-lg font-semibold mb-2">Create Employee Shift</h2>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <select
-                name="EmployeeID"
-                value={form.EmployeeID}
-                onChange={async (e) => {
-                    const selectedID = e.target.value;
-                    setForm(prev => ({
-                    ...prev,
-                    EmployeeID: selectedID
-                    }));
+                {/* Employee Dropdown */}
+                    <select
+                    name="EmployeeID"
+                    value={form.EmployeeID}
+                    onChange={async (e) => {
+                        const selectedID = e.target.value;
+                        setForm(prev => ({ ...prev, EmployeeID: selectedID }));
 
-                    // Fetch department for the selected employee
-                    try {
-                    const res = await fetch(`${BACKEND_URL}/supervisor/HR/employee-department?EmployeeID=${selectedID}`);
-                    const data = await res.json();
-                    if (res.ok && data.Department) {
-                        setForm(prev => ({
-                        ...prev,
-                        Department: data.Department
-                        }));
-                    } else {
+                        // Fetch department automatically
+                        try {
+                        const res = await fetch(`${BACKEND_URL}/supervisor/HR/get-employee-department?EmployeeID=${selectedID}`);
+                        const data = await res.json();
+                        if (res.ok && data.Department) {
+                            setForm(prev => ({ ...prev, Department: data.Department }));
+                        } else {
+                            setForm(prev => ({ ...prev, Department: '' }));
+                        }
+                        } catch (err) {
+                        console.error("Failed to fetch department", err);
                         setForm(prev => ({ ...prev, Department: '' }));
-                    }
-                    } catch (err) {
-                    console.error("Failed to fetch department", err);
-                    setForm(prev => ({ ...prev, Department: '' }));
-                    }
-                }}
-                required
-                className="p-2 rounded bg-black/50 text-white border border-gray-700"
-                >
-                <option value="">Select Employee</option>
-                {employeeList.map((emp, idx) => (
-                    <option key={idx} value={emp.EmployeeID}>
-                    {emp.FirstName} {emp.LastName}
-                    </option>
-                ))}
-                </select>
-                {/* Department dropdown */}
-                <select
-                    name="Department"
-                    value={form.Department}
-                    onChange={handleChange}
-                    required
+                        }
+                    }}
                     className="p-2 rounded bg-black/50 text-white border border-gray-700"
-                >
-                    <option value="">Select Department</option>
-                    {departmentList.map((dept, idx) => (
-                        <option key={idx} value={dept.DepartmentName}>
-                            {dept.DepartmentName}
+                    required
+                    >
+                    <option value="">-- Choose an employee --</option>
+                    {employeeList.map(emp => (
+                        <option key={emp.EmployeeID} value={emp.EmployeeID}>
+                        {emp.FirstName} {emp.LastName}
                         </option>
                     ))}
                 </select>
+                {/* Department Display (auto-filled) */}
+                <input
+                    type="text"
+                    name="Department"
+                    value={form.Department}
+                    readOnly
+                    className="p-2 rounded bg-black/30 text-white border border-gray-700"
+                />
 
                 <input type="date" name="scheduleDate" value={form.scheduleDate} onChange={handleChange} required className="p-2 rounded bg-black/50 text-white border border-gray-700" />
                 <input type="time" name="shiftStart" value={form.shiftStart} onChange={handleChange} required className="p-2 rounded bg-black/50 text-white border border-gray-700" />
