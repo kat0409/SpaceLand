@@ -14,7 +14,7 @@ export default function UserPortal() {
   const [loading, setLoading] = useState(true);
   const {logout} = useContext(AuthContext);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
   useEffect(() => {
     const visitorID = localStorage.getItem('VisitorID');

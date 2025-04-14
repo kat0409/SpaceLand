@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { AuthContext } from '../AuthProvider';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
 export default function ScheduleViewer({employeeID}) {
   const { auth } = useContext(AuthContext);
