@@ -20,7 +20,7 @@ export default function Shopping() {
                 items.map(item => (
                     <div key={item.merchandiseID} className="bg-white/5 p-4 rounded-lg border border-white/10">
                     <h2 className="text-xl font-semibold">{item.itemName}</h2>
-                    <p className="text-purple-300 font-bold mb-2">${item.price.toFixed(2)}</p>
+                    <p className="text-purple-300 font-bold mb-2">${Number(item.price).toFixed(2)}</p>
                     <p className="text-sm text-gray-500">In Stock: {item.quantity}</p>
                     </div>
                 ))
