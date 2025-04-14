@@ -15,7 +15,7 @@ const ScheduleForm = ({ onScheduleAdded }) => {
     const [departmentList, setDepartmentList] = useState([]);
 
     useEffect(() => {
-        fetch(`${BACKEND_URL}/supervisor/HR/employee-names`)
+        fetch(`${BACKEND_URL}/supervisor/HR/all-employee-names`)
             .then(res => res.json())
             .then(data => setEmployeeList(data))
             .catch(err => console.error("Failed to fetch employee names", err));
@@ -54,22 +54,43 @@ const ScheduleForm = ({ onScheduleAdded }) => {
         <div className="bg-white/10 p-4 rounded-xl">
             <h2 className="text-lg font-semibold mb-2">Create Employee Shift</h2>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Employee dropdown */}
-                <select
-                    name="Employee Name"
-                    value={form.EmployeeID}
-                    onChange={handleChange}
-                    required
-                    className="p-2 rounded bg-black/50 text-white border border-gray-700"
-                >
-                    <option value="">Select Employee</option>
-                    {employeeList.map((emp, idx) => (
-                        <option key={idx} value={emp.EmployeeID}>
-                            {emp.FullName}
-                        </option>
-                    ))}
-                </select>
+            <select
+                name="EmployeeID"
+                value={form.EmployeeID}
+                onChange={async (e) => {
+                    const selectedID = e.target.value;
+                    setForm(prev => ({
+                    ...prev,
+                    EmployeeID: selectedID
+                    }));
 
+                    // Fetch department for the selected employee
+                    try {
+                    const res = await fetch(`${BACKEND_URL}/supervisor/HR/employee-department?EmployeeID=${selectedID}`);
+                    const data = await res.json();
+                    if (res.ok && data.Department) {
+                        setForm(prev => ({
+                        ...prev,
+                        Department: data.Department
+                        }));
+                    } else {
+                        setForm(prev => ({ ...prev, Department: '' }));
+                    }
+                    } catch (err) {
+                    console.error("Failed to fetch department", err);
+                    setForm(prev => ({ ...prev, Department: '' }));
+                    }
+                }}
+                required
+                className="p-2 rounded bg-black/50 text-white border border-gray-700"
+                >
+                <option value="">Select Employee</option>
+                {employeeList.map((emp, idx) => (
+                    <option key={idx} value={emp.EmployeeID}>
+                    {emp.FirstName} {emp.LastName}
+                    </option>
+                ))}
+                </select>
                 {/* Department dropdown */}
                 <select
                     name="Department"

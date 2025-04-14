@@ -1889,7 +1889,8 @@ const deleteEvent = (req, res) => {
 };
 
 const getEmployeeSchedule = (req, res) => {
-    const employeeID = req.url.split("/").pop();
+    const parsedUrl = url.parse(req.url,true);
+    const {employeeID} = parsedUrl.query;
     pool.query(queries.getEmployeeSchedule, [employeeID], (err, results) => {
         if (err) {
             res.writeHead(500, { "Content-Type": "application/json" });
