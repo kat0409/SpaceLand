@@ -2671,6 +2671,25 @@ const getDepartmentByEmployeeID = (req, res) => {
     });
 };
 
+const getAttendanceReport = (req, res) => {
+    const parsedUrl = url.parse(req.url, true);
+    const { startDate, endDate, department = 'all', employeeID = 0 } = parsedUrl.query;
+  
+    pool.query(
+      queries.getAttendanceReport,
+      [startDate, endDate, department, department, parseInt(employeeID), parseInt(employeeID)],
+      (err, results) => {
+        if (err) {
+          console.error("Attendance report error:", err);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          return res.end(JSON.stringify({ error: "Failed to generate report" }));
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+      }
+    );
+  };
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -2751,5 +2770,6 @@ module.exports = {
     getBestWorstSellersReport,
     maintenanceEmployeePerformanceReport,
     getAllEmployees,
-    getDepartmentByEmployeeID
+    getDepartmentByEmployeeID,
+    getAttendanceReport
 };  

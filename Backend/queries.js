@@ -810,7 +810,8 @@ module.exports = {
     getTransactionSummaryReport,
     maintenanceEmployeePerformanceReport,
     getAllEmployees,
-    getDepartmentByEmployeeID
+    getDepartmentByEmployeeID,
+    getAttendanceReport
 };
 
 //checkMerchQuantity
