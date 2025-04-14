@@ -10,6 +10,7 @@ import EmployeeProfileForm from '../components/EmployeeProfileUpdateForm';
 import FireEmployeeForm from '../components/FireEmployeeForm';
 import TimeOffRequestReviewForm from '../components/TimeOffRequestReviewForm';
 import ScheduleForm from '../components/ScheduleForm';
+import CalendarView from '../components/HRCalendarView';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
@@ -19,6 +20,7 @@ export default function HRSupervisorPortal() {
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("scheduling");
     const [refreshKey, setRefreshKey] = useState(Date.now());
+    const [schedules, setSchedules] = useState([]);
 
     console.log('HRSupervisorPortal rendered with auth:', auth);
 
@@ -49,6 +51,19 @@ export default function HRSupervisorPortal() {
             setIsLoading(false);
         }
     }, [auth, navigate]);
+
+    useEffect(() => {
+        fetch(`${BACKEND_URL}/supervisor/HR/get-schedule`)
+            .then(res => res.json())
+            .then(data => {
+                setSchedules(data);
+                setIsLoading(false);
+            })
+            .catch(err => {
+                console.error("Failed to fetch schedule:", err);
+                setIsLoading(false);
+            });
+    }, [refreshKey]);
 
     useEffect(() => {
         console.log('Data fetching effect triggered');
@@ -144,6 +159,7 @@ export default function HRSupervisorPortal() {
 
                 {activeTab === 'scheduling' && (
                     <div className="space-y-6">
+                        <CalendarView schedule={schedules} />
                         <ScheduleForm onScheduleAdded={() => setRefreshKey(Date.now())} />
                         <DeleteScheduleForm onScheduleDeleted={() => setRefreshKey(Date.now())} />
                         <EmployeeScheduleDisplay refreshKey={refreshKey} />
