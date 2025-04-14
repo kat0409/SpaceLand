@@ -4,6 +4,7 @@ const cors = require('cors');
 const eRoutes = require('./routes');
 const path = require('path');
 const fs = require('fs');
+const express = require('express');
 
 //If you are calling a getter function, use GET
 //If you are calling an add function, use POST
@@ -226,3 +227,6 @@ const PORT  = process.env.PORT || 3000 //check if there is an environment variab
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+// In Backend/server.js
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
