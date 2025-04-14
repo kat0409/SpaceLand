@@ -4,22 +4,22 @@ import { AuthContext } from '../AuthProvider';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
-export default function ScheduleViewer() {
+export default function ScheduleViewer({employeeID}) {
   const { auth } = useContext(AuthContext);
   const [schedule, setSchedule] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
-      if (!auth.EmployeeID) return;
+      if (!employeeID) return;
 
-      fetch(`${BACKEND_URL}/employee/get-schedule?EmployeeID=${auth.EmployeeID}`)
+      fetch(`${BACKEND_URL}/employee/get-schedule?employeeID=${employeeID}`)
           .then(res => res.json())
           .then(data => setSchedule(data))
           .catch(err => {
               console.error("Error fetching schedule:", err);
               setError("Failed to load schedule. Please try again later.");
           });
-  }, [auth.EmployeeID]);
+  }, [employeeID]);
 
   return (
       <div>
