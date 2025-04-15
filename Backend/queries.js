@@ -672,7 +672,10 @@ const getAllEmployees = `
 `;
 
 const getEmployeeScheduleForSup  = `
-    SELECT * FROM employee_schedule;
+    SELECT es.*, e.FirstName, e.LastName
+    FROM employee_schedule es
+    JOIN employee e ON es.EmployeeID = e.EmployeeID
+    ORDER BY es.scheduleDate;
 `;
 
 const getSchedulesWithNames = `
