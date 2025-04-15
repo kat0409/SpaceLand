@@ -276,9 +276,15 @@ const getVisitorTicketTransactions = `
             WHEN tt.ticketType = 'General' THEN 49.99
             WHEN tt.ticketType = 'Cosmic' THEN 89.99
             ELSE tt.totalAmount / tt.quantity
-        END as pricePerTicket,
-        tt.totalAmount
+        END as ticketPricePerUnit,
+        tt.totalAmount as ticketTotal,
+        mp.mealPlanName,
+        mp.price as mealPlanPrice,
+        (tt.totalAmount + IFNULL(mp.price, 0)) as grandTotal
     FROM tickettransactions tt
+    LEFT JOIN mealplantransactions mpt ON DATE(tt.transactionDate) = DATE(mpt.transactionDate) 
+        AND tt.VisitorID = mpt.VisitorID
+    LEFT JOIN mealplans mp ON mpt.mealPlanID = mp.mealPlanID
     WHERE tt.VisitorID = ?
     ORDER BY tt.transactionDate DESC;
 `;
