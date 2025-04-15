@@ -19,6 +19,7 @@ export default function MaintenanceSupervisorPortal() {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showRequestDetails, setShowRequestDetails] = useState(false);
   const [activeTab, setActiveTab] = useState('Dashboard');
+  const [weatherAlerts, setWeatherAlerts] = useState([]);
 
   useEffect(() => {
     if (auth.isAuthenticated && auth.role === 'supervisor' && localStorage.getItem('department') === 'maintenance') {
@@ -206,7 +207,27 @@ export default function MaintenanceSupervisorPortal() {
                 )}
               </motion.div>
 
-              {/* Add a second panel here if needed (like ride status or performance preview) */}
+              {weatherAlerts.length > 0 && (
+              <div className="bg-red-500/20 border border-red-400/50 rounded-lg p-4 mb-6">
+                <h3 className="text-lg font-semibold mb-2">⚠️ Unresolved Weather Alerts</h3>
+                {weatherAlerts.map(alert => (
+                  <div key={alert.alertID} className="flex justify-between items-center mb-2">
+                    <div>
+                      <p>{alert.alertMessage}</p>
+                      <p className="text-sm text-gray-300">
+                        {new Date(alert.timestamp).toLocaleString()}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleResolveAlert(alert.alertID)}
+                      className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded"
+                    >
+                      Resolve
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
             </div>
           </>
         )}

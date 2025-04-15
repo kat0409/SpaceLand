@@ -52,6 +52,16 @@ export default function SupervisorPortal() {
             .catch(err => console.error('Filtered report error:', err));
     };*/
 
+    useEffect(() => {
+        fetch(`${BACKEND_URL}/weather-alert`)
+            .then(res => res.json())
+            .then(data => {
+                const unresolved = data.filter(alert => alert.isResolved === 0);
+                setWeatherAlerts(unresolved);
+            })
+            .catch(err => console.error("Failed to fetch weather alerts:", err));
+    }, []);
+
     const fetchFilteredReport = async () => {
         try {
             const params = new URLSearchParams();
