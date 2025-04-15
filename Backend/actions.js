@@ -1628,79 +1628,151 @@ const addMealPlanTransaction = (req,res) => {
 };
 
 const deleteMerchandise = (req, res) => {
-    const merchandiseID = req.url.split('/').pop();
-    
+    const parsedUrl = url.parse(req.url, true);
+    const merchandiseID = parsedUrl.query.merchandiseID;
+
     if (!merchandiseID) {
         res.writeHead(400, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "Missing merchandise ID" }));
         return;
     }
-    
-    pool.query('DELETE FROM merchandise WHERE merchandiseID = ?', [merchandiseID], (error, results) => {
-        if (error) {
-            console.error("Error deleting merchandise:", error);
+
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.error("Connection error:", err);
             res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Internal server error" }));
+            res.end(JSON.stringify({ error: "Failed to connect to database" }));
             return;
         }
-        
-        if (results.affectedRows === 0) {
-            res.writeHead(404, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Merchandise not found" }));
-            return;
-        }
-        
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ message: "Merchandise deleted successfully" }));
+
+        connection.beginTransaction(err => {
+            if (err) {
+                connection.release();
+                console.error("Transaction error:", err);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Failed to start transaction" }));
+                return;
+            }
+
+            //Delete from lowstocknotifications (fk constraint)
+            connection.query('DELETE FROM lowstocknotifications WHERE merchandiseID = ?', [merchandiseID], (err) => {
+                if (err) return rollback(connection, res, "Failed to delete from lowstocknotifications", err);
+
+                //Delete from merchandisetransactions (fk constraint)
+                connection.query('DELETE FROM merchandisetransactions WHERE merchandiseID = ?', [merchandiseID], (err) => {
+                    if (err) return rollback(connection, res, "Failed to delete from merchandisetransactions", err);
+
+                    //Delete from merchandise (final delete)
+                    connection.query('DELETE FROM merchandise WHERE merchandiseID = ?', [merchandiseID], (err, results) => {
+                        if (err) return rollback(connection, res, "Failed to delete merchandise", err);
+
+                        if (results.affectedRows === 0) {
+                            connection.rollback(() => {
+                                connection.release();
+                                res.writeHead(404, { "Content-Type": "application/json" });
+                                res.end(JSON.stringify({ error: "Merchandise not found" }));
+                            });
+                        } else {
+                            connection.commit(err => {
+                                connection.release();
+                                if (err) {
+                                    console.error("Commit error:", err);
+                                    res.writeHead(500, { "Content-Type": "application/json" });
+                                    res.end(JSON.stringify({ error: "Failed to commit transaction" }));
+                                    return;
+                                }
+
+                                res.writeHead(200, { "Content-Type": "application/json" });
+                                res.end(JSON.stringify({ message: "Merchandise deleted successfully" }));
+                            });
+                        }
+                    });
+                });
+            });
+        });
     });
 };
 
+// Rollback helper function for the delete item function
+function rollback(connection, res, message, err) {
+    console.error(message, err);
+    connection.rollback(() => {
+        connection.release();
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: message }));
+    });
+}
+
 const updateMerchandise = (req, res) => {
     let body = '';
-    
+
     req.on('data', (chunk) => {
         body += chunk.toString();
     });
-    
+
     req.on('end', () => {
         let parsedBody;
         try {
             parsedBody = JSON.parse(body);
         } catch (err) {
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Invalid JSON format" }));
-            return;
+            return res.end(JSON.stringify({ error: "Invalid JSON format" }));
         }
-        
-        const { merchandiseID, itemName, price, quantity, giftShopName, description } = parsedBody;
-        
-        if (!merchandiseID || !itemName || price === undefined || quantity === undefined) {
+
+        const { merchandiseID, giftShopName, itemName, price, quantity } = parsedBody;
+
+        if (!merchandiseID) {
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Missing required fields" }));
-            return;
+            return res.end(JSON.stringify({ error: "Missing merchandiseID" }));
         }
-        
-        pool.query(
-            'UPDATE merchandise SET itemName = ?, price = ?, quantity = ?, giftShopName = ?, description = ? WHERE merchandiseID = ?',
-            [itemName, price, quantity, giftShopName || null, description || null, merchandiseID],
-            (error, results) => {
-                if (error) {
-                    console.error("Error updating merchandise:", error);
-                    res.writeHead(500, { "Content-Type": "application/json" });
-                    res.end(JSON.stringify({ error: "Internal server error" }));
-                    return;
-                }
-                
-                if (results.affectedRows === 0) {
-                    res.writeHead(404, { "Content-Type": "application/json" });
-                    res.end(JSON.stringify({ error: "Merchandise not found" }));
-                    return;
-                }
-                
-                res.writeHead(200, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ message: "Merchandise updated successfully" }));
+
+        const fields = [];
+        const values = [];
+
+        if (giftShopName !== undefined) {
+            fields.push("giftShopName = ?");
+            values.push(giftShopName || null);
+        }
+
+        if (itemName !== undefined) {
+            fields.push("itemName = ?");
+            values.push(itemName);
+        }
+
+        if (price !== undefined) {
+            fields.push("price = ?");
+            values.push(Number(price));
+        }
+
+        if (quantity !== undefined) {
+            fields.push("quantity = ?");
+            values.push(Number(quantity));
+        }
+
+        if (fields.length === 0) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "No fields provided for update" }));
+        }
+
+        values.push(merchandiseID); 
+
+        const sql = `UPDATE merchandise SET ${fields.join(", ")} WHERE merchandiseID = ?`;
+
+        pool.query(sql, values, (error, results) => {
+            if (error) {
+                console.error("Error updating merchandise:", error.message || error);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Internal server error" }));
             }
-        );
+
+            if (results.affectedRows === 0) {
+                res.writeHead(404, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Merchandise not found" }));
+            }
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Merchandise updated successfully" }));
+        });
     });
 };
 
