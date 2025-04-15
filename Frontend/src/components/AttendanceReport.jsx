@@ -2,6 +2,14 @@ import React, { useEffect, useState } from 'react';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
+// Helper function to format dates correctly
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  // Add the timezone offset back to get the correct date
+  date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
+  return date.toLocaleDateString();
+};
+
 export default function AttendanceReport() {
   const [records, setRecords] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -118,9 +126,9 @@ export default function AttendanceReport() {
               <tr key={i} className="bg-black/20 border-b border-white/10">
                 <td className="p-2">{r.FullName}</td>
                 <td className="p-2">{r.Department}</td>
-                <td className="p-2">{r.date}</td>
-                <td className="p-2">{r.clockIn}</td>
-                <td className="p-2">{r.clockOut}</td>
+                <td className="p-2">{formatDate(r.date)}</td>
+                <td className="p-2">{new Date(r.clockIn).toLocaleTimeString()}</td>
+                <td className="p-2">{new Date(r.clockOut).toLocaleTimeString()}</td>
                 <td className="p-2">
                     {isNaN(Number(r.HoursWorked)) ? 'N/A' : Number(r.HoursWorked).toFixed(2)}
                 </td>
