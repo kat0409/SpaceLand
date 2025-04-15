@@ -26,15 +26,24 @@ export default function TimeOffRequest({ employeeID }) {
 
     try {
       const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
+      
+      // Manually add +1 day to each date to fix the off-by-one issue
+      const adjustDate = (dateStr) => {
+        const date = new Date(dateStr);
+        date.setDate(date.getDate() + 1);
+        return date.toISOString().split('T')[0];
+      };
+      
       const response = await fetch(`${BACKEND_URL}/employee/time-off-request`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          employeeID,
-          ...formData,
-          status: 'pending'
+          EmployeeID: employeeID,
+          startDate: adjustDate(formData.startDate),
+          endDate: adjustDate(formData.endDate),
+          reason: formData.reason
         }),
       });
 

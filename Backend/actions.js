@@ -1628,79 +1628,151 @@ const addMealPlanTransaction = (req,res) => {
 };
 
 const deleteMerchandise = (req, res) => {
-    const merchandiseID = req.url.split('/').pop();
-    
+    const parsedUrl = url.parse(req.url, true);
+    const merchandiseID = parsedUrl.query.merchandiseID;
+
     if (!merchandiseID) {
         res.writeHead(400, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "Missing merchandise ID" }));
         return;
     }
-    
-    pool.query('DELETE FROM merchandise WHERE merchandiseID = ?', [merchandiseID], (error, results) => {
-        if (error) {
-            console.error("Error deleting merchandise:", error);
+
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.error("Connection error:", err);
             res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Internal server error" }));
+            res.end(JSON.stringify({ error: "Failed to connect to database" }));
             return;
         }
-        
-        if (results.affectedRows === 0) {
-            res.writeHead(404, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Merchandise not found" }));
-            return;
-        }
-        
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ message: "Merchandise deleted successfully" }));
+
+        connection.beginTransaction(err => {
+            if (err) {
+                connection.release();
+                console.error("Transaction error:", err);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Failed to start transaction" }));
+                return;
+            }
+
+            //Delete from lowstocknotifications (fk constraint)
+            connection.query('DELETE FROM lowstocknotifications WHERE merchandiseID = ?', [merchandiseID], (err) => {
+                if (err) return rollback(connection, res, "Failed to delete from lowstocknotifications", err);
+
+                //Delete from merchandisetransactions (fk constraint)
+                connection.query('DELETE FROM merchandisetransactions WHERE merchandiseID = ?', [merchandiseID], (err) => {
+                    if (err) return rollback(connection, res, "Failed to delete from merchandisetransactions", err);
+
+                    //Delete from merchandise (final delete)
+                    connection.query('DELETE FROM merchandise WHERE merchandiseID = ?', [merchandiseID], (err, results) => {
+                        if (err) return rollback(connection, res, "Failed to delete merchandise", err);
+
+                        if (results.affectedRows === 0) {
+                            connection.rollback(() => {
+                                connection.release();
+                                res.writeHead(404, { "Content-Type": "application/json" });
+                                res.end(JSON.stringify({ error: "Merchandise not found" }));
+                            });
+                        } else {
+                            connection.commit(err => {
+                                connection.release();
+                                if (err) {
+                                    console.error("Commit error:", err);
+                                    res.writeHead(500, { "Content-Type": "application/json" });
+                                    res.end(JSON.stringify({ error: "Failed to commit transaction" }));
+                                    return;
+                                }
+
+                                res.writeHead(200, { "Content-Type": "application/json" });
+                                res.end(JSON.stringify({ message: "Merchandise deleted successfully" }));
+                            });
+                        }
+                    });
+                });
+            });
+        });
     });
 };
 
+// Rollback helper function for the delete item function
+function rollback(connection, res, message, err) {
+    console.error(message, err);
+    connection.rollback(() => {
+        connection.release();
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: message }));
+    });
+}
+
 const updateMerchandise = (req, res) => {
     let body = '';
-    
+
     req.on('data', (chunk) => {
         body += chunk.toString();
     });
-    
+
     req.on('end', () => {
         let parsedBody;
         try {
             parsedBody = JSON.parse(body);
         } catch (err) {
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Invalid JSON format" }));
-            return;
+            return res.end(JSON.stringify({ error: "Invalid JSON format" }));
         }
-        
-        const { merchandiseID, itemName, price, quantity, giftShopName, description } = parsedBody;
-        
-        if (!merchandiseID || !itemName || price === undefined || quantity === undefined) {
+
+        const { merchandiseID, giftShopName, itemName, price, quantity } = parsedBody;
+
+        if (!merchandiseID) {
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Missing required fields" }));
-            return;
+            return res.end(JSON.stringify({ error: "Missing merchandiseID" }));
         }
-        
-        pool.query(
-            'UPDATE merchandise SET itemName = ?, price = ?, quantity = ?, giftShopName = ?, description = ? WHERE merchandiseID = ?',
-            [itemName, price, quantity, giftShopName || null, description || null, merchandiseID],
-            (error, results) => {
-                if (error) {
-                    console.error("Error updating merchandise:", error);
-                    res.writeHead(500, { "Content-Type": "application/json" });
-                    res.end(JSON.stringify({ error: "Internal server error" }));
-                    return;
-                }
-                
-                if (results.affectedRows === 0) {
-                    res.writeHead(404, { "Content-Type": "application/json" });
-                    res.end(JSON.stringify({ error: "Merchandise not found" }));
-                    return;
-                }
-                
-                res.writeHead(200, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ message: "Merchandise updated successfully" }));
+
+        const fields = [];
+        const values = [];
+
+        if (giftShopName !== undefined) {
+            fields.push("giftShopName = ?");
+            values.push(giftShopName || null);
+        }
+
+        if (itemName !== undefined) {
+            fields.push("itemName = ?");
+            values.push(itemName);
+        }
+
+        if (price !== undefined) {
+            fields.push("price = ?");
+            values.push(Number(price));
+        }
+
+        if (quantity !== undefined) {
+            fields.push("quantity = ?");
+            values.push(Number(quantity));
+        }
+
+        if (fields.length === 0) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "No fields provided for update" }));
+        }
+
+        values.push(merchandiseID); 
+
+        const sql = `UPDATE merchandise SET ${fields.join(", ")} WHERE merchandiseID = ?`;
+
+        pool.query(sql, values, (error, results) => {
+            if (error) {
+                console.error("Error updating merchandise:", error.message || error);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Internal server error" }));
             }
-        );
+
+            if (results.affectedRows === 0) {
+                res.writeHead(404, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Merchandise not found" }));
+            }
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Merchandise updated successfully" }));
+        });
     });
 };
 
@@ -2407,28 +2479,85 @@ const getFilteredSalesReport = (req, res) => {
 };
 
 const getTransactionSummaryReport = (req, res) => {
-    const { startDate, endDate } = url.parse(req.url, true).query;
+    const { startDate, endDate, transactionType } = url.parse(req.url, true).query;
   
     if (!startDate || !endDate) {
       res.writeHead(400, { "Content-Type": "application/json" });
       return res.end(JSON.stringify({ error: "Missing date range" }));
     }
   
-    pool.query(
-      queries.getTransactionSummaryReport,
-      [startDate, endDate, startDate, endDate, startDate, endDate],
-      (err, results) => {
-        if (err) {
-          console.error("Transaction summary error:", err);
-          res.writeHead(500, { "Content-Type": "application/json" });
-          return res.end(JSON.stringify({ error: "Internal server error" }));
-        }
+    let sql = '';
+    let params = [];
   
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(results));
+    if (transactionType === 'ticket') {
+      sql = `
+        SELECT DATE(transactionDate) AS transactionDate, 'ticket' AS transactionType, SUM(tix.price) AS totalRevenue
+        FROM tickettransactions t
+        JOIN tickets tix ON t.transactionID = tix.transactionID
+        WHERE DATE(transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(transactionDate)
+        ORDER BY transactionDate;
+      `;
+      params = [startDate, endDate];
+    } else if (transactionType === 'mealplan') {
+      sql = `
+        SELECT DATE(transactionDate) AS transactionDate, 'mealplan' AS transactionType, SUM(mp.price) AS totalRevenue
+        FROM mealplantransactions m
+        JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
+        WHERE DATE(transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(transactionDate)
+        ORDER BY transactionDate;
+      `;
+      params = [startDate, endDate];
+    } else if (transactionType === 'merch') {
+      sql = `
+        SELECT DATE(transactionDate) AS transactionDate, 'merch' AS transactionType, SUM(totalAmount) AS totalRevenue
+        FROM merchandisetransactions
+        WHERE DATE(transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(transactionDate)
+        ORDER BY transactionDate;
+      `;
+      params = [startDate, endDate];
+    } else {
+      // default to all transaction types
+      sql = `
+        SELECT DATE(transactionDate) AS transactionDate, 'ticket' AS transactionType, SUM(tix.price) AS totalRevenue
+        FROM tickettransactions t
+        JOIN tickets tix ON t.transactionID = tix.transactionID
+        WHERE DATE(transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(transactionDate)
+  
+        UNION ALL
+  
+        SELECT DATE(transactionDate) AS transactionDate, 'mealplan' AS transactionType, SUM(mp.price) AS totalRevenue
+        FROM mealplantransactions m
+        JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
+        WHERE DATE(transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(transactionDate)
+  
+        UNION ALL
+  
+        SELECT DATE(transactionDate) AS transactionDate, 'merch' AS transactionType, SUM(totalAmount) AS totalRevenue
+        FROM merchandisetransactions
+        WHERE DATE(transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(transactionDate)
+  
+        ORDER BY transactionDate;
+      `;
+      params = [startDate, endDate, startDate, endDate, startDate, endDate];
+    }
+  
+    pool.query(sql, params, (err, results) => {
+      if (err) {
+        console.error("Transaction summary error:", err);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ error: "Internal server error" }));
       }
-    );
-  };  
+  
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(results));
+    });
+  };    
 
   const getBestWorstSellersReport = (req, res) => {
     const { startDate, endDate, groupBy = 'month', transactionType = 'all' } = url.parse(req.url, true).query;

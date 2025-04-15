@@ -171,7 +171,7 @@ function routes(req, res) {
         return actions.addMerchandise(req,res);
     }
 
-    if(url.startsWith('/supervisor/merchandise/delete-item/') && method === 'DELETE'){
+    if(url.startsWith('/supervisor/merchandise/delete-item') && method === 'DELETE'){
         return actions.deleteMerchandise(req,res);
     }
 
