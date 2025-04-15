@@ -51,7 +51,12 @@ export default function EmployeeProfile({ employee, onUpdate }) {
       if (response.ok) {
         const data = await response.json();
         if (data.message) {
-          onUpdate(formData);
+          // Update the employee state with the new data while preserving other fields
+          onUpdate({
+            ...employee,
+            ...updateData,
+            password: undefined // Remove password from state
+          });
           setIsEditing(false);
         } else {
           throw new Error('Update failed');
