@@ -11,12 +11,20 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onren
 
 export default function Home() {
   const [alerts, setAlerts] = useState([]);
+  const [weatherAlerts, setWeatherAlerts] = useState([]);
 
   useEffect(() => {
     fetch(`${BACKEND_URL}/alerts`)
       .then(res => res.json())
       .then(data => setAlerts(data))
       .catch(err => console.error("Failed to fetch alerts", err));
+    fetch(`${BACKEND_URL}/weather-alerts`)
+      .then(res => res.json())
+      .then(data => {
+        const unresolved = data.filter(weatherAlert => weatherAlert.isResolved === 0);
+        setWeatherAlerts(unresolved);
+      })
+      .catch(err => console.error("Failed to fetch weather alerts", err));
   }, []);
 
   return (
@@ -31,6 +39,19 @@ export default function Home() {
               {alert.alertMessage}{" "}
               <span className="text-sm text-white/70 ml-2">
                 ({new Date(alert.timestamp).toLocaleString()})
+              </span>
+            </p>
+          ))}
+        </div>
+      )}
+      {/* Weather Alert Section */}
+      {weatherAlerts.length > 0 && (
+        <div className="bg-gradient-to-r from-red-700 via-red-600 to-red-700 text-white text-center py-4 shadow-lg z-50 relative">
+          {weatherAlerts.map(weatherAlert => (
+            <p key={weatherAlert.alertID}>
+              {weatherAlert.alertMessage}
+              <span className="text-sm text-white/70 ml-2">
+                ({new Date(weatherAlert.timestamp).toLocaleString()})
               </span>
             </p>
           ))}
