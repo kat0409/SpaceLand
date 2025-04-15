@@ -2854,5 +2854,6 @@ module.exports = {
     getAllEmployees,
     getDepartmentByEmployeeID,
     getAttendanceReport,
-    getMerchandiseItems
+    getMerchandiseItems,
+    updateVisitorInfo
 };  
