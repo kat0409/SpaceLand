@@ -11,7 +11,7 @@ import MaintenanceEmployeePerformanceReport from "../components/MaintenanceEmplo
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
 export default function MaintenanceSupervisorPortal() {
-  const { auth } = useContext(AuthContext);
+  const { auth, logout } = useContext(AuthContext);
   const [maintenanceRequests, setMaintenanceRequests] = useState([]);
   const [rides, setRides] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -99,6 +99,11 @@ export default function MaintenanceSupervisorPortal() {
     setShowRequestDetails(true);
   };
 
+  const handleLogout = () => {
+    logout();
+    window.location.href = "/auth";
+  };
+
   if (!auth.isAuthenticated || auth.role !== 'supervisor' || localStorage.getItem('department') !== 'maintenance') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
@@ -118,13 +123,23 @@ export default function MaintenanceSupervisorPortal() {
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
       <Header />
       <div className="container mx-auto px-4 py-20">
-        <motion.h1 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-4xl font-bold mb-8 text-center"
-        >
-          Maintenance Supervisor Portal
-        </motion.h1>
+        <div className="flex justify-between items-center mb-8">
+          <motion.h1 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl font-bold text-center"
+          >
+            Maintenance Supervisor Portal
+          </motion.h1>
+          <motion.button
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            onClick={handleLogout}
+            className="px-6 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-semibold transition"
+          >
+            Logout
+          </motion.button>
+        </div>
 
         <div className="flex justify-center mb-10 space-x-4">
           {[
