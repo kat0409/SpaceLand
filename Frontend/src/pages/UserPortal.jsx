@@ -370,33 +370,38 @@ export default function UserPortal() {
               )}
             </div>
 
-            {/* Merchandise Purchases */}
-            <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-8 rounded-2xl">
+           {/* Merchandise Purchases */}
+           <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-8 rounded-2xl">
               <h3 className="text-3xl font-bold mb-4">🛍️ Merchandise Purchases</h3>
-              {purchases.length > 0 ? (
+              {purchases && purchases.length > 0 ? (
                 <div className="bg-white/10 p-4 rounded-xl border border-white/10 overflow-x-auto">
-                  <table className="w-full text-sm text-left">
+                  <table className="w-full text-sm">
                     <thead className="text-purple-300">
                       <tr>
-                        <th>Date</th><th>Item</th><th>Shop</th><th>Quantity</th><th>Price</th><th>Total</th>
+                        <th className="text-left p-2">Date</th>
+                        <th className="text-left p-2">Item</th>
+                        <th className="text-left p-2">Shop</th>
+                        <th className="text-left p-2">Quantity</th>
+                        <th className="text-left p-2">Price</th>
+                        <th className="text-left p-2">Total</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {purchases.map((p, i) => (
-                        <tr key={i} className="border-t border-white/10">
-                          <td>{new Date(p.transactionDate).toLocaleDateString()}</td>
-                          <td>{p.itemName}</td>
-                          <td>{p.giftShopName}</td>
-                          <td>{p.quantity}</td>
-                          <td>${parseFloat(p.price).toFixed(2)}</td>
-                          <td>${parseFloat(p.totalAmount).toFixed(2)}</td>
+                      {purchases.map((tx, idx) => (
+                        <tr key={idx} className="border-t border-white/10">
+                          <td className="p-2">{new Date(tx.transactionDate).toLocaleDateString()}</td>
+                          <td className="p-2">{tx.itemName}</td>
+                          <td className="p-2">{tx.giftShopName}</td>
+                          <td className="p-2">{tx.quantity}</td>
+                          <td className="p-2">${parseFloat(tx.price).toFixed(2)}</td>
+                          <td className="p-2">${parseFloat(tx.totalAmount).toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               ) : (
-                <p className="text-gray-400">No merchandise purchases found.</p>
+                <p className="text-gray-400 p-6 bg-white/10 rounded-xl border border-white/10">No merchandise purchases found.</p>
               )}
             </div>
           </div>
