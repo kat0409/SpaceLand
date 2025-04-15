@@ -180,7 +180,7 @@ function routes(req, res) {
     }
 
     if(url.startsWith('/supervisor/merchandise/sales-data') && method === 'GET'){
-        return actions.getMerchandiseSalesData(req, res);
+        return actions.getMerchandiseSalesData(req,res);
     }
 
     if(url.startsWith('/supervisor/maintenance/maintenance-request') && method === "POST"){
