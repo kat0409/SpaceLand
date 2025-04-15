@@ -1629,41 +1629,79 @@ const addMealPlanTransaction = (req,res) => {
 
 const deleteMerchandise = (req, res) => {
     const parsedUrl = url.parse(req.url, true);
-    const merchandiseID = parseInt(parsedUrl.query.merchandiseID); 
-    
+    const merchandiseID = parsedUrl.query.merchandiseID;
+
     if (!merchandiseID) {
         res.writeHead(400, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "Missing merchandise ID" }));
         return;
     }
-    
-    pool.query('DELETE FROM lowstocknotifications WHERE merchandiseID = ?', [merchandiseID], (err1) => {
-        if (err1) {
-            console.error("Error deleting low stock notifications:", err1);
+
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.error("Connection error:", err);
             res.writeHead(500, { "Content-Type": "application/json" });
-            return res.end(JSON.stringify({ error: "Error deleting dependent notifications" }));
+            res.end(JSON.stringify({ error: "Failed to connect to database" }));
+            return;
         }
-    
-        // Now delete the merchandise item, was not working at first because of the foreign key constraint
-        // but now it should work because we deleted the dependent notifications first
-        pool.query('DELETE FROM merchandise WHERE merchandiseID = ?', [merchandiseID], (err2, results) => {
-            if (err2) {
-                console.error("Error deleting merchandise:", err2);
+
+        connection.beginTransaction(err => {
+            if (err) {
+                connection.release();
+                console.error("Transaction error:", err);
                 res.writeHead(500, { "Content-Type": "application/json" });
-                return res.end(JSON.stringify({ error: "Error deleting merchandise" }));
+                res.end(JSON.stringify({ error: "Failed to start transaction" }));
+                return;
             }
-    
-            if (results.affectedRows === 0) {
-                res.writeHead(404, { "Content-Type": "application/json" });
-                return res.end(JSON.stringify({ error: "Merchandise not found" }));
-            }
-    
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ message: "Merchandise deleted successfully" }));
+
+            //Delete from lowstocknotifications (fk constraint)
+            connection.query('DELETE FROM lowstocknotifications WHERE merchandiseID = ?', [merchandiseID], (err) => {
+                if (err) return rollback(connection, res, "Failed to delete from lowstocknotifications", err);
+
+                //Delete from merchandisetransactions (fk constraint)
+                connection.query('DELETE FROM merchandisetransactions WHERE merchandiseID = ?', [merchandiseID], (err) => {
+                    if (err) return rollback(connection, res, "Failed to delete from merchandisetransactions", err);
+
+                    //Delete from merchandise (final deletion)
+                    connection.query('DELETE FROM merchandise WHERE merchandiseID = ?', [merchandiseID], (err, results) => {
+                        if (err) return rollback(connection, res, "Failed to delete merchandise", err);
+
+                        if (results.affectedRows === 0) {
+                            connection.rollback(() => {
+                                connection.release();
+                                res.writeHead(404, { "Content-Type": "application/json" });
+                                res.end(JSON.stringify({ error: "Merchandise not found" }));
+                            });
+                        } else {
+                            connection.commit(err => {
+                                connection.release();
+                                if (err) {
+                                    console.error("Commit error:", err);
+                                    res.writeHead(500, { "Content-Type": "application/json" });
+                                    res.end(JSON.stringify({ error: "Failed to commit transaction" }));
+                                    return;
+                                }
+
+                                res.writeHead(200, { "Content-Type": "application/json" });
+                                res.end(JSON.stringify({ message: "Merchandise deleted successfully" }));
+                            });
+                        }
+                    });
+                });
+            });
         });
     });
-    
 };
+
+// Rollback helper function for the delete item function
+function rollback(connection, res, message, err) {
+    console.error(message, err);
+    connection.rollback(() => {
+        connection.release();
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: message }));
+    });
+}
 
 const updateMerchandise = (req, res) => {
     let body = '';
