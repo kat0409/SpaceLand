@@ -341,7 +341,11 @@ function routes(req, res) {
 
     if (url.startsWith("/get-merchandise") && method === "GET") {
         return actions.getMerchandiseItems(req, res);
-    }    
+    }  
+    
+    if (url.startsWith("/weather-alert") && method === "GET") {
+        return actions.displayAlert(req, res);
+    } 
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
