@@ -1777,9 +1777,12 @@ const updateMerchandise = (req, res) => {
 };
 
 const getMerchandiseSalesData = (req, res) => {
-    const { startDate, endDate } = req.query;
+    const parsedUrl = require('url').parse(req.url, true);
+    const { startDate, endDate } = parsedUrl.query;
     if (!startDate || !endDate) {
-        return res.status(400).json({ error: "startDate and endDate are required" });
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "startDate and endDate are required" }));
+        return;
     }
     const sql = `
         SELECT m.itemName, SUM(mt.quantity) AS quantity, SUM(mt.totalAmount) AS totalAmount
@@ -1790,8 +1793,13 @@ const getMerchandiseSalesData = (req, res) => {
         ORDER BY totalAmount DESC
     `;
     pool.query(sql, [startDate, endDate], (err, results) => {
-        if (err) return res.status(500).json({ error: "Internal server error" });
-        res.json(results);
+        if (err) {
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+            return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
     });
 };
 
