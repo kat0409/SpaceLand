@@ -106,7 +106,7 @@ const InventoryOverviewChart = ({ inventoryData = [] }) => {
           <p className="text-2xl font-bold">{inventoryData.length}</p>
         </div>
         <div className="bg-white/10 p-4 rounded-xl">
-          <h3 className="text-lg font-semibold text-purple-300">Total Value</h3>
+          <h3 className="text-lg font-semibold text-purple-300">Total Inventory Value</h3>
           <p className="text-2xl font-bold">${calculateInventoryValue()}</p>
         </div>
         <div className="bg-white/10 p-4 rounded-xl">

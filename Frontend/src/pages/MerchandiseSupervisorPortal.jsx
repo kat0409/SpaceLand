@@ -369,6 +369,7 @@ export default function SupervisorPortal() {
                 {/* Inventory Tab */}
                 {activeTab === 'inventory' && (
                     <div className="space-y-6">
+                        <InventoryOverviewChart inventoryData={merchandise} />
                         <div className="bg-white/10 p-6 rounded-xl">
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-2xl font-semibold">🛍️ Merchandise Inventory</h2>
@@ -379,7 +380,6 @@ export default function SupervisorPortal() {
                                     Add New Item
                                 </button>
                             </div>
-                            
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm">
                                     <thead className="text-left text-purple-300">
@@ -409,19 +409,8 @@ export default function SupervisorPortal() {
                                                 </td>
                                                 <td className="p-2">${parseFloat(item.price).toFixed(2)}</td>
                                                 <td className="p-2">
-                                                    <button 
-                                                        onClick={() => handleEditItem(item)}
-                                                        className="text-blue-400 hover:text-blue-300 mr-3"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => handleDeleteItem(item.merchandiseID)}
-                                                        className="text-red-400 hover:text-red-300"
-                                                        disabled={isDeleting}
-                                                    >
-                                                        Delete
-                                                    </button>
+                                                    <button onClick={() => handleEditItem(item)} className="text-blue-400 hover:underline mr-2">Edit</button>
+                                                    <button onClick={() => handleDeleteItem(item.merchandiseID)} className="text-red-400 hover:underline">Delete</button>
                                                 </td>
                                             </tr>
                                         ))}
@@ -429,7 +418,6 @@ export default function SupervisorPortal() {
                                 </table>
                             </div>
                         </div>
-                        
                         <div className="bg-white/10 p-6 rounded-xl">
                             <h2 className="text-2xl font-semibold mb-4">📦 Merchandise Orders</h2>
                             <div className="overflow-x-auto">
@@ -473,7 +461,6 @@ export default function SupervisorPortal() {
                 {/* Sales Reports Tab */}
                 {activeTab === 'sales' && (
                     <div className="space-y-6">
-                        <InventoryOverviewChart inventoryData={merchandise} />
                         <TransactionSummaryReport />
                         <BestWorstSellerReport />
                         <div className="bg-white/10 p-4 rounded-xl mb-6">
