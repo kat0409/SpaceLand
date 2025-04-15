@@ -22,6 +22,16 @@ export default function MaintenanceSupervisorPortal() {
   const [weatherAlerts, setWeatherAlerts] = useState([]);
 
   useEffect(() => {
+    fetch(`${BACKEND_URL}/weather-alert`)
+      .then(res => res.json())
+      .then(data => {
+        const unresolved = data.filter(alert => alert.isResolved === 0);
+        setWeatherAlerts(unresolved);
+      })
+      .catch(err => console.error("Failed to fetch weather alerts:", err));
+  }, []);  
+
+  useEffect(() => {
     if (auth.isAuthenticated && auth.role === 'supervisor' && localStorage.getItem('department') === 'maintenance') {
       fetchMaintenanceData();
     }
@@ -115,6 +125,19 @@ export default function MaintenanceSupervisorPortal() {
     );
   }
 
+  const handleResolveAlert = async (alertID) => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/supervisor/maintenance/resolve-weather-alert?alertID=${alertID}`, {
+        method: "PUT",
+      });
+      if (!res.ok) throw new Error("Failed to resolve alert");
+  
+      setWeatherAlerts(prev => prev.filter(alert => alert.alertID !== alertID));
+    } catch (err) {
+      console.error(err.message);
+    }
+  };  
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
       <Header />
@@ -163,6 +186,28 @@ export default function MaintenanceSupervisorPortal() {
             <div className="mb-10">
               <MarkMaintenanceCompletionForm />
             </div>
+            {/* ✅ Weather Alert Section – place it BEFORE the request grid */}
+            {weatherAlerts.length > 0 && (
+              <div className="bg-red-500/20 border border-red-400/50 rounded-lg p-4 mb-6">
+                <h3 className="text-lg font-semibold mb-2">⚠️ Unresolved Weather Alerts</h3>
+                {weatherAlerts.map(alert => (
+                  <div key={alert.alertID} className="flex justify-between items-center mb-2">
+                    <div>
+                      <p>{alert.alertMessage}</p>
+                      <p className="text-sm text-gray-300">
+                        {new Date(alert.timestamp).toLocaleString()}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleResolveAlert(alert.alertID)}
+                      className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded"
+                    >
+                      Resolve
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
             {/* Dashboard grid view */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Maintenance Request Status Section */}
@@ -206,28 +251,6 @@ export default function MaintenanceSupervisorPortal() {
                   </div>
                 )}
               </motion.div>
-
-              {weatherAlerts.length > 0 && (
-              <div className="bg-red-500/20 border border-red-400/50 rounded-lg p-4 mb-6">
-                <h3 className="text-lg font-semibold mb-2">⚠️ Unresolved Weather Alerts</h3>
-                {weatherAlerts.map(alert => (
-                  <div key={alert.alertID} className="flex justify-between items-center mb-2">
-                    <div>
-                      <p>{alert.alertMessage}</p>
-                      <p className="text-sm text-gray-300">
-                        {new Date(alert.timestamp).toLocaleString()}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => handleResolveAlert(alert.alertID)}
-                      className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded"
-                    >
-                      Resolve
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
             </div>
           </>
         )}
