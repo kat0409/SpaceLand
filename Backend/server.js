@@ -6,7 +6,7 @@ const eRoutes = require('./routes');
 //If you are calling a getter function, use GET
 //If you are calling an add function, use POST
 
-const corsMiddleWare = cors();
+
 
 //GET: fetch data from the database
 //POST: add data to the database
@@ -62,7 +62,8 @@ const routeMap = {
         '/supervisor/HR/all-employee-names',
         '/supervisor/HR/get-employee-department',
         '/supervisor/HR/attendance-report',
-        "/get-merchandise"
+        "/get-merchandise",
+        '/weather-alert'
     ],
     'POST': [
         '/supervisor/HR/add-employee', 
@@ -88,9 +89,12 @@ const routeMap = {
         '/employee/clock-in',
         '/employee/clock-out',
         '/supervisor/HR/schedule',
-        '/supervisor/HR/fire-employee'
+        '/supervisor/HR/fire-employee',
+        "/resolve-weather-alert",
+        "/payment-info"
     ],
     'PUT': [
+        '/update-visitor',
         '/update-employee', 
         '/update-merchandise-quantity', 
         '/update-maintenance',
@@ -144,43 +148,44 @@ const routeMap = {
     });
 });*/
 
-const server = http.createServer((req, res) => {
-    res.setHeader("Access-Control-Allow-Origin", "*"); // OR better: "http://localhost:5173"
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+const corsMiddleware = cors({
+  origin: '*', // Or specify your frontend origin here instead of '*'
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+});
 
-    if (req.method === "OPTIONS") {
+const server = http.createServer((req, res) => {
+  corsMiddleware(req, res, () => {
+    if (req.method === 'OPTIONS') {
       res.writeHead(204);
       res.end();
       return;
     }
-  
-    corsMiddleWare(req, res, () => {
-      const parsedUrl = url.parse(req.url, true);
-      const { pathname } = parsedUrl;
-      const method = req.method;
-  
-      if (pathname === "/") {
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify("From backend side"));
-        return;
-      }
-  
-      const isMatch = (routeMap[method] || []).some(route =>
-        pathname.startsWith(route)
-      );
-  
-      if (isMatch) {
-        return eRoutes(req, res);
-      }
-  
-      res.writeHead(404, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Route not found" }));
-    });
+
+    const parsedUrl = url.parse(req.url, true);
+    const { pathname } = parsedUrl;
+    const method = req.method;
+
+    if (pathname === '/') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify("From backend side"));
+      return;
+    }
+
+    const isMatch = (routeMap[method] || []).some(route =>
+      pathname.startsWith(route)
+    );
+
+    if (isMatch) {
+      return eRoutes(req, res);
+    }
+
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: "Route not found" }));
   });
+});
 
-const PORT  = process.env.PORT || 3000 //check if there is an environment variable
-
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

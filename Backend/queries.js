@@ -272,9 +272,21 @@ const getVisitorTicketTransactions = `
         tt.transactionDate,
         tt.ticketType,
         tt.quantity,
-        tt.totalAmount
+        CASE 
+            WHEN tt.ticketType = 'General' THEN 49.99
+            WHEN tt.ticketType = 'Cosmic' THEN 89.99
+            ELSE tt.totalAmount / tt.quantity
+        END as ticketPricePerUnit,
+        tt.totalAmount as ticketTotal,
+        mp.mealPlanName,
+        mp.price as mealPlanPrice,
+        (tt.totalAmount + IFNULL(mp.price, 0)) as grandTotal
     FROM tickettransactions tt
-    WHERE tt.VisitorID = ?;
+    LEFT JOIN mealplantransactions mpt ON DATE(tt.transactionDate) = DATE(mpt.transactionDate) 
+        AND tt.VisitorID = mpt.VisitorID
+    LEFT JOIN mealplans mp ON mpt.mealPlanID = mp.mealPlanID
+    WHERE tt.VisitorID = ?
+    ORDER BY tt.transactionDate DESC;
 `;
 
 const getEmployeeAccountInfo = `
@@ -722,6 +734,21 @@ const getMerchandiseItems = `
     FROM merchandise
     ORDER BY itemName;
 `;
+const displayAlert = `
+    SELECT alertID, alertMessage, timestamp
+    FROM weatheralerts
+    WHERE isResolved = FALSE
+    ORDER BY timestamp DESC;
+`;
+
+const resolveWeatherAlert = `
+    UPDATE alerts SET isResolved = 1 WHERE alertID = ?
+`;
+
+const addPaymentInfo = `
+    INSERT INTO paymentinfo (VisitorID, CardType, CardNumber, CVV, CardholderName, ExpiryDate, BillingAddress) 
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+`;
 
 module.exports = {
     getRides,
@@ -818,7 +845,10 @@ module.exports = {
     getAllEmployees,
     getDepartmentByEmployeeID,
     getAttendanceReport,
-    getMerchandiseItems
+    getMerchandiseItems,
+    displayAlert,
+    resolveWeatherAlert,
+    addPaymentInfo
 };
 
 //checkMerchQuantity
