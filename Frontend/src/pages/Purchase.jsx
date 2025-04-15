@@ -80,112 +80,22 @@ export default function Purchase() {
   const handlePurchase = async () => {
     if (!validatePurchase()) return;
 
-    setLoading(true);
-    setError('');
-    setSuccess('');
+    // Calculate the total cost
+    const orderSummary = {
+      ticketType,
+      ticketQuantity,
+      ticketTotal: TICKET_TYPES[ticketType].price * ticketQuantity,
+      mealPlan,
+      mealPlanTotal: mealPlan ? MEAL_PLANS[mealPlan].price : 0,
+      total: calculateTotal()
+    };
 
-    try {
-      const visitorID = localStorage.getItem("VisitorID");
-      console.log("VisitorID from localStorage:", visitorID);
-      
-      if (!visitorID) {
-        throw new Error('User not authenticated. Please log in again.');
-      }
-      
-      // Purchase tickets
-      const ticketEndpoint = `${BACKEND_URL}/purchase-${ticketType.toLowerCase()}-pass`;
-      console.log('Making ticket purchase request to:', ticketEndpoint);
-      
-      const ticketPayload = {
-        VisitorID: visitorID,
-        quantity: ticketQuantity,
-        price: TICKET_TYPES[ticketType].price
-      };
-      console.log('With payload:', ticketPayload);
-      
-      try {
-        const ticketResponse = await fetch(
-          ticketEndpoint,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(ticketPayload)
-          }
-        );
-        
-        // Log the raw response
-        console.log('Ticket response status:', ticketResponse.status);
-        console.log('Ticket response OK:', ticketResponse.ok);
-        
-        // Check for network errors
-        if (!ticketResponse) {
-          throw new Error('Network error. Please try again later.');
-        }
-
-        const ticketData = await ticketResponse.json();
-        console.log('Ticket purchase response data:', ticketData);
-
-        if (!ticketResponse.ok) {
-          throw new Error(ticketData.error || `Failed to purchase tickets (Status: ${ticketResponse.status})`);
-        }
-        
-        // Purchase meal plan
-        const mealPlanEndpoint = `${BACKEND_URL}/meal-plan-purchase`;
-        console.log('Making meal plan purchase request to:', mealPlanEndpoint);
-        
-        const mealPlanPayload = {
-          VisitorID: visitorID,
-          mealPlanID: mealPlan === 'General Meal Plan' ? 1 : 2
-        };
-        console.log('With payload:', mealPlanPayload);
-
-        const mealPlanResponse = await fetch(mealPlanEndpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(mealPlanPayload)
-        });
-        
-        // Log the raw response
-        console.log('Meal plan response status:', mealPlanResponse.status);
-        console.log('Meal plan response OK:', mealPlanResponse.ok);
-
-        // Check for network errors
-        if (!mealPlanResponse) {
-          throw new Error('Network error. Please try again later.');
-        }
-
-        const mealPlanData = await mealPlanResponse.json();
-        console.log('Meal plan purchase response data:', mealPlanData);
-
-        if (!mealPlanResponse.ok) {
-          throw new Error(mealPlanData.error || `Failed to purchase meal plan (Status: ${mealPlanResponse.status})`);
-        }
-
-        // Success! Show message and redirect
-        setSuccess('Purchase successful! Redirecting to your portal...');
-        
-        // Store transaction IDs in localStorage for reference
-        if (ticketData.transactionID) {
-          localStorage.setItem('lastTicketTransactionID', ticketData.transactionID);
-        }
-        if (mealPlanData.transactionID) {
-          localStorage.setItem('lastMealPlanTransactionID', mealPlanData.transactionID);
-        }
-        
-        // Redirect to user portal after successful purchase
-        setTimeout(() => {
-          navigate('/userportal');
-        }, 1500);
-      } catch (fetchError) {
-        console.error('API request failed:', fetchError);
-        setError(fetchError.message || 'Failed to communicate with the server');
-      }
-    } catch (err) {
-      console.error('Purchase error:', err);
-      setError(err.message || 'An error occurred during the purchase process');
-    } finally {
-      setLoading(false);
-    }
+    // Navigate to payment form with the order details
+    navigate('/payment', { 
+      state: { 
+        orderSummary 
+      } 
+    });
   };
 
   const calculateTotal = () => {

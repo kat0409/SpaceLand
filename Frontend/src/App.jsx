@@ -18,6 +18,7 @@ import MerchandiseSupervisorPortal from './pages/MerchandiseSupervisorPortal';
 import MaintenanceSupervisorPortal from './pages/MaintenanceSupervisorPortal';
 import HRSupervisorPortal from './pages/HRSupervisorPortal';
 import Shopping from './pages/Shopping';
+import PaymentForm from './pages/PaymentForm';
 
 export default function App() {
   return (
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/supervisor/merchandise" element={<MerchandiseSupervisorPortal />} />
           <Route path="/supervisor/maintenance" element={<MaintenanceSupervisorPortal />} />
           <Route path="/supervisor/HR" element={<HRSupervisorPortal />} />
+          <Route path="/payment" element={<PaymentForm />} />
         </Routes>
       </motion.div>
     </Router>
