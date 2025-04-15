@@ -24,22 +24,41 @@ export default function EmployeeProfile({ employee, onUpdate }) {
     e.preventDefault();
     try {
       const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
-      const response = await fetch(`${BACKEND_URL}/employee/update-info`, {
+
+      // Create update data object, excluding empty password
+      const updateData = {
+        EmployeeID: employee.EmployeeID,
+        FirstName: formData.FirstName,
+        LastName: formData.LastName,
+        Email: formData.Email,
+        Address: formData.Address,
+        username: formData.username
+      };
+
+      // Only include password if it's not empty
+      if (formData.password.trim() !== '') {
+        updateData.password = formData.password;
+      }
+
+      const response = await fetch(`${BACKEND_URL}/supervisor/HR/update-employee-profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          employeeID: employee.EmployeeID,
-          ...formData
-        }),
+        body: JSON.stringify(updateData),
       });
 
       if (response.ok) {
-        onUpdate(formData);
-        setIsEditing(false);
+        const data = await response.json();
+        if (data.message) {
+          onUpdate(formData);
+          setIsEditing(false);
+        } else {
+          throw new Error('Update failed');
+        }
       } else {
-        throw new Error('Failed to update profile');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update profile');
       }
     } catch (error) {
       console.error('Error updating profile:', error);
