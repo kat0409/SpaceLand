@@ -54,34 +54,52 @@ export default function UserPortal() {
 
   const handleUpdateSubmit = async () => {
     try {
-      const updateData = {
-        visitorID,
-        FirstName: formData.FirstName,
-        LastName: formData.LastName
-      };
+      // Validate form data before sending
+      if (formData.FirstName && formData.FirstName.length < 2) {
+        alert("First name must be at least 2 characters");
+        return;
+      }
+      if (formData.LastName && formData.LastName.length < 2) {
+        alert("Last name must be at least 2 characters");
+        return;
+      }
+      if (formData.Email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.Email)) {
+        alert("Please enter a valid email address");
+        return;
+      }
+      if (formData.Phone && !/^\+?[\d\s-]{10,}$/.test(formData.Phone)) {
+        alert("Please enter a valid phone number");
+        return;
+      }
+      if (formData.Height && (isNaN(formData.Height) || formData.Height < 50 || formData.Height > 250)) {
+        alert("Height must be between 50 and 250 cm");
+        return;
+      }
 
       const res = await fetch(`${BACKEND_URL}/update-visitor`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updateData),
+        body: JSON.stringify({ 
+          visitorID, 
+          ...formData,
+          // Convert boolean values to 1/0 for MySQL
+          MilitaryStatus: formData.MilitaryStatus ? 1 : 0,
+          AccessibilityNeeds: formData.AccessibilityNeeds ? 1 : 0
+        }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        alert("Name updated successfully!");
-        setUserData(prev => ({
-          ...prev,
-          FirstName: formData.FirstName,
-          LastName: formData.LastName
-        }));
+        alert(data.message || "Account info updated successfully!");
+        setUserData(formData);
         setEditMode(false);
       } else {
-        alert(data.error || "Update failed.");
+        alert(data.error || "Update failed. Please check your input and try again.");
       }
     } catch (err) {
       console.error("Update error", err);
-      alert("An error occurred.");
+      alert("An error occurred. Please try again later.");
     }
   };
 
@@ -96,6 +114,7 @@ export default function UserPortal() {
           <div className="text-center text-purple-400 text-xl">Loading your data...</div>
         ) : (
           <div className="grid grid-cols-1 gap-6">
+            {/* Account Info */}
             <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-8 rounded-2xl">
               <div className="flex justify-between items-center">
                 <h2 className="text-3xl font-bold mb-4">👤 Account Info</h2>
@@ -108,18 +127,119 @@ export default function UserPortal() {
               </div>
               {editMode ? (
                 <div className="grid md:grid-cols-2 gap-4">
-                  {["FirstName", "LastName"].map(field => (
-                    <div key={field}>
-                      <label className="text-sm text-purple-300">{field}:</label>
-                      <input
-                        name={field}
-                        type="text"
-                        value={formData[field] || ""}
-                        onChange={handleUpdateChange}
-                        className="w-full px-3 py-2 rounded bg-black text-white border border-white/10 focus:ring-2 ring-purple-500"
-                      />
-                    </div>
-                  ))}
+                  <div>
+                    <label className="text-sm text-purple-300">First Name*</label>
+                    <input
+                      name="FirstName"
+                      type="text"
+                      value={formData.FirstName || ""}
+                      onChange={handleUpdateChange}
+                      className="w-full px-3 py-2 rounded bg-black text-white border border-white/10 focus:ring-2 ring-purple-500"
+                      required
+                      minLength={2}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-purple-300">Last Name*</label>
+                    <input
+                      name="LastName"
+                      type="text"
+                      value={formData.LastName || ""}
+                      onChange={handleUpdateChange}
+                      className="w-full px-3 py-2 rounded bg-black text-white border border-white/10 focus:ring-2 ring-purple-500"
+                      required
+                      minLength={2}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-purple-300">Email*</label>
+                    <input
+                      name="Email"
+                      type="email"
+                      value={formData.Email || ""}
+                      onChange={handleUpdateChange}
+                      className="w-full px-3 py-2 rounded bg-black text-white border border-white/10 focus:ring-2 ring-purple-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-purple-300">Phone*</label>
+                    <input
+                      name="Phone"
+                      type="tel"
+                      value={formData.Phone || ""}
+                      onChange={handleUpdateChange}
+                      className="w-full px-3 py-2 rounded bg-black text-white border border-white/10 focus:ring-2 ring-purple-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-purple-300">Address</label>
+                    <input
+                      name="Address"
+                      type="text"
+                      value={formData.Address || ""}
+                      onChange={handleUpdateChange}
+                      className="w-full px-3 py-2 rounded bg-black text-white border border-white/10 focus:ring-2 ring-purple-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-purple-300">Date of Birth</label>
+                    <input
+                      name="DateOfBirth"
+                      type="date"
+                      value={formData.DateOfBirth || ""}
+                      onChange={handleUpdateChange}
+                      className="w-full px-3 py-2 rounded bg-black text-white border border-white/10 focus:ring-2 ring-purple-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-purple-300">Gender</label>
+                    <select
+                      name="Gender"
+                      value={formData.Gender || ""}
+                      onChange={handleUpdateChange}
+                      className="w-full px-3 py-2 rounded bg-black text-white border border-white/10 focus:ring-2 ring-purple-500"
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                      <option value="Prefer not to say">Prefer not to say</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm text-purple-300">Height (cm)</label>
+                    <input
+                      name="Height"
+                      type="number"
+                      min="50"
+                      max="250"
+                      value={formData.Height || ""}
+                      onChange={handleUpdateChange}
+                      className="w-full px-3 py-2 rounded bg-black text-white border border-white/10 focus:ring-2 ring-purple-500"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      name="MilitaryStatus"
+                      checked={formData.MilitaryStatus || false}
+                      onChange={(e) => setFormData(prev => ({ ...prev, MilitaryStatus: e.target.checked }))}
+                      className="rounded bg-black text-purple-500 focus:ring-purple-500"
+                    />
+                    <label className="text-sm text-purple-300">Military Status</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      name="AccessibilityNeeds"
+                      checked={formData.AccessibilityNeeds || false}
+                      onChange={(e) => setFormData(prev => ({ ...prev, AccessibilityNeeds: e.target.checked }))}
+                      className="rounded bg-black text-purple-500 focus:ring-purple-500"
+                    />
+                    <label className="text-sm text-purple-300">Accessibility Needs</label>
+                  </div>
                   <button
                     onClick={handleUpdateSubmit}
                     className="col-span-full mt-4 px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg"
@@ -148,6 +268,7 @@ export default function UserPortal() {
               )}
             </div>
 
+            {/* Ticket History */}
             <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-8 rounded-2xl">
               <h3 className="text-3xl font-bold mb-4">🎟️ Ticket History</h3>
               {tickets.length > 0 ? (
@@ -175,6 +296,7 @@ export default function UserPortal() {
               )}
             </div>
 
+            {/* Merchandise Purchases */}
             <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-8 rounded-2xl">
               <h3 className="text-3xl font-bold mb-4">🛍️ Merchandise Purchases</h3>
               {purchases.length > 0 ? (

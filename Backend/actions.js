@@ -2735,40 +2735,102 @@ const updateVisitorInfo = (req, res) => {
     req.on("data", chunk => { body += chunk.toString(); });
   
     req.on("end", () => {
-      const { visitorID, FirstName, LastName, Phone, Email, Address } = JSON.parse(body);
-  
-      if (!visitorID) {
-        res.writeHead(400, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify({ error: "visitorID required" }));
-      }
-  
-      const fields = [];
-      const values = [];
-  
-      if (FirstName) { fields.push("FirstName = ?"); values.push(FirstName); }
-      if (LastName) { fields.push("LastName = ?"); values.push(LastName); }
-      if (Phone) { fields.push("Phone = ?"); values.push(Phone); }
-      if (Email) { fields.push("Email = ?"); values.push(Email); }
-      if (Address) { fields.push("Address = ?"); values.push(Address); }
-  
-      if (fields.length === 0) {
-        res.writeHead(400, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify({ error: "No update fields provided" }));
-      }
-  
-      const sql = `UPDATE visitor SET ${fields.join(", ")} WHERE VisitorID = ?`;
-      values.push(visitorID);
-  
-      pool.query(sql, values, (err, result) => {
-        if (err) {
-          console.error("Update error:", err);
-          res.writeHead(500, { "Content-Type": "application/json" });
-          return res.end(JSON.stringify({ error: "Internal server error" }));
+      try {
+        const data = JSON.parse(body);
+        const { 
+          visitorID, 
+          FirstName, 
+          LastName, 
+          Phone, 
+          Email, 
+          Address,
+          DateOfBirth,
+          Gender,
+          Height,
+          MilitaryStatus,
+          AccessibilityNeeds
+        } = data;
+    
+        if (!visitorID) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          return res.end(JSON.stringify({ error: "visitorID required" }));
         }
   
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ message: "Visitor info updated successfully" }));
-      });
+        const fields = [];
+        const values = [];
+  
+        if (FirstName) { 
+          if (FirstName.length < 2) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "First name must be at least 2 characters" }));
+          }
+          fields.push("FirstName = ?"); 
+          values.push(FirstName); 
+        }
+        if (LastName) { 
+          if (LastName.length < 2) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Last name must be at least 2 characters" }));
+          }
+          fields.push("LastName = ?"); 
+          values.push(LastName); 
+        }
+        if (Phone) { 
+          if (!/^\+?[\d\s-]{10,}$/.test(Phone)) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Invalid phone number format" }));
+          }
+          fields.push("Phone = ?"); 
+          values.push(Phone); 
+        }
+        if (Email) { 
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(Email)) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Invalid email format" }));
+          }
+          fields.push("Email = ?"); 
+          values.push(Email); 
+        }
+        if (Address) { fields.push("Address = ?"); values.push(Address); }
+        if (DateOfBirth) { fields.push("DateOfBirth = ?"); values.push(DateOfBirth); }
+        if (Gender) { fields.push("Gender = ?"); values.push(Gender); }
+        if (Height) { 
+          if (isNaN(Height) || Height < 50 || Height > 250) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Height must be between 50 and 250 cm" }));
+          }
+          fields.push("Height = ?"); 
+          values.push(Height); 
+        }
+        if (MilitaryStatus !== undefined) { fields.push("MilitaryStatus = ?"); values.push(MilitaryStatus ? 1 : 0); }
+        if (AccessibilityNeeds !== undefined) { fields.push("AccessibilityNeeds = ?"); values.push(AccessibilityNeeds ? 1 : 0); }
+  
+        if (fields.length === 0) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          return res.end(JSON.stringify({ error: "No update fields provided" }));
+        }
+  
+        const sql = `UPDATE visitors SET ${fields.join(", ")} WHERE VisitorID = ?`;
+        values.push(visitorID);
+  
+        pool.query(sql, values, (err, result) => {
+          if (err) {
+            console.error("Update error:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Database error: " + err.message }));
+          }
+  
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ 
+            message: "Visitor info updated successfully",
+            updatedFields: fields.map(f => f.split(" = ")[0])
+          }));
+        });
+      } catch (err) {
+        console.error("Error processing request:", err);
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Invalid request data" }));
+      }
     });
   };
 
