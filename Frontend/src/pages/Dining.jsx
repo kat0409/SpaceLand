@@ -7,21 +7,21 @@ export default function Dining() {
   const restaurants = [
     {
       name: 'Galactic Grub Hub',
-      tier: 'Standard',
+      tier: 'General',
       image: '/assets/galactic-grub.jpg', // Make sure this image exists in /public/assets
       description:
         'Enjoy classic park favorites with a cosmic twist — burgers, fries, and nebula milkshakes!',
     },
     {
       name: 'Cosmo Café',
-      tier: 'Premium',
+      tier: 'Cosmic',
       image: '/assets/cosmo-cafe.jpg',
       description:
         'Elegant space dining under the stars with a chef-curated experience and cosmic cuisine.',
     },
     {
       name: 'Rocket Fuel Express',
-      tier: 'Standard',
+      tier: 'General',
       image: '/assets/rocket-fuel.jpg',
       description:
         'Quick bites for adventurers on the go — interstellar tacos, wraps, and comet smoothies!',
@@ -29,8 +29,8 @@ export default function Dining() {
   ];
 
   const tierColors = {
-    Standard: 'bg-blue-500 text-white',
-    Premium: 'bg-yellow-400 text-black',
+    General: 'bg-blue-500 text-white',
+    Cosmic: 'bg-yellow-400 text-black',
   };
 
   return (
