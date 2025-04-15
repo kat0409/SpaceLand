@@ -2479,28 +2479,85 @@ const getFilteredSalesReport = (req, res) => {
 };
 
 const getTransactionSummaryReport = (req, res) => {
-    const { startDate, endDate } = url.parse(req.url, true).query;
+    const { startDate, endDate, transactionType } = url.parse(req.url, true).query;
   
     if (!startDate || !endDate) {
       res.writeHead(400, { "Content-Type": "application/json" });
       return res.end(JSON.stringify({ error: "Missing date range" }));
     }
   
-    pool.query(
-      queries.getTransactionSummaryReport,
-      [startDate, endDate, startDate, endDate, startDate, endDate],
-      (err, results) => {
-        if (err) {
-          console.error("Transaction summary error:", err);
-          res.writeHead(500, { "Content-Type": "application/json" });
-          return res.end(JSON.stringify({ error: "Internal server error" }));
-        }
+    let sql = '';
+    let params = [];
   
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(results));
+    if (transactionType === 'ticket') {
+      sql = `
+        SELECT DATE(transactionDate) AS transactionDate, 'ticket' AS transactionType, SUM(tix.price) AS totalRevenue
+        FROM tickettransactions t
+        JOIN tickets tix ON t.transactionID = tix.transactionID
+        WHERE DATE(transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(transactionDate)
+        ORDER BY transactionDate;
+      `;
+      params = [startDate, endDate];
+    } else if (transactionType === 'mealplan') {
+      sql = `
+        SELECT DATE(transactionDate) AS transactionDate, 'mealplan' AS transactionType, SUM(mp.price) AS totalRevenue
+        FROM mealplantransactions m
+        JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
+        WHERE DATE(transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(transactionDate)
+        ORDER BY transactionDate;
+      `;
+      params = [startDate, endDate];
+    } else if (transactionType === 'merch') {
+      sql = `
+        SELECT DATE(transactionDate) AS transactionDate, 'merch' AS transactionType, SUM(totalAmount) AS totalRevenue
+        FROM merchandisetransactions
+        WHERE DATE(transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(transactionDate)
+        ORDER BY transactionDate;
+      `;
+      params = [startDate, endDate];
+    } else {
+      // default to all transaction types
+      sql = `
+        SELECT DATE(transactionDate) AS transactionDate, 'ticket' AS transactionType, SUM(tix.price) AS totalRevenue
+        FROM tickettransactions t
+        JOIN tickets tix ON t.transactionID = tix.transactionID
+        WHERE DATE(transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(transactionDate)
+  
+        UNION ALL
+  
+        SELECT DATE(transactionDate) AS transactionDate, 'mealplan' AS transactionType, SUM(mp.price) AS totalRevenue
+        FROM mealplantransactions m
+        JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
+        WHERE DATE(transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(transactionDate)
+  
+        UNION ALL
+  
+        SELECT DATE(transactionDate) AS transactionDate, 'merch' AS transactionType, SUM(totalAmount) AS totalRevenue
+        FROM merchandisetransactions
+        WHERE DATE(transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(transactionDate)
+  
+        ORDER BY transactionDate;
+      `;
+      params = [startDate, endDate, startDate, endDate, startDate, endDate];
+    }
+  
+    pool.query(sql, params, (err, results) => {
+      if (err) {
+        console.error("Transaction summary error:", err);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ error: "Internal server error" }));
       }
-    );
-  };  
+  
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(results));
+    });
+  };    
 
   const getBestWorstSellersReport = (req, res) => {
     const { startDate, endDate, groupBy = 'month', transactionType = 'all' } = url.parse(req.url, true).query;
