@@ -48,8 +48,32 @@ export default function EmployeeDashboard() {
       }
     };
 
+    const fetchScheduleData = async () => {
+      try {
+        const res = await fetch(`${BACKEND_URL}/employee/get-schedule?employeeID=${auth.userID}`);
+        if (!res.ok) {
+          throw new Error('Failed to fetch schedule data');
+        }
+        const data = await res.json();
+        
+        // Format the schedule data
+        const formattedSchedule = data.map(shift => ({
+          ...shift,
+          scheduleDate: new Date(shift.scheduleDate).toISOString().split('T')[0],
+          shiftStart: shift.shiftStart.substring(0, 5),  // Convert "00:00:00" to "00:00"
+          shiftEnd: shift.shiftEnd.substring(0, 5)      // Convert "00:00:00" to "00:00"
+        }));
+        
+        setSchedule(formattedSchedule);
+      } catch (err) {
+        console.error('Schedule Fetch Error:', err);
+        setError('Error fetching schedule data.');
+      }
+    };
+
     if (auth.userID) {
       fetchEmployeeData();
+      fetchScheduleData();
     }
   }, [auth.userID]);
 
