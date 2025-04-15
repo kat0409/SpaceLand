@@ -109,7 +109,7 @@ export default function BestWorstSellerReport() {
             <tbody>
               {reportData.map((entry, idx) => (
                 <tr key={idx} className="text-center border-b border-gray-700">
-                  <td className="p-3 capitalize">{entry.type}</td>
+                  <td className="p-3 capitalize">{entry.transactionType}</td>
                   <td className="p-3">{entry.best}</td>
                   <td className="p-3">{entry.worst}</td>
                 </tr>
