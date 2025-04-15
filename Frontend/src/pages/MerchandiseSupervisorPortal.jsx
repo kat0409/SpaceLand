@@ -13,6 +13,16 @@ import BestWorstSellerReport from "../components/BestWorstSellerReport";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
+const getDefaultDateRange = () => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 30);
+    return {
+        startDate: start.toISOString().slice(0, 10),
+        endDate: end.toISOString().slice(0, 10)
+    };
+};
+
 export default function SupervisorPortal() {
     const [lowStock, setLowStock] = useState([]);
     const [ticketSales, setTicketSales] = useState([]);
@@ -26,31 +36,14 @@ export default function SupervisorPortal() {
     const [currentItem, setCurrentItem] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const {logout} = useContext(AuthContext);
-    /*const [filters, setFilters] = useState({
-        startDate: '',
-        endDate: '',
-        ticketType: '',
-        visitorName:'',
-        minSpent: '',
-        maxSpent: '',
-        purchaseType: '',
-        merchandiseItem: ''
-    });*/
+    const defaultRange = getDefaultDateRange();
     const [filters, setFilters] = useState({
-        startDate: "",
-        endDate: "",
+        startDate: defaultRange.startDate,
+        endDate: defaultRange.endDate,
         transactionType: "",
         bestOnly: "0"
     });
     const [notification, setNotification] = useState({ message: '', type: '' });
-
-    /*const fetchFilteredReport = () => {
-        const params = new URLSearchParams(filters);
-        fetch(`${BACKEND_URL}/supervisor/merchandise/visitor-purchases?${params.toString()}`)
-            .then(res => res.json())
-            .then(data => setVisitorPurchasesReport(data))
-            .catch(err => console.error('Filtered report error:', err));
-    };*/
 
     useEffect(() => {
         fetch(`${BACKEND_URL}/weather-alert`)
@@ -461,6 +454,8 @@ export default function SupervisorPortal() {
                 {/* Sales Reports Tab */}
                 {activeTab === 'sales' && (
                     <div className="space-y-6">
+                        <MerchandiseSalesChart salesData={salesData} />
+                        <div className="text-xs text-gray-400 mb-2 ml-2">Data Source: <b>merchandisetransactions</b> table in SpaceLandDB</div>
                         <TransactionSummaryReport />
                         <BestWorstSellerReport />
                         <div className="bg-white/10 p-4 rounded-xl mb-6">
@@ -505,7 +500,6 @@ export default function SupervisorPortal() {
                                 Apply Filters
                             </button>
                         </div>
-                        
                         <div className="bg-white/10 p-6 rounded-xl">
                             <h2 className="text-2xl font-semibold mb-4">Sales Report</h2>
                             <div className="overflow-x-auto">
@@ -518,15 +512,24 @@ export default function SupervisorPortal() {
                                         <th className="p-2">Revenue</th>
                                         <th className="p-2">Avg Revenue</th>
                                     </>}
-                                    {["all", "ticket"].includes(filters.transactionType) && <>
+                                    {[
+                                        "all",
+                                        "ticket"
+                                    ].includes(filters.transactionType) && <>
                                         <th className="p-2">Best Ticket</th>
                                         {filters.bestOnly === "0" && <th className="p-2">Worst Ticket</th>}
                                     </>}
-                                    {["all", "mealplan"].includes(filters.transactionType) && <>
+                                    {[
+                                        "all",
+                                        "mealplan"
+                                    ].includes(filters.transactionType) && <>
                                         <th className="p-2">Best Meal Plan</th>
                                         {filters.bestOnly === "0" && <th className="p-2">Worst Meal Plan</th>}
                                     </>}
-                                    {["all", "merch"].includes(filters.transactionType) && <>
+                                    {[
+                                        "all",
+                                        "merch"
+                                    ].includes(filters.transactionType) && <>
                                         <th className="p-2">Best Merch</th>
                                         {filters.bestOnly === "0" && <th className="p-2">Worst Merch</th>}
                                     </>}
@@ -541,15 +544,24 @@ export default function SupervisorPortal() {
                                         <td className="p-2">${parseFloat(row.totalRevenue).toFixed(2)}</td>
                                         <td className="p-2">${parseFloat(row.avgRevenuePerItem).toFixed(2)}</td>
                                         </>}
-                                        {["all", "ticket"].includes(filters.transactionType) && <>
+                                        {[
+                                            "all",
+                                            "ticket"
+                                        ].includes(filters.transactionType) && <>
                                         <td className="p-2">{row.bestSellingTicket}</td>
                                         {filters.bestOnly === "0" && <td className="p-2">{row.worstSellingTicket}</td>}
                                         </>}
-                                        {["all", "mealplan"].includes(filters.transactionType) && <>
+                                        {[
+                                            "all",
+                                            "mealplan"
+                                        ].includes(filters.transactionType) && <>
                                         <td className="p-2">{row.bestSellingMealPlan}</td>
                                         {filters.bestOnly === "0" && <td className="p-2">{row.worstSellingMealPlan}</td>}
                                         </>}
-                                        {["all", "merch"].includes(filters.transactionType) && <>
+                                        {[
+                                            "all",
+                                            "merch"
+                                        ].includes(filters.transactionType) && <>
                                         <td className="p-2">{row.bestSellingMerch}</td>
                                         {filters.bestOnly === "0" && <td className="p-2">{row.worstSellingMerch}</td>}
                                         </>}
