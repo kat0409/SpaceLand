@@ -335,9 +335,10 @@ export default function UserPortal() {
                     <thead className="text-purple-300">
                       <tr>
                         <td>Date</td>
-                        <td>Ticket Type</td>
-                        <td>Price Per Ticket</td>
+                        <td>Package Details</td>
+                        <td>Ticket Price</td>
                         <td>Quantity</td>
+                        <td>Meal Plan</td>
                         <td>Total</td>
                       </tr>
                     </thead>
@@ -345,10 +346,20 @@ export default function UserPortal() {
                       {tickets.map((t, i) => (
                         <tr key={i} className="border-t border-white/10">
                           <td>{new Date(t.transactionDate).toLocaleDateString()}</td>
-                          <td>{t.ticketType}</td>
-                          <td>${Number(t.pricePerTicket).toFixed(2)}</td>
+                          <td>
+                            {t.ticketType} Pass
+                            {t.mealPlanName && <span className="block text-xs text-purple-400">+ {t.mealPlanName}</span>}
+                          </td>
+                          <td>${Number(t.ticketPricePerUnit).toFixed(2)}</td>
                           <td>{t.quantity}</td>
-                          <td>${Number(t.totalAmount).toFixed(2)}</td>
+                          <td>
+                            {t.mealPlanPrice ? (
+                              <>${Number(t.mealPlanPrice).toFixed(2)}</>
+                            ) : (
+                              <span className="text-gray-500">No meal plan</span>
+                            )}
+                          </td>
+                          <td>${Number(t.grandTotal).toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
