@@ -1657,50 +1657,74 @@ const deleteMerchandise = (req, res) => {
 
 const updateMerchandise = (req, res) => {
     let body = '';
-    
+
     req.on('data', (chunk) => {
         body += chunk.toString();
     });
-    
+
     req.on('end', () => {
         let parsedBody;
         try {
             parsedBody = JSON.parse(body);
         } catch (err) {
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Invalid JSON format" }));
-            return;
+            return res.end(JSON.stringify({ error: "Invalid JSON format" }));
         }
-        
-        const { merchandiseID, itemName, price, quantity, giftShopName, description } = parsedBody;
-        
-        if (!merchandiseID || !itemName || price === undefined || quantity === undefined) {
+
+        const { merchandiseID, giftShopName, itemName, price, quantity } = parsedBody;
+
+        if (!merchandiseID) {
             res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Missing required fields" }));
-            return;
+            return res.end(JSON.stringify({ error: "Missing merchandiseID" }));
         }
-        
-        pool.query(
-            'UPDATE merchandise SET itemName = ?, price = ?, quantity = ?, giftShopName = ?, description = ? WHERE merchandiseID = ?',
-            [itemName, price, quantity, giftShopName || null, description || null, merchandiseID],
-            (error, results) => {
-                if (error) {
-                    console.error("Error updating merchandise:", error);
-                    res.writeHead(500, { "Content-Type": "application/json" });
-                    res.end(JSON.stringify({ error: "Internal server error" }));
-                    return;
-                }
-                
-                if (results.affectedRows === 0) {
-                    res.writeHead(404, { "Content-Type": "application/json" });
-                    res.end(JSON.stringify({ error: "Merchandise not found" }));
-                    return;
-                }
-                
-                res.writeHead(200, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ message: "Merchandise updated successfully" }));
+
+        const fields = [];
+        const values = [];
+
+        if (giftShopName !== undefined) {
+            fields.push("giftShopName = ?");
+            values.push(giftShopName || null);
+        }
+
+        if (itemName !== undefined) {
+            fields.push("itemName = ?");
+            values.push(itemName);
+        }
+
+        if (price !== undefined) {
+            fields.push("price = ?");
+            values.push(Number(price));
+        }
+
+        if (quantity !== undefined) {
+            fields.push("quantity = ?");
+            values.push(Number(quantity));
+        }
+
+        if (fields.length === 0) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "No fields provided for update" }));
+        }
+
+        values.push(merchandiseID); 
+
+        const sql = `UPDATE merchandise SET ${fields.join(", ")} WHERE merchandiseID = ?`;
+
+        pool.query(sql, values, (error, results) => {
+            if (error) {
+                console.error("Error updating merchandise:", error.message || error);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Internal server error" }));
             }
-        );
+
+            if (results.affectedRows === 0) {
+                res.writeHead(404, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Merchandise not found" }));
+            }
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Merchandise updated successfully" }));
+        });
     });
 };
 
