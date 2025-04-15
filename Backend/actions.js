@@ -1629,7 +1629,7 @@ const addMealPlanTransaction = (req,res) => {
 
 const deleteMerchandise = (req, res) => {
     const parsedUrl = url.parse(req.url, true);
-    const merchandiseID = parsedUrl.query.merchandiseID; 
+    const merchandiseID = parseInt(parsedUrl.query.merchandiseID); 
     
     if (!merchandiseID) {
         res.writeHead(400, { "Content-Type": "application/json" });
