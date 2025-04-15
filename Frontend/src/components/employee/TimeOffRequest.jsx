@@ -32,9 +32,10 @@ export default function TimeOffRequest({ employeeID }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          employeeID,
-          ...formData,
-          status: 'pending'
+          EmployeeID: employeeID,
+          startDate: formData.startDate,
+          endDate: formData.endDate,
+          reason: formData.reason
         }),
       });
 
