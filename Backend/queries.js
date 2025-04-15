@@ -734,6 +734,21 @@ const getMerchandiseItems = `
     FROM merchandise
     ORDER BY itemName;
 `;
+const displayAlert = `
+    SELECT alertID, alertMessage, timestamp
+    FROM weatheralerts
+    WHERE isResolved = FALSE
+    ORDER BY timestamp DESC;
+`;
+
+const resolveWeatherAlert = `
+    UPDATE alerts SET isResolved = 1 WHERE alertID = ?
+`;
+
+const addPaymentInfo = `
+    INSERT INTO paymentinfo (VisitorID, CardType, CardNumber, CVV, CardholderName, ExpiryDate, BillingAddress) 
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+`;
 
 module.exports = {
     getRides,
@@ -830,7 +845,10 @@ module.exports = {
     getAllEmployees,
     getDepartmentByEmployeeID,
     getAttendanceReport,
-    getMerchandiseItems
+    getMerchandiseItems,
+    displayAlert,
+    resolveWeatherAlert,
+    addPaymentInfo
 };
 
 //checkMerchQuantity
