@@ -2729,6 +2729,49 @@ const getMerchandiseItems = (req, res) => {
     });
 };
 
+const updateVisitorInfo = (req, res) => {
+    let body = "";
+  
+    req.on("data", chunk => { body += chunk.toString(); });
+  
+    req.on("end", () => {
+      const { visitorID, FirstName, LastName, Phone, Email, Address } = JSON.parse(body);
+  
+      if (!visitorID) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ error: "visitorID required" }));
+      }
+  
+      const fields = [];
+      const values = [];
+  
+      if (FirstName) { fields.push("FirstName = ?"); values.push(FirstName); }
+      if (LastName) { fields.push("LastName = ?"); values.push(LastName); }
+      if (Phone) { fields.push("Phone = ?"); values.push(Phone); }
+      if (Email) { fields.push("Email = ?"); values.push(Email); }
+      if (Address) { fields.push("Address = ?"); values.push(Address); }
+  
+      if (fields.length === 0) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ error: "No update fields provided" }));
+      }
+  
+      const sql = `UPDATE visitor SET ${fields.join(", ")} WHERE VisitorID = ?`;
+      values.push(visitorID);
+  
+      pool.query(sql, values, (err, result) => {
+        if (err) {
+          console.error("Update error:", err);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          return res.end(JSON.stringify({ error: "Internal server error" }));
+        }
+  
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ message: "Visitor info updated successfully" }));
+      });
+    });
+  };
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,

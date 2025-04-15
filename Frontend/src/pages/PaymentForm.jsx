@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { AuthContext } from '../components/AuthProvider';
-import { useContext } from 'react';
 
 export default function PaymentForm() {
   const navigate = useNavigate();
@@ -54,63 +52,15 @@ export default function PaymentForm() {
     setLoading(true);
     setMessage('');
 
-    const { auth } = useContext(AuthContext);
-    const visitorID = localStorage.getItem('VisitorID');
-
-    try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Create ticket record
-      const ticketResponse = await fetch(`${BACKEND_URL}/create-ticket`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          visitorID,
-          ticketType: orderSummary.ticketType,
-          quantity: orderSummary.ticketQuantity,
-          totalAmount: orderSummary.ticketTotal,
-          transactionDate: new Date().toISOString()
-        })
-      });
-
-      if (!ticketResponse.ok) {
-        throw new Error('Failed to create ticket record');
-      }
-
-      // If meal plan was selected, create meal plan record
-      if (orderSummary.mealPlan) {
-        const mealPlanResponse = await fetch(`${BACKEND_URL}/create-meal-plan`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            visitorID,
-            mealPlanType: orderSummary.mealPlan,
-            totalAmount: orderSummary.mealPlanTotal,
-            transactionDate: new Date().toISOString()
-          })
-        });
-
-        if (!mealPlanResponse.ok) {
-          throw new Error('Failed to create meal plan record');
-        }
-      }
-
-      setMessage('Payment successful! Redirecting to your portal...');
-      
-      // Redirect after successful payment
-      setTimeout(() => {
-        navigate('/userportal');
-      }, 2000);
-    } catch (error) {
-      setMessage(`Error: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
+    // Simulate payment processing
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    setMessage('Payment successful! Redirecting to your portal...');
+    
+    // Redirect after "payment"
+    setTimeout(() => {
+      navigate('/userportal');
+    }, 2000);
   };
 
   return (
