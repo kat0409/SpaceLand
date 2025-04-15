@@ -272,9 +272,15 @@ const getVisitorTicketTransactions = `
         tt.transactionDate,
         tt.ticketType,
         tt.quantity,
+        CASE 
+            WHEN tt.ticketType = 'General' THEN 49.99
+            WHEN tt.ticketType = 'Cosmic' THEN 89.99
+            ELSE tt.totalAmount / tt.quantity
+        END as pricePerTicket,
         tt.totalAmount
     FROM tickettransactions tt
-    WHERE tt.VisitorID = ?;
+    WHERE tt.VisitorID = ?
+    ORDER BY tt.transactionDate DESC;
 `;
 
 const getEmployeeAccountInfo = `
