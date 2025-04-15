@@ -13,7 +13,7 @@ export default function UserPortal() {
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
+  const BACKEND_URL = 'https://spacelandmark.onrender.com';
   const visitorID = localStorage.getItem('VisitorID');
 
   useEffect(() => {
@@ -76,30 +76,88 @@ export default function UserPortal() {
         return;
       }
 
+      // Parse and validate the date
+      let dateToSend = null;
+      if (formData.DateOfBirth) {
+        // Handle different date formats (MM/DD/YYYY or YYYY-MM-DD)
+        const dateStr = formData.DateOfBirth;
+        let parsedDate;
+        
+        if (dateStr.includes('/')) {
+          // Convert MM/DD/YYYY to YYYY-MM-DD
+          const [month, day, year] = dateStr.split('/');
+          parsedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        } else {
+          parsedDate = dateStr;
+        }
+
+        // Validate the date
+        const testDate = new Date(parsedDate);
+        if (isNaN(testDate.getTime())) {
+          alert("Please enter a valid date in MM/DD/YYYY format");
+          return;
+        }
+        dateToSend = parsedDate;
+      }
+
+      const adjustedFormData = {
+        ...formData,
+        DateOfBirth: dateToSend
+      };
+
       const res = await fetch(`${BACKEND_URL}/update-visitor`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           visitorID, 
-          ...formData,
+          ...adjustedFormData,
           // Convert boolean values to 1/0 for MySQL
-          MilitaryStatus: formData.MilitaryStatus ? 1 : 0,
-          AccessibilityNeeds: formData.AccessibilityNeeds ? 1 : 0
+          MilitaryStatus: adjustedFormData.MilitaryStatus ? 1 : 0,
+          AccessibilityNeeds: adjustedFormData.AccessibilityNeeds ? 1 : 0
         }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        alert(data.message || "Account info updated successfully!");
-        setUserData(formData);
-        setEditMode(false);
+        // Fetch the updated data from the server
+        const updatedDataRes = await fetch(`${BACKEND_URL}/account-info?visitorID=${visitorID}`);
+        const updatedData = await updatedDataRes.json();
+        
+        if (updatedData && updatedData[0]) {
+          // Format the date properly in the response data
+          const formattedData = {
+            ...updatedData[0],
+            DateOfBirth: updatedData[0].DateOfBirth ? updatedData[0].DateOfBirth.split('T')[0] : null
+          };
+          setUserData(formattedData);
+          setFormData(formattedData);
+          setEditMode(false);
+          alert("Account info updated successfully!");
+        } else {
+          alert("Update successful but failed to fetch updated data. Please refresh the page.");
+        }
       } else {
         alert(data.error || "Update failed. Please check your input and try again.");
       }
     } catch (err) {
-      console.error("Update error", err);
-      alert("An error occurred. Please try again later.");
+      console.error("Update error:", err);
+      alert("An error occurred while updating. Please check the date format (MM/DD/YYYY) and try again.");
+    }
+  };
+
+  // Format the display date correctly
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    try {
+      const [year, month, day] = dateString.split('T')[0].split('-');
+      return new Date(year, month - 1, day).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric'
+      });
+    } catch (err) {
+      return dateString; // Fallback to original string if parsing fails
     }
   };
 
@@ -257,7 +315,7 @@ export default function UserPortal() {
                     <span className="text-purple-300 font-semibold">Address:</span> {userData.Address}
                   </p>
                   <p>
-                    <span className="text-purple-300 font-semibold">Date of Birth:</span> {userData.DateOfBirth}<br />
+                    <span className="text-purple-300 font-semibold">Date of Birth:</span> {formatDate(userData.DateOfBirth)}<br />
                     <span className="text-purple-300 font-semibold">Gender:</span> {userData.Gender}<br />
                     <span className="text-purple-300 font-semibold">Height:</span> {userData.Height} cm<br />
                     <span className="text-purple-300 font-semibold">Age:</span> {userData.Age}<br />
@@ -276,7 +334,11 @@ export default function UserPortal() {
                   <table className="w-full text-sm text-left">
                     <thead className="text-purple-300">
                       <tr>
-                        <th>Date</th><th>Ticket Type</th><th>Quantity</th><th>Total</th>
+                        <td>Date</td>
+                        <td>Ticket Type</td>
+                        <td>Price Per Ticket</td>
+                        <td>Quantity</td>
+                        <td>Total</td>
                       </tr>
                     </thead>
                     <tbody>
@@ -284,8 +346,9 @@ export default function UserPortal() {
                         <tr key={i} className="border-t border-white/10">
                           <td>{new Date(t.transactionDate).toLocaleDateString()}</td>
                           <td>{t.ticketType}</td>
+                          <td>${Number(t.pricePerTicket).toFixed(2)}</td>
                           <td>{t.quantity}</td>
-                          <td>${parseFloat(t.totalAmount).toFixed(2)}</td>
+                          <td>${Number(t.totalAmount).toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
