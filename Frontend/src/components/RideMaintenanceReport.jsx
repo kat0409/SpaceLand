@@ -43,7 +43,7 @@ export default function RideMaintenanceReport() {
                 } else {
                     throw new Error("Unexpected response format");
                 }
-            })
+            })            
             .catch(err => setError(err.message))
             .finally(() => setLoading(false));
     };
