@@ -2729,6 +2729,19 @@ const getMerchandiseItems = (req, res) => {
     });
 };
 
+const displayAlert = (req,res) => {
+    pool.query(queries.displayAlert, (err, results) => {
+        if (err) {
+            console.error("Error fetching alerts:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Failed to fetch alerts" }));
+        }
+    
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(results));
+    });
+}
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -2811,5 +2824,6 @@ module.exports = {
     getAllEmployees,
     getDepartmentByEmployeeID,
     getAttendanceReport,
-    getMerchandiseItems
+    getMerchandiseItems,
+    displayAlert
 };  

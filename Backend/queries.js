@@ -723,6 +723,13 @@ const getMerchandiseItems = `
     ORDER BY itemName;
 `;
 
+const displayAlert = `
+    SELECT alertID, alertMessage, timestamp
+    FROM weatheralerts
+    WHERE isResolved = FALSE
+    ORDER BY timestamp DESC;
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -818,7 +825,8 @@ module.exports = {
     getAllEmployees,
     getDepartmentByEmployeeID,
     getAttendanceReport,
-    getMerchandiseItems
+    getMerchandiseItems,
+    displayAlert
 };
 
 //checkMerchQuantity
