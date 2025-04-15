@@ -54,17 +54,27 @@ export default function UserPortal() {
 
   const handleUpdateSubmit = async () => {
     try {
+      const updateData = {
+        visitorID,
+        FirstName: formData.FirstName,
+        LastName: formData.LastName
+      };
+
       const res = await fetch(`${BACKEND_URL}/update-visitor`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ visitorID, ...formData }),
+        body: JSON.stringify(updateData),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        alert("Account info updated!");
-        setUserData(formData);
+        alert("Name updated successfully!");
+        setUserData(prev => ({
+          ...prev,
+          FirstName: formData.FirstName,
+          LastName: formData.LastName
+        }));
         setEditMode(false);
       } else {
         alert(data.error || "Update failed.");
@@ -86,7 +96,6 @@ export default function UserPortal() {
           <div className="text-center text-purple-400 text-xl">Loading your data...</div>
         ) : (
           <div className="grid grid-cols-1 gap-6">
-            {/* Account Info */}
             <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-8 rounded-2xl">
               <div className="flex justify-between items-center">
                 <h2 className="text-3xl font-bold mb-4">👤 Account Info</h2>
@@ -99,7 +108,7 @@ export default function UserPortal() {
               </div>
               {editMode ? (
                 <div className="grid md:grid-cols-2 gap-4">
-                  {["FirstName", "LastName", "Phone", "Email", "Address", "DateOfBirth", "Gender", "Height"].map(field => (
+                  {["FirstName", "LastName"].map(field => (
                     <div key={field}>
                       <label className="text-sm text-purple-300">{field}:</label>
                       <input
@@ -139,7 +148,6 @@ export default function UserPortal() {
               )}
             </div>
 
-            {/* Ticket History */}
             <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-8 rounded-2xl">
               <h3 className="text-3xl font-bold mb-4">🎟️ Ticket History</h3>
               {tickets.length > 0 ? (
@@ -167,7 +175,6 @@ export default function UserPortal() {
               )}
             </div>
 
-            {/* Merchandise Purchases */}
             <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-8 rounded-2xl">
               <h3 className="text-3xl font-bold mb-4">🛍️ Merchandise Purchases</h3>
               {purchases.length > 0 ? (
