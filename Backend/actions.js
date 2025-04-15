@@ -2742,6 +2742,28 @@ const displayAlert = (req,res) => {
     });
 }
 
+const resolveWeatherAlert = (req, res) => {
+    const parsedUrl = url.parse(req.url, true);
+    const { alertID } = parsedUrl.query;
+
+    if (!alertID) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ error: "Missing alertID" }));
+    }
+
+    pool.query(queries.resolveWeatherAlert,[alertID],(err, results) => {
+            if (err) {
+            console.error("Failed to resolve alert:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Database error" }));
+            }
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Alert resolved" }));
+        }
+    );
+};
+
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -2825,5 +2847,6 @@ module.exports = {
     getDepartmentByEmployeeID,
     getAttendanceReport,
     getMerchandiseItems,
-    displayAlert
+    displayAlert,
+    resolveWeatherAlert
 };  

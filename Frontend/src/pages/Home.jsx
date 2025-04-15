@@ -18,11 +18,11 @@ export default function Home() {
       .then(res => res.json())
       .then(data => setAlerts(data))
       .catch(err => console.error("Failed to fetch alerts", err));
-    fetch(`${BACKEND_URL}/weather-alerts`)
+    fetch(`${BACKEND_URL}/weather-alert`)
       .then(res => res.json())
       .then(data => {
-        const unresolved = data.filter(weatherAlert => weatherAlert.isResolved === 0);
-        setWeatherAlerts(unresolved);
+        //const unresolved = data.filter(weatherAlert => weatherAlert.isResolved === 0);
+        setWeatherAlerts(data);
       })
       .catch(err => console.error("Failed to fetch weather alerts", err));
   }, []);

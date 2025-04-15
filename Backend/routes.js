@@ -345,6 +345,10 @@ function routes(req, res) {
     
     if (url.startsWith("/weather-alert") && method === "GET") {
         return actions.displayAlert(req, res);
+    }
+
+    if (url.startsWith("/resolve-weather-alert") && method === "POST") {
+        return actions.resolveWeatherAlert(req, res);
     } 
 
     res.writeHead(404, { 'Content-Type': 'application/json' });

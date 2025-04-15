@@ -730,6 +730,10 @@ const displayAlert = `
     ORDER BY timestamp DESC;
 `;
 
+const resolveWeatherAlert = `
+    UPDATE alerts SET isResolved = 1 WHERE alertID = ?
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -826,7 +830,8 @@ module.exports = {
     getDepartmentByEmployeeID,
     getAttendanceReport,
     getMerchandiseItems,
-    displayAlert
+    displayAlert,
+    resolveWeatherAlert
 };
 
 //checkMerchQuantity

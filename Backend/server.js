@@ -89,7 +89,8 @@ const routeMap = {
         '/employee/clock-in',
         '/employee/clock-out',
         '/supervisor/HR/schedule',
-        '/supervisor/HR/fire-employee'
+        '/supervisor/HR/fire-employee',
+        "/resolve-weather-alert"
     ],
     'PUT': [
         '/update-employee', 
