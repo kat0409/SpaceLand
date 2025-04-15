@@ -30,10 +30,13 @@ export default function EmployeeDashboard() {
   useEffect(() => {
     const fetchEmployeeData = async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/employee/account-info?employeeID=${auth.userID}`);
+        const res = await fetch(`${BACKEND_URL}/employee/profile?EmployeeID=${auth.userID}`);
+        if (!res.ok) {
+          throw new Error('Failed to fetch employee data');
+        }
         const data = await res.json();
 
-        if (res.ok && data && data.EmployeeID) {
+        if (data && data.EmployeeID) {
           setEmployee(data);
           setError('');
         } else {
