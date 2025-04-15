@@ -1637,23 +1637,32 @@ const deleteMerchandise = (req, res) => {
         return;
     }
     
-    pool.query('DELETE FROM merchandise WHERE merchandiseID = ?', [merchandiseID], (error, results) => {
-        if (error) {
-            console.error("Error deleting merchandise:", error);
+    pool.query('DELETE FROM lowstocknotifications WHERE merchandiseID = ?', [merchandiseID], (err1) => {
+        if (err1) {
+            console.error("Error deleting low stock notifications:", err1);
             res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Internal server error" }));
-            return;
+            return res.end(JSON.stringify({ error: "Error deleting dependent notifications" }));
         }
-        
-        if (results.affectedRows === 0) {
-            res.writeHead(404, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Merchandise not found" }));
-            return;
-        }
-        
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ message: "Merchandise deleted successfully" }));
+    
+        // Now delete the merchandise item, was not working at first because of the foreign key constraint
+        // but now it should work because we deleted the dependent notifications first
+        pool.query('DELETE FROM merchandise WHERE merchandiseID = ?', [merchandiseID], (err2, results) => {
+            if (err2) {
+                console.error("Error deleting merchandise:", err2);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Error deleting merchandise" }));
+            }
+    
+            if (results.affectedRows === 0) {
+                res.writeHead(404, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Merchandise not found" }));
+            }
+    
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Merchandise deleted successfully" }));
+        });
     });
+    
 };
 
 const updateMerchandise = (req, res) => {
