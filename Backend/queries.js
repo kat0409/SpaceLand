@@ -440,7 +440,7 @@ const clockOut = `
 `;
 
 const getEmployeeProfile = `
-    SELECT EmployeeID, FirstName, LastName, Email, Address, Department, dateOfBirth
+    SELECT EmployeeID, FirstName, LastName, Email, Address, Department, dateOfBirth, username, employmentStatus
     FROM employee
     WHERE EmployeeID = ?
 `;
