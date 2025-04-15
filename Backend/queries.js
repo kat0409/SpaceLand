@@ -734,6 +734,11 @@ const resolveWeatherAlert = `
     UPDATE alerts SET isResolved = 1 WHERE alertID = ?
 `;
 
+const addPaymentInfo = `
+    INSERT INTO paymentinfo (VisitorID, CardType, CardNumber, CVV, CardholderName, ExpiryDate, BillingAddress) 
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+`;
+
 module.exports = {
     getRides,
     getEmployees,
@@ -831,7 +836,8 @@ module.exports = {
     getAttendanceReport,
     getMerchandiseItems,
     displayAlert,
-    resolveWeatherAlert
+    resolveWeatherAlert,
+    addPaymentInfo
 };
 
 //checkMerchQuantity

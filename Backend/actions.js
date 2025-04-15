@@ -2763,6 +2763,57 @@ const resolveWeatherAlert = (req, res) => {
     );
 };
 
+const addPaymentInfo = (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        let parsedBody;
+        try {
+            parsedBody = JSON.parse(body);
+        } catch (error) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Invalid JSON format" }));
+    }
+
+    const {
+        VisitorID,
+        CardType,
+        CardNumber,
+        CVV,
+        CardholderName,
+        ExpiryDate,
+        BillingAddress,
+    } = parsedBody;
+
+    if (!VisitorID ||!CardType ||!CardNumber ||!CVV ||!CardholderName ||!ExpiryDate ||!BillingAddress) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        return res.end(
+            JSON.stringify({ error: "All fields are required" })
+        );
+    }
+
+    pool.query(queries.addPaymentInfo,[VisitorID, CardType, CardNumber, CVV, CardholderName, ExpiryDate, BillingAddress],(err, results) => {
+        if (err) {
+            console.error("Failed to insert payment info:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Internal server error" }));
+        }
+
+        res.writeHead(201, { "Content-Type": "application/json" });
+        res.end(
+            JSON.stringify({
+                message: "Payment information saved successfully",
+                paymentID: results.insertId,
+            })
+        );
+        }
+      );
+    });
+};  
 
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
@@ -2848,5 +2899,6 @@ module.exports = {
     getAttendanceReport,
     getMerchandiseItems,
     displayAlert,
-    resolveWeatherAlert
+    resolveWeatherAlert,
+    addPaymentInfo
 };  
