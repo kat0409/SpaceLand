@@ -12,7 +12,7 @@ import EmployeeCalendarView from '../components/EmployeeCalendarView';
 import ClockInOutForm from '../components/ClockInOutForm';
 
 export default function EmployeeDashboard() {
-  const { auth } = useContext(AuthContext);
+  const { auth, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [schedule, setSchedule] = useState([]);
@@ -20,6 +20,11 @@ export default function EmployeeDashboard() {
   const [employee, setEmployee] = useState(null);
   const [error, setError] = useState('');
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
+
+  const handleLogout = () => {
+    logout();
+    navigate("/employee-login");
+  };
 
   useEffect(() => {
     if (!auth.isAuthenticated || auth.role !== "employee") {
@@ -103,20 +108,28 @@ export default function EmployeeDashboard() {
             <h1 className="text-4xl font-bold mb-4 md:mb-0">
               Welcome, {employee?.FirstName || 'Employee'}! 👋
             </h1>
-            <div className="flex space-x-2 overflow-x-auto pb-2 md:pb-0">
-              {tabs.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-6 py-2 rounded-lg transition-colors whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-white/5 hover:bg-white/10'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+            <div className="flex items-center space-x-4">
+              <div className="flex space-x-2 overflow-x-auto pb-2 md:pb-0">
+                {tabs.map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`px-6 py-2 rounded-lg transition-colors whitespace-nowrap ${
+                      activeTab === tab.id
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-white/5 hover:bg-white/10'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={handleLogout}
+                className="px-6 py-2 rounded-lg bg-red-600 hover:bg-red-700 transition-colors text-white"
+              >
+                Logout
+              </button>
             </div>
           </div>
 
@@ -140,7 +153,6 @@ export default function EmployeeDashboard() {
                 <ScheduleViewer employeeID={auth.userID} />
                 <ClockInOutForm employeeID={auth.userID} />
               </>            
-            
             )}
 
             {activeTab === 'timeoff' && auth.userID && (
