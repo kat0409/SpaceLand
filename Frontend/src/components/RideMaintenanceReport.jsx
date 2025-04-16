@@ -20,7 +20,8 @@ export default function RideMaintenanceReport() {
 
     const fetchReport = () => {
         setLoading(true);
-        
+        setError(null); // reset error on each fetch
+
         const params = new URLSearchParams();
         if (startDate) params.append('startDate', startDate);
         if (endDate) params.append('endDate', endDate);
@@ -29,24 +30,34 @@ export default function RideMaintenanceReport() {
         const url = `${BACKEND_URL}/supervisor/maintenance/ride-maintenance?${params.toString()}`;
 
         fetch(url)
-            .then(res => {
-                if (!res.ok) throw new Error("Failed to fetch report");
-                return res.json();
+            .then(async (res) => {
+                if (res.status === 404) {
+                    return { empty: true };
+                }
+                if (!res.ok) {
+                    throw new Error("Failed to fetch report");
+                }
+                const data = await res.json();
+                return data;
             })
-            .then(data => {
-                if (Array.isArray(data)) {
-                    setReport(data);
-                    setError(null);
-                } else if (data.message === "No maintenance data found") {
+            .then((data) => {
+                if (data.empty) {
                     setReport([]);
+                    setError(null);
+                } else if (Array.isArray(data)) {
+                    setReport(data);
                     setError(null);
                 } else {
                     throw new Error("Unexpected response format");
                 }
             })
-            .catch(err => setError(err.message))
+            .catch(err => {
+                console.error(err);
+                setError(err.message);
+                setReport([]);
+            })
             .finally(() => setLoading(false));
-    };
+    };      
 
     useEffect(() => {
         fetchReport();
