@@ -746,7 +746,7 @@ const displayAlert = `
 `;
 
 const resolveWeatherAlert = `
-    UPDATE alerts SET isResolved = 1 WHERE alertID = ?
+    UPDATE weatheralerts SET isResolved = 1 WHERE alertID = ?
 `;
 
 const addPaymentInfo = `
