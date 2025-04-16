@@ -26,6 +26,7 @@ export default function SupervisorPortal() {
     const [currentItem, setCurrentItem] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [showAlerts, setShowAlerts] = useState(true);
+    const [weatherAlerts, setWeatherAlerts] = useState([]);
     const {logout} = useContext(AuthContext);
     /*const [filters, setFilters] = useState({
         startDate: '',
@@ -54,13 +55,16 @@ export default function SupervisorPortal() {
     };*/
 
     useEffect(() => {
-        fetch(`${BACKEND_URL}/weather-alert`)
-            .then(res => res.json())
-            .then(data => {
-                const unresolved = data.filter(alert => alert.isResolved === 0);
-                setWeatherAlerts(unresolved);
-            })
-            .catch(err => console.error("Failed to fetch weather alerts:", err));
+        // Only fetch weather alerts if needed
+        if (typeof setWeatherAlerts === 'function') {
+            fetch(`${BACKEND_URL}/weather-alert`)
+                .then(res => res.json())
+                .then(data => {
+                    const unresolved = data.filter(alert => alert.isResolved === 0);
+                    setWeatherAlerts(unresolved);
+                })
+                .catch(err => console.error("Failed to fetch weather alerts:", err));
+        }
     }, []);
 
     const fetchFilteredReport = async () => {
@@ -158,29 +162,8 @@ export default function SupervisorPortal() {
     };
 
     useEffect(() => {
-        // Fetch low stock items
-        fetch(`${BACKEND_URL}/supervisor/merchandise/low-stock`)
-            .then(res => res.json())
-            .then(data => setLowStock(data))
-            .catch(err => console.error('Low Stock Error:', err));
-        
-        // Fetch ticket sales
-        fetch(`${BACKEND_URL}/supervisor/merchandise/ticket-sales`)
-            .then(res => res.json())
-            .then(data => setTicketSales(data))
-            .catch(err => console.error('Ticket Sales Error:', err));
-        
-        // Fetch visitor purchases report
-        fetch(`${BACKEND_URL}/supervisor/merchandise/visitor-purchases`)
-            .then(res => res.json())
-            .then(data => setVisitorPurchasesReport(data))
-            .catch(err => console.error('Visitor Purchases Report Error:', err));
-        
-        // Fetch low stock notifications
-        fetch(`${BACKEND_URL}/supervisor/merchandise/notifications?SupervisorID=12`)
-            .then(res => res.json())
-            .then(data => setLowStockItems(data))
-            .catch(err => console.error('Error fetching low stock notifications:', err));
+        // Fetch low stock items and merchandise data first
+        let currentInventory = [];
         
         // Fetch merchandise data
         fetch(`${BACKEND_URL}/supervisor/merchandise/merch`)
@@ -188,15 +171,67 @@ export default function SupervisorPortal() {
             .then((data) => {
                 if (Array.isArray(data)) {
                     setMerchandise(data);
+                    currentInventory = data; // Store for comparison with alerts
+                    
+                    // Now fetch low stock notifications
+                    return fetch(`${BACKEND_URL}/supervisor/merchandise/notifications?SupervisorID=12`);
                 } else {
                     console.error("Unexpected merchandise data:", data);
+                    return Promise.reject("Invalid merchandise data");
                 }
             })
-            .catch((err) => {
-                console.error("Error fetching merchandise:", err);
-            });
+            .then(res => res.json())
+            .then(notificationData => {
+                if (Array.isArray(notificationData) && notificationData.length > 0) {
+                    // Filter notifications to only include items that are still actually low in stock
+                    const validAlerts = notificationData.filter(alert => {
+                        // Find the corresponding item in current inventory
+                        const inventoryItem = currentInventory.find(item => 
+                            item.itemName === alert.itemName || 
+                            item.merchandiseID === alert.merchandiseID
+                        );
+                        
+                        // Only keep alert if item exists and quantity is still below threshold (usually 10)
+                        return inventoryItem && inventoryItem.quantity < 10;
+                    });
+                    
+                    setLowStockItems(validAlerts);
+                    console.log("Filtered low stock notifications:", validAlerts.length);
+                } else {
+                    // If no valid notifications, use low stock items from inventory
+                    const criticalStock = currentInventory.filter(item => item.quantity < 10);
+                    
+                    // Format them to match notification structure
+                    const formattedAlerts = criticalStock.map(item => ({
+                        notificationID: `auto-${item.merchandiseID}`,
+                        itemName: item.itemName,
+                        stockLevel: item.quantity,
+                        message: `Order more ${item.itemName}. Only ${item.quantity} left!`,
+                        merchandiseID: item.merchandiseID
+                    }));
+                    
+                    setLowStockItems(formattedAlerts);
+                    console.log("Created alerts from low stock items:", formattedAlerts.length);
+                }
+            })
+            .catch(err => console.error('Error in merchandise/notifications flow:', err));
+            
+        // Other data fetching
+        fetch(`${BACKEND_URL}/supervisor/merchandise/low-stock`)
+            .then(res => res.json())
+            .then(data => setLowStock(data))
+            .catch(err => console.error('Low Stock Error:', err));
         
-        // Fetch merchandise orders
+        fetch(`${BACKEND_URL}/supervisor/merchandise/ticket-sales`)
+            .then(res => res.json())
+            .then(data => setTicketSales(data))
+            .catch(err => console.error('Ticket Sales Error:', err));
+        
+        fetch(`${BACKEND_URL}/supervisor/merchandise/visitor-purchases`)
+            .then(res => res.json())
+            .then(data => setVisitorPurchasesReport(data))
+            .catch(err => console.error('Visitor Purchases Report Error:', err));
+            
         fetch(`${BACKEND_URL}/supervisor/merchandise/orders`)
             .then((res) => res.json())
             .then((data) => {
@@ -209,18 +244,6 @@ export default function SupervisorPortal() {
             .catch((err) => {
                 console.error("Error fetching merchandise orders:", err);
             });
-        
-        // Fetch merchandise sales data for charts
-        /*fetch(`${BACKEND_URL}/supervisor/merchandise/sales-data`)
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data)) {
-                    setSalesData(data);
-                } else {
-                    console.error("Unexpected sales data:", data);
-                }
-            })
-            .catch(err => console.error("Error fetching sales data:", err));*/
             
         fetchFilteredReport();
     }, []);
@@ -243,7 +266,7 @@ export default function SupervisorPortal() {
                 )}
 
                 {/* Low Stock Alerts - Enhanced Collapsible */}
-                {lowStockItems.length > 0 && (
+                {lowStockItems && lowStockItems.length > 0 && (
                     <div className={`mb-6 transition-all duration-300 ease-in-out ${showAlerts ? 'opacity-100' : 'opacity-90'}`}>
                         <div 
                             className={`border border-red-500/50 rounded-lg overflow-hidden transition-all duration-300 ${showAlerts ? 'bg-red-900/50' : 'bg-red-950/30'}`}
@@ -285,9 +308,9 @@ export default function SupervisorPortal() {
                             >
                                 <ul className="space-y-2 text-red-200">
                                     {lowStockItems.map((item) => (
-                                        <li key={item.notificationID} className="flex items-center">
+                                        <li key={item.notificationID || item.merchandiseID} className="flex items-center">
                                             <span className="inline-block w-2 h-2 rounded-full bg-red-400 mr-2"></span>
-                                            <span>{item.itemName}: Only {item.stockLevel} left — {item.message}</span>
+                                            <span>{item.itemName}: Only {item.stockLevel || item.quantity} left {item.message ? `— ${item.message}` : ''}</span>
                                         </li>
                                     ))}
                                 </ul>
@@ -302,26 +325,42 @@ export default function SupervisorPortal() {
                 {/* Navigation Tabs */}
                 <div className="flex flex-wrap border-b border-gray-700 mb-6">
                     <button 
-                        className={`py-2 px-4 font-medium ${activeTab === 'dashboard' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400 hover:text-white'}`}
-                        onClick={() => setActiveTab('dashboard')}
+                        type="button"
+                        className={`py-2 px-4 font-medium transition-colors duration-200 ${activeTab === 'dashboard' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400 hover:text-white hover:border-b-2 hover:border-purple-300'}`}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setActiveTab('dashboard');
+                        }}
                     >
                         Dashboard
                     </button>
                     <button 
-                        className={`py-2 px-4 font-medium ${activeTab === 'inventory' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400 hover:text-white'}`}
-                        onClick={() => setActiveTab('inventory')}
+                        type="button"
+                        className={`py-2 px-4 font-medium transition-colors duration-200 ${activeTab === 'inventory' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400 hover:text-white hover:border-b-2 hover:border-purple-300'}`}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setActiveTab('inventory');
+                        }}
                     >
                         Inventory
                     </button>
                     <button 
-                        className={`py-2 px-4 font-medium ${activeTab === 'sales' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400 hover:text-white'}`}
-                        onClick={() => setActiveTab('sales')}
+                        type="button"
+                        className={`py-2 px-4 font-medium transition-colors duration-200 ${activeTab === 'sales' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400 hover:text-white hover:border-b-2 hover:border-purple-300'}`}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setActiveTab('sales');
+                        }}
                     >
                         Sales Reports
                     </button>
                     <button 
-                        className={`py-2 px-4 font-medium ${activeTab === 'manage' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400 hover:text-white'}`}
-                        onClick={() => setActiveTab('manage')}
+                        type="button"
+                        className={`py-2 px-4 font-medium transition-colors duration-200 ${activeTab === 'manage' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400 hover:text-white hover:border-b-2 hover:border-purple-300'}`}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setActiveTab('manage');
+                        }}
                     >
                         Manage Inventory
                     </button>
@@ -422,7 +461,10 @@ export default function SupervisorPortal() {
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-2xl font-semibold">🛍️ Merchandise Inventory</h2>
                                 <button
-                                    onClick={() => setActiveTab('manage')}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setActiveTab('manage');
+                                    }}
                                     className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-white"
                                 >
                                     Add New Item
