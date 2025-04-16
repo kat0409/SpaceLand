@@ -334,6 +334,7 @@ export default function UserPortal() {
                   <table className="w-full text-sm text-left">
                     <thead className="text-purple-300">
                       <tr>
+                        <td>Ticket ID</td>
                         <td>Date</td>
                         <td>Package Details</td>
                         <td>Ticket Price</td>
@@ -345,6 +346,7 @@ export default function UserPortal() {
                     <tbody>
                       {tickets.map((t, i) => (
                         <tr key={i} className="border-t border-white/10">
+                          <td>#{t.ticketID || `TKT-${i+1000}`}</td>
                           <td>{new Date(t.transactionDate).toLocaleDateString()}</td>
                           <td>
                             {t.ticketType} Pass
