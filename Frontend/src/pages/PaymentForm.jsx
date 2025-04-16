@@ -13,6 +13,7 @@ export default function PaymentForm() {
     BillingAddress: ""
   });
   const [error, setError] = useState("");
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -40,15 +41,48 @@ export default function PaymentForm() {
         throw new Error(data.error || "Something went wrong");
       }
 
-      alert("Payment Info Saved!");
-      navigate("/userportal");
+      // Show custom popup instead of alert
+      setShowSuccessPopup(true);
+      
+      // Automatically redirect after 3 seconds
+      setTimeout(() => {
+        setShowSuccessPopup(false);
+        navigate("/userportal");
+      }, 3000);
+      
     } catch (err) {
       setError(err.message);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-10 max-w-xl mx-auto">
+    <div className="min-h-screen bg-black text-white p-10 max-w-xl mx-auto relative">
+      {/* Success Popup */}
+      {showSuccessPopup && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/70">
+          <div className="bg-gradient-to-b from-gray-900 to-black border border-purple-500 rounded-xl p-8 max-w-md mx-auto shadow-lg shadow-purple-500/30 animate-fadeIn">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-purple-300 mb-2">Payment Info Saved!</h2>
+              <p className="text-gray-300 mb-6">Your payment information has been successfully stored.</p>
+              <button 
+                onClick={() => {
+                  setShowSuccessPopup(false);
+                  navigate("/userportal");
+                }}
+                className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition duration-200"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <h1 className="text-3xl font-bold mb-6">Enter Payment Information</h1>
       {error && <p className="text-red-400 mb-4">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
