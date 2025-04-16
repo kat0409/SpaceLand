@@ -52,6 +52,7 @@ export default function TransactionSummaryReport() {
   const [reportData, setReportData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [totalRevenue, setTotalRevenue] = useState(0);
 
   useEffect(() => {
     const today = new Date();
@@ -67,6 +68,16 @@ export default function TransactionSummaryReport() {
       transactionType: 'all'
     });
   }, []);
+
+  // Calculate total revenue whenever report data changes
+  useEffect(() => {
+    if (reportData.length > 0) {
+      const sum = reportData.reduce((total, row) => total + parseFloat(row.totalRevenue), 0);
+      setTotalRevenue(sum);
+    } else {
+      setTotalRevenue(0);
+    }
+  }, [reportData]);
 
   const fetchReport = async () => {
     if (!filters.startDate || !filters.endDate) {
@@ -175,6 +186,18 @@ export default function TransactionSummaryReport() {
               <tr>
                 <td colSpan="3" className="text-center p-4 text-gray-400">
                   No transactions found for selected filters.
+                </td>
+              </tr>
+            )}
+            
+            {/* Total Revenue Summary Row */}
+            {reportData.length > 0 && (
+              <tr className="border-t-2 border-purple-500 bg-white/10 font-bold">
+                <td colSpan="2" className="p-3 text-right text-purple-300">
+                  TOTAL REVENUE
+                </td>
+                <td className="p-3 text-white">
+                  ${totalRevenue.toFixed(2)}
                 </td>
               </tr>
             )}

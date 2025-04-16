@@ -45,6 +45,40 @@ export default function Dining() {
             Fuel your intergalactic journey with a variety of cosmic cuisine experiences.
           </p>
 
+          {/* Featured Cosmo Café Section */}
+          <div className="mb-16 rounded-2xl overflow-hidden shadow-2xl bg-white/5 border border-gray-700">
+            <div className="grid md:grid-cols-2 gap-0">
+              <div className="relative h-80 md:h-auto overflow-hidden">
+                <img 
+                  src="/assets/cafe.jpg" 
+                  alt="Cosmo Café Featured Image" 
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent md:bg-gradient-to-l md:from-transparent md:to-black/80"></div>
+              </div>
+              <div className="p-8 flex flex-col justify-center text-left">
+                <h3 className="text-3xl font-bold text-purple-300 mb-4">Featured: Cosmo Café</h3>
+                <p className="text-gray-200 mb-6">
+                  Experience the pinnacle of cosmic cuisine at our signature restaurant. Cosmo Café offers a sophisticated dining atmosphere with panoramic views of the celestial surroundings. Our award-winning chefs create dishes that blend Earth's finest ingredients with innovative space-inspired techniques.
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <span className="w-5 h-5 flex items-center justify-center bg-purple-500 rounded-full mr-2">✓</span>
+                    <span>Elegant space-themed ambiance</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="w-5 h-5 flex items-center justify-center bg-purple-500 rounded-full mr-2">✓</span>
+                    <span>Cosmic Meal Plan accepted</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="w-5 h-5 flex items-center justify-center bg-purple-500 rounded-full mr-2">✓</span>
+                    <span>Reservations recommended</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
             {restaurants.map((res, index) => (
               <motion.div
