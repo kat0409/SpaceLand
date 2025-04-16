@@ -3,8 +3,8 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Stars, Html, Environment } from '@react-three/drei';
 
 // Cloud Storage URLs for the models
-const ROLLER_COASTER_URL = 'gs://3dmodels1/roller_coaster.glb';
-const FERRIS_WHEEL_URL = 'gs://3dmodels1/carnival_ferris_wheel.glb';
+const ROLLER_COASTER_URL = 'https://storage.googleapis.com/3dmodels1/roller_coaster.glb';
+const FERRIS_WHEEL_URL = 'https://storage.googleapis.com/3dmodels1/carnival_ferris_wheel.glb';
 
 // Preload models to avoid flickering during transitions
 useGLTF.preload(ROLLER_COASTER_URL);
