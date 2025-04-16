@@ -12,6 +12,7 @@ export default function UserPortal() {
   const [tickets, setTickets] = useState([]);
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const BACKEND_URL = 'https://spacelandmark.onrender.com';
   const visitorID = localStorage.getItem('VisitorID');
@@ -25,8 +26,13 @@ export default function UserPortal() {
     fetch(`${BACKEND_URL}/account-info?visitorID=${visitorID}`)
       .then(res => res.json())
       .then(data => {
-        setUserData(data[0]);
-        setFormData(data[0]);
+        // Format the date for both userData and formData
+        const formattedData = {
+          ...data[0],
+          DateOfBirth: data[0].DateOfBirth ? data[0].DateOfBirth.split('T')[0] : null
+        };
+        setUserData(formattedData);
+        setFormData(formattedData);
       })
       .catch(err => console.error("Error fetching account info:", err));
 
@@ -50,6 +56,18 @@ export default function UserPortal() {
   const handleUpdateChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Toggle edit mode with properly formatted date
+  const toggleEditMode = () => {
+    if (!editMode) {
+      // Ensure date is properly formatted when entering edit mode
+      setFormData(prev => ({
+        ...prev,
+        DateOfBirth: prev.DateOfBirth ? prev.DateOfBirth.split('T')[0] : ''
+      }));
+    }
+    setEditMode(!editMode);
   };
 
   const handleUpdateSubmit = async () => {
@@ -133,7 +151,12 @@ export default function UserPortal() {
           setUserData(formattedData);
           setFormData(formattedData);
           setEditMode(false);
-          alert("Account info updated successfully!");
+          setShowSuccessPopup(true);
+          
+          // Auto-hide popup after 3 seconds
+          setTimeout(() => {
+            setShowSuccessPopup(false);
+          }, 3000);
         } else {
           alert("Update successful but failed to fetch updated data. Please refresh the page.");
         }
@@ -168,6 +191,29 @@ export default function UserPortal() {
         <h2 className="text-4xl font-bold mb-6">🌌 Welcome to Your Portal</h2>
         <p className="text-gray-400 mb-10">View or update your passes, perks, and cosmic stats.</p>
 
+        {/* Success Popup */}
+        {showSuccessPopup && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/70">
+            <div className="bg-gradient-to-b from-gray-900 to-black border border-purple-500 rounded-xl p-8 max-w-md mx-auto shadow-lg shadow-purple-500/30 animate-fadeIn">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-purple-300 mb-2">Account Updated!</h2>
+                <p className="text-gray-300 mb-6">Your account information has been updated successfully.</p>
+                <button 
+                  onClick={() => setShowSuccessPopup(false)}
+                  className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition duration-200"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {loading ? (
           <div className="text-center text-purple-400 text-xl">Loading your data...</div>
         ) : (
@@ -177,7 +223,7 @@ export default function UserPortal() {
               <div className="flex justify-between items-center">
                 <h2 className="text-3xl font-bold mb-4">👤 Account Info</h2>
                 <button
-                  onClick={() => setEditMode(!editMode)}
+                  onClick={toggleEditMode}
                   className="px-4 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm"
                 >
                   {editMode ? "Cancel" : "Edit Info"}
