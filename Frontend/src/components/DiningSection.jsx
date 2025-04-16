@@ -6,21 +6,21 @@ export default function DiningSection() {
     {
       name: 'Galactic Grub Hub',
       tier: 'Standard',
-      image: '/public/assets/galactic-grub.jpg', // <-- You’ll add this image
+      image: '/assets/galactic-grub.jpg', // Fixed path
       description:
         'Enjoy classic park favorites with a cosmic twist — burgers, fries, and nebula milkshakes!',
     },
     {
       name: 'Cosmo Café',
       tier: 'Premium',
-      image: '/public/assets/cosmo-cafe.jpg', // <-- You’ll add this image
+      image: '/assets/cosmo-cafe.jpg', // Fixed path
       description:
         'Elegant space dining under the stars with a chef-curated experience and cosmic cuisine.',
     },
     {
       name: 'Rocket Fuel Express',
       tier: 'Standard',
-      image: '/public/assets/rocket-fuel.jpg', // <-- You’ll add this image
+      image: '/assets/rocket-fuel.jpg', // Fixed path
       description:
         'Quick bites for adventurers on the go — interstellar tacos, wraps, and comet smoothies!',
     },
