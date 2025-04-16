@@ -9,8 +9,6 @@ export default function CursorOverlay() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const smoothX = useSpring(mouseX, { damping: 20, stiffness: 300 });
-  const smoothY = useSpring(mouseY, { damping: 20, stiffness: 300 });
 
   const [clicking, setClicking] = useState(false);
   const [hovering, setHovering] = useState(false);
@@ -49,7 +47,7 @@ export default function CursorOverlay() {
       <motion.div
         ref={cursorRef}
         className="fixed top-0 left-0 z-[9999] pointer-events-none"
-        style={{ translateX: smoothX, translateY: smoothY }}
+        style={{ translateX: mouseX, translateY: mouseY }}
       >
         {!hovering && (
           <motion.div
@@ -65,8 +63,8 @@ export default function CursorOverlay() {
         ref={ringRef}
         className="fixed top-0 left-0 z-[9998] pointer-events-none border-2 border-purple-400 rounded-full"
         style={{
-          translateX: smoothX,
-          translateY: smoothY,
+          translateX: mouseX,
+          translateY: mouseY,
           width: 40,
           height: 40,
           marginLeft: -20,
