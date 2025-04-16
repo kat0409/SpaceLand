@@ -5,16 +5,23 @@ import { OrbitControls, useGLTF, Stars, Html, Environment } from '@react-three/d
 // Cloud Storage URLs for the models
 const ROLLER_COASTER_URL = 'https://storage.googleapis.com/3dmodels1/roller_coaster.glb';
 const FERRIS_WHEEL_URL = 'https://storage.googleapis.com/3dmodels1/carnival_ferris_wheel.glb';
+const DROP_TOWER_URL = 'https://storage.googleapis.com/3dmodels1/drop_tower.glb';
+const GALAXY_COASTER_URL = 'https://storage.googleapis.com/3dmodels1/swing_ride.glb';
 
 // Preload models to avoid flickering during transitions
 useGLTF.preload(ROLLER_COASTER_URL);
 useGLTF.preload(FERRIS_WHEEL_URL);
+useGLTF.preload(DROP_TOWER_URL);
+useGLTF.preload(GALAXY_COASTER_URL);
 
 function RideModel({ rideType, position = [0, -1, 0], rotation = [0, Math.PI / 4, 0], scale = 0.05 }) {
   // Choose the right model based on ride type
-  const modelPath = rideType === 'Lunar Loop' 
-    ? FERRIS_WHEEL_URL
-    : ROLLER_COASTER_URL;
+  const modelPath = 
+    rideType === 'Lunar Loop' ? FERRIS_WHEEL_URL :
+    rideType === 'Black Hole Drop' ? DROP_TOWER_URL :
+    rideType === 'Astro Twister' ? ROLLER_COASTER_URL :
+    rideType === 'Galaxy Coaster' ? GALAXY_COASTER_URL :
+    ROLLER_COASTER_URL; // Default fallback
     
   const { scene } = useGLTF(modelPath);
   
@@ -28,6 +35,13 @@ function RideModel({ rideType, position = [0, -1, 0], rotation = [0, Math.PI / 4
           if (rideType === 'Lunar Loop') {
             child.material.emissive = { r: 0.1, g: 0.2, b: 0.3 };
             child.material.emissiveIntensity = 0.6;
+          } else if (rideType === 'Black Hole Drop') {
+            child.material.emissive = { r: 0.3, g: 0.1, b: 0.3 };
+            child.material.emissiveIntensity = 0.7;
+          } else if (rideType === 'Galaxy Coaster') {
+            child.material.emissive = { r: 0.2, g: 0.3, b: 0.1 };
+            child.material.emissiveIntensity = 0.8;
+            child.material.metalness = 0.9;
           } else {
             child.material.emissive = { r: 0.2, g: 0.1, b: 0 };
             child.material.emissiveIntensity = 0.5;
@@ -45,12 +59,14 @@ function RideModel({ rideType, position = [0, -1, 0], rotation = [0, Math.PI / 4
   const getPosition = () => {
     switch(rideType) {
       case 'Lunar Loop':
-        return [0, 0, 0]; // Adjust Ferris wheel position
+        return [0, -0.25, 0]; // Adjust Ferris wheel position
       case 'Black Hole Drop':
-        return [0, -1.2, 0];
+        return [0, 0, 0]; // Adjust Drop Tower position
       case 'Astro Twister':
-        return [0, -0.7, 0.2];
-      default: // Galaxy Coaster
+        return [0, -0.1, 0.2];
+      case 'Galaxy Coaster':
+        return [0, -0.1, 0]; // Adjust Swing ride position
+      default:
         return position;
     }
   };
@@ -60,10 +76,12 @@ function RideModel({ rideType, position = [0, -1, 0], rotation = [0, Math.PI / 4
       case 'Lunar Loop':
         return [0, 0, 0]; // Reset rotation for Ferris wheel
       case 'Black Hole Drop':
-        return [0.1, Math.PI / 2, 0];
+        return [0, 0, 0]; // Reset rotation for Drop Tower
       case 'Astro Twister':
         return [0, Math.PI * 1.75, 0];
-      default: // Galaxy Coaster
+      case 'Galaxy Coaster':
+        return [0, Math.PI / 2, 0]; // Rotate Swing ride for better viewing
+      default:
         return rotation;
     }
   };
@@ -73,10 +91,12 @@ function RideModel({ rideType, position = [0, -1, 0], rotation = [0, Math.PI / 4
       case 'Lunar Loop':
         return 0.025; // Adjust scale for Ferris wheel
       case 'Black Hole Drop':
-        return 0.07;
+        return 0.035; // Adjust scale for Drop Tower
       case 'Astro Twister':
         return 0.055;
-      default: // Galaxy Coaster
+      case 'Galaxy Coaster':
+        return 0.04; // Adjust scale for Swing ride
+      default:
         return scale;
     }
   };
