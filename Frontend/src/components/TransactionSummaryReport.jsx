@@ -2,6 +2,46 @@ import React, { useState, useEffect } from 'react';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
+// Helper function to format dates
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  
+  try {
+    // Handle special database format
+    if (typeof dateString === 'string' && dateString.includes('-')) {
+      // Extract date parts from the string
+      const parts = dateString.split('T')[0].split('-');
+      if (parts.length === 3) {
+        // Create date using UTC to avoid timezone offset issues
+        const year = parseInt(parts[0]);
+        const month = parseInt(parts[1]) - 1; // JS months are 0-indexed
+        const day = parseInt(parts[2]);
+        
+        // Use the date parts to construct a date string that won't shift due to timezone
+        return `${month + 1}/${day}/${year}`;
+      }
+    }
+    
+    // For non-string or non-standard formats, use the date object
+    const date = new Date(dateString);
+    if (!isNaN(date.getTime())) {
+      // Use UTC methods to avoid timezone issues
+      const year = date.getUTCFullYear();
+      const month = date.getUTCMonth() + 1; // JS months are 0-indexed
+      const day = date.getUTCDate();
+      
+      // Format with leading zeros
+      return `${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}/${year}`;
+    }
+    
+    // Last fallback - just use the raw string
+    return dateString;
+  } catch (error) {
+    console.error("Date parsing error:", error);
+    return dateString;
+  }
+};
+
 export default function TransactionSummaryReport() {
   const [filters, setFilters] = useState({
     startDate: '',
@@ -126,7 +166,7 @@ export default function TransactionSummaryReport() {
             {reportData.length > 0 ? (
               reportData.map((row, idx) => (
                 <tr key={idx} className="border-t border-white/10 hover:bg-white/5">
-                  <td className="p-2">{row.transactionDate}</td>
+                  <td className="p-2">{formatDate(row.transactionDate)}</td>
                   <td className="p-2 capitalize">{row.transactionType}</td>
                   <td className="p-2">${parseFloat(row.totalRevenue).toFixed(2)}</td>
                 </tr>
