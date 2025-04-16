@@ -2,15 +2,19 @@ import { useState, Suspense, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Stars, Html, Environment } from '@react-three/drei';
 
+// Cloud Storage URLs for the models
+const ROLLER_COASTER_URL = 'gs://3dmodels1/roller_coaster.glb';
+const FERRIS_WHEEL_URL = 'gs://3dmodels1/carnival_ferris_wheel.glb';
+
 // Preload models to avoid flickering during transitions
-useGLTF.preload('/assets/models/roller_coaster.glb');
-useGLTF.preload('/assets/models/carnival_ferris_wheel.glb');
+useGLTF.preload(ROLLER_COASTER_URL);
+useGLTF.preload(FERRIS_WHEEL_URL);
 
 function RideModel({ rideType, position = [0, -1, 0], rotation = [0, Math.PI / 4, 0], scale = 0.05 }) {
   // Choose the right model based on ride type
   const modelPath = rideType === 'Lunar Loop' 
-    ? '/assets/models/carnival_ferris_wheel.glb'
-    : '/assets/models/roller_coaster.glb';
+    ? FERRIS_WHEEL_URL
+    : ROLLER_COASTER_URL;
     
   const { scene } = useGLTF(modelPath);
   
