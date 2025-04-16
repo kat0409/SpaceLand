@@ -50,10 +50,9 @@ export default function EventsForSupervisor() {
 
     const handleDeleteEvent = async (eventID, eventName) => {
         try {
-            const res = await fetch(`${BACKEND_URL}/supervisor/HR/delete-event`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ eventID, eventName })
+            const res = await fetch(`${BACKEND_URL}/supervisor/HR/delete-event?eventID=${eventID}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" }
             });
             if (!res.ok) throw new Error("Failed to delete event");
             fetchEvents();
