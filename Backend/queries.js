@@ -739,10 +739,6 @@ const addPaymentInfo = `
     VALUES (?, ?, ?, ?, ?, ?, ?)
 `;
 
-const addWeatherAlert = `
-    INSERT INTO weather(date, temperature, weatherCondition, wind_Speed, precipitation)
-`;
-
 module.exports = {
     getRides,
     getEmployees,
