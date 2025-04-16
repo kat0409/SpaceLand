@@ -3009,6 +3009,44 @@ const updateVisitorInfo = (req, res) => {
     });
   };
 
+const addWeatherAlert = (req, res) => {
+    let body = '';
+    
+    req.on('data', chunk => {
+        body += chunk.toString();
+    });
+    
+    req.on('end', () => {
+        try {
+            const data = JSON.parse(body);
+            const { alertMessage } = data;
+            
+            if (!alertMessage) {
+                res.writeHead(400, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Missing alert message" }));
+            }
+            
+            pool.query(queries.addWeatherAlert, [alertMessage], (err, results) => {
+                if (err) {
+                    console.error("Failed to add weather alert:", err);
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    return res.end(JSON.stringify({ error: "Database error" }));
+                }
+                
+                res.writeHead(201, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ 
+                    message: "Weather alert created successfully",
+                    alertID: results.insertId
+                }));
+            });
+        } catch (err) {
+            console.error("Error parsing request:", err);
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid request data" }));
+        }
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -3095,5 +3133,6 @@ module.exports = {
     updateVisitorInfo,
     addPaymentInfo,
     resolveWeatherAlert,
-    displayAlert
+    displayAlert,
+    addWeatherAlert
 };  
