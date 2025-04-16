@@ -7,6 +7,7 @@ import MaintenanceRequestForm from "./MaintenanceRequestForm";
 import MarkMaintenanceCompletionForm from "./MarkMaintenanceCompletionForm";
 import RideMaintenanceReport from "../components/RideMaintenanceReport";
 import MaintenanceEmployeePerformanceReport from "../components/MaintenanceEmployeePerformanceReport";
+import WeatherAlertManager from "../components/WeatherAlertManager";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
@@ -146,6 +147,7 @@ export default function MaintenanceSupervisorPortal() {
             { key: 'dashboard', label: 'Dashboard' },
             { key: 'report', label: 'Ride Maintenance Report' },
             { key: 'performance', label: 'Employee Performance' },
+            { key: 'weather', label: 'Weather Alerts' },
           ].map(tab => (
             <button
               key={tab.key}
@@ -236,6 +238,12 @@ export default function MaintenanceSupervisorPortal() {
           <div className="bg-gray-800/50 rounded-lg p-6 text-center">
             <h2 className="text-2xl font-bold mb-4">Employee Performance</h2>
             <MaintenanceEmployeePerformanceReport />
+          </div>
+        )}
+
+        {activeTab === 'weather' && (
+          <div className="bg-gray-800/50 rounded-lg p-6">
+            <WeatherAlertManager />
           </div>
         )}
 
