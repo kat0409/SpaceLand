@@ -25,6 +25,7 @@ export default function SupervisorPortal() {
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [showAlerts, setShowAlerts] = useState(true);
     const {logout} = useContext(AuthContext);
     /*const [filters, setFilters] = useState({
         startDate: '',
@@ -95,6 +96,10 @@ export default function SupervisorPortal() {
     const handleEditItem = (item) => {
         setCurrentItem(item);
         setEditModalOpen(true);
+    };
+
+    const toggleAlerts = () => {
+        setShowAlerts(!showAlerts);
     };
     
     const handleDeleteItem = async (itemId) => {
@@ -237,17 +242,60 @@ export default function SupervisorPortal() {
                     </div>
                 )}
 
-                {/* Low Stock Alerts */}
+                {/* Low Stock Alerts - Enhanced Collapsible */}
                 {lowStockItems.length > 0 && (
-                    <div className="bg-red-900/50 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg mb-6" role="alert">
-                        <strong className="font-bold">⚠️ Low Stock Alert!</strong>
-                        <ul className="mt-2 list-disc list-inside">
-                            {lowStockItems.map((item) => (
-                                <li key={item.notificationID}>
-                                    {item.itemName}: Only {item.stockLevel} left — {item.message}
-                                </li>
-                            ))}
-                        </ul>
+                    <div className={`mb-6 transition-all duration-300 ease-in-out ${showAlerts ? 'opacity-100' : 'opacity-90'}`}>
+                        <div 
+                            className={`border border-red-500/50 rounded-lg overflow-hidden transition-all duration-300 ${showAlerts ? 'bg-red-900/50' : 'bg-red-950/30'}`}
+                        >
+                            {/* Alert Header - Always Visible */}
+                            <div 
+                                className="flex justify-between items-center cursor-pointer p-3 hover:bg-red-800/30"
+                                onClick={toggleAlerts}
+                            >
+                                <div className="flex items-center">
+                                    <span className="text-red-300 mr-2">
+                                        {/* Alert Icon */}
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                        </svg>
+                                    </span>
+                                    <strong className="font-bold text-red-200">Low Stock Alert!</strong>
+                                    <span className="text-red-300 text-sm ml-2">({lowStockItems.length} items)</span>
+                                </div>
+                                
+                                <div className="flex items-center">
+                                    <span className="text-xs text-red-300 mr-2">{showAlerts ? 'Click to collapse' : 'Click to expand'}</span>
+                                    <button className="text-red-200 hover:text-white focus:outline-none transition-transform duration-300" style={{ transform: showAlerts ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {/* Alert Content - Collapsible */}
+                            <div 
+                                className="overflow-hidden transition-all duration-300 ease-in-out"
+                                style={{ 
+                                    maxHeight: showAlerts ? '500px' : '0',
+                                    opacity: showAlerts ? 1 : 0,
+                                    padding: showAlerts ? '0.75rem 1rem 1rem' : '0 1rem'
+                                }}
+                            >
+                                <ul className="space-y-2 text-red-200">
+                                    {lowStockItems.map((item) => (
+                                        <li key={item.notificationID} className="flex items-center">
+                                            <span className="inline-block w-2 h-2 rounded-full bg-red-400 mr-2"></span>
+                                            <span>{item.itemName}: Only {item.stockLevel} left — {item.message}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                                <div className="mt-3 pt-3 border-t border-red-500/30">
+                                    <span className="text-xs text-red-300/70">Items below critical threshold require immediate attention</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -463,100 +511,16 @@ export default function SupervisorPortal() {
                     <div className="space-y-6">
                         <TransactionSummaryReport />
                         <BestWorstSellerReport />
-                        <div className="bg-white/10 p-4 rounded-xl mb-6">
-                            <h2 className="text-lg mb-2 font-semibold">Sales Report Filters</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <input 
-                                type="date" 
-                                value={filters.startDate}
-                                onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-                                className="w-full p-2 rounded bg-black/50 text-white border border-gray-700"
-                                />
-                                <input 
-                                type="date" 
-                                value={filters.endDate}
-                                onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-                                className="w-full p-2 rounded bg-black/50 text-white border border-gray-700"
-                                />
-                                <select 
-                                value={filters.transactionType}
-                                onChange={(e) => setFilters({ ...filters, transactionType: e.target.value })}
-                                className="w-full p-2 rounded bg-black/50 text-white border border-gray-700"
-                                >
-                                <option value="all">All Transactions</option>
-                                <option value="ticket">Tickets</option>
-                                <option value="mealplan">Meal Plans</option>
-                                <option value="merch">Merchandise</option>
-                                </select>
-                                <label className="text-white">
-                                <input
-                                    type="checkbox"
-                                    checked={filters.bestOnly === "1"}
-                                    onChange={(e) => setFilters({ ...filters, bestOnly: e.target.checked ? "1" : "0" })}
-                                    className="mr-2"
-                                />
-                                Best-Sellers Only
-                                </label>
-                            </div>
-                            <button 
-                                className="mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded transition"
-                                onClick={fetchFilteredReport}
-                            >
-                                Apply Filters
-                            </button>
-                        </div>
-                        
                         <div className="bg-white/10 p-6 rounded-xl">
-                            <h2 className="text-2xl font-semibold mb-4">Sales Report</h2>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm text-white">
-                                <thead className="text-left text-purple-300">
-                                    <tr>
-                                    <th className="p-2">Date</th>
-                                    {filters.bestOnly === "0" && <>
-                                        <th className="p-2">Total Sales</th>
-                                        <th className="p-2">Revenue</th>
-                                        <th className="p-2">Avg Revenue</th>
-                                    </>}
-                                    {["all", "ticket"].includes(filters.transactionType) && <>
-                                        <th className="p-2">Best Ticket</th>
-                                        {filters.bestOnly === "0" && <th className="p-2">Worst Ticket</th>}
-                                    </>}
-                                    {["all", "mealplan"].includes(filters.transactionType) && <>
-                                        <th className="p-2">Best Meal Plan</th>
-                                        {filters.bestOnly === "0" && <th className="p-2">Worst Meal Plan</th>}
-                                    </>}
-                                    {["all", "merch"].includes(filters.transactionType) && <>
-                                        <th className="p-2">Best Merch</th>
-                                        {filters.bestOnly === "0" && <th className="p-2">Worst Merch</th>}
-                                    </>}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {salesData.map((row, idx) => (
-                                    <tr key={idx} className="border-t border-white/10 hover:bg-white/5">
-                                        <td className="p-2">{row.transactionDate}</td>
-                                        {filters.bestOnly === "0" && <>
-                                        <td className="p-2">{row.totalSales}</td>
-                                        <td className="p-2">${parseFloat(row.totalRevenue).toFixed(2)}</td>
-                                        <td className="p-2">${parseFloat(row.avgRevenuePerItem).toFixed(2)}</td>
-                                        </>}
-                                        {["all", "ticket"].includes(filters.transactionType) && <>
-                                        <td className="p-2">{row.bestSellingTicket}</td>
-                                        {filters.bestOnly === "0" && <td className="p-2">{row.worstSellingTicket}</td>}
-                                        </>}
-                                        {["all", "mealplan"].includes(filters.transactionType) && <>
-                                        <td className="p-2">{row.bestSellingMealPlan}</td>
-                                        {filters.bestOnly === "0" && <td className="p-2">{row.worstSellingMealPlan}</td>}
-                                        </>}
-                                        {["all", "merch"].includes(filters.transactionType) && <>
-                                        <td className="p-2">{row.bestSellingMerch}</td>
-                                        {filters.bestOnly === "0" && <td className="p-2">{row.worstSellingMerch}</td>}
-                                        </>}
-                                    </tr>
-                                    ))}
-                                </tbody>
-                                </table>
+                            <div className="flex items-center justify-center p-8">
+                                <div className="text-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-purple-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <h3 className="text-xl font-semibold mb-2">Advanced Sales Reports</h3>
+                                    <p className="text-gray-400 mb-4">This feature is currently under development.</p>
+                                    <p className="text-gray-400 text-sm">Please refer to the summary reports above for sales information.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
