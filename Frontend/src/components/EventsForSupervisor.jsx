@@ -7,6 +7,8 @@ export default function EventsForSupervisor() {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showConfirmation, setShowConfirmation] = useState(false);
+    const [eventToDelete, setEventToDelete] = useState(null);
     const [newEvent, setNewEvent] = useState({
         eventName: '',
         durationMin: '',
@@ -47,22 +49,63 @@ export default function EventsForSupervisor() {
             setError(err.message);
         }
     };
+    
+    // Show confirmation dialog
+    const promptDeleteConfirmation = (event) => {
+        setEventToDelete(event);
+        setShowConfirmation(true);
+    };
+    
+    // Cancel deletion
+    const cancelDelete = () => {
+        setShowConfirmation(false);
+        setEventToDelete(null);
+    };
 
-    const handleDeleteEvent = async (eventID, eventName) => {
+    const handleDeleteEvent = async () => {
+        if (!eventToDelete) return;
+        
         try {
-            const res = await fetch(`${BACKEND_URL}/supervisor/HR/delete-event?eventID=${eventID}`, {
+            const res = await fetch(`${BACKEND_URL}/supervisor/HR/delete-event?eventID=${eventToDelete.eventID}`, {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" }
             });
             if (!res.ok) throw new Error("Failed to delete event");
             fetchEvents();
+            setShowConfirmation(false);
+            setEventToDelete(null);
         } catch (err) {
             setError(err.message);
+            setShowConfirmation(false);
         }
     };
 
     return (
         <div className="text-white">
+            {/* Confirmation Dialog */}
+            {showConfirmation && eventToDelete && (
+                <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/70">
+                    <div className="bg-gradient-to-b from-gray-900 to-black border border-red-500 rounded-xl p-6 max-w-md mx-auto shadow-lg shadow-red-500/30">
+                        <h3 className="text-xl font-bold text-red-400 mb-3">Confirm Deletion</h3>
+                        <p className="mb-6">Are you sure you want to delete the event "{eventToDelete.eventName}"? This action cannot be undone.</p>
+                        <div className="flex space-x-4">
+                            <button 
+                                onClick={cancelDelete} 
+                                className="flex-1 px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={handleDeleteEvent} 
+                                className="flex-1 px-4 py-2 rounded bg-red-600 hover:bg-red-700 transition-colors"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <h2 className="text-2xl font-bold mb-6">Manage Events</h2>
 
             <form onSubmit={handleAddEvent} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -87,7 +130,7 @@ export default function EventsForSupervisor() {
                             <p className="text-sm text-gray-300 mb-2">{event.description}</p>
                             <p className="text-sm">Duration: {event.durationMin} minutes</p>
                             <p className="text-sm">Type: {event.type}</p>
-                            <button onClick={() => handleDeleteEvent(event.eventID, event.eventName)} className="mt-3 bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-white text-sm">Delete</button>
+                            <button onClick={() => promptDeleteConfirmation(event)} className="mt-3 bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-white text-sm">Delete</button>
                         </motion.div>
                     ))}
                 </div>

@@ -10,6 +10,7 @@ export default function DeleteScheduleForm({ onScheduleDeleted }) {
     const [message, setMessage] = useState('');
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [showConfirmation, setShowConfirmation] = useState(false);
 
     // Load employee names and IDs for dropdown
     useEffect(() => {
@@ -35,6 +36,17 @@ export default function DeleteScheduleForm({ onScheduleDeleted }) {
             });
     }, [selectedEmployeeID]);
 
+    const promptConfirmation = () => {
+        if(!selectedEmployeeID || !selectedScheduleDate) {
+            return;
+        }
+        setShowConfirmation(true);
+    };
+
+    const cancelDelete = () => {
+        setShowConfirmation(false);
+    };
+
     const handleSubmit = async () => {
         if(!selectedEmployeeID || !selectedScheduleDate){
             return;
@@ -55,6 +67,9 @@ export default function DeleteScheduleForm({ onScheduleDeleted }) {
             const data = await res.json();
 
             if (res.ok) {
+                // Close confirmation dialog
+                setShowConfirmation(false);
+                
                 // Get employee name for the success message
                 const employee = employees.find(emp => emp.EmployeeID === selectedEmployeeID);
                 const employeeName = employee ? `${employee.FirstName} ${employee.LastName}` : `Employee #${selectedEmployeeID}`;
@@ -83,17 +98,61 @@ export default function DeleteScheduleForm({ onScheduleDeleted }) {
                     onScheduleDeleted();
                 }
             } else {
+                setShowConfirmation(false);
                 setMessage(`Error: ${data.error || "Unknown error"}`);
             }
         }
         catch(error){
             console.error("Error deleting schedule:", error);
+            setShowConfirmation(false);
             setMessage("Failed to delete schedule.");
         }
     };
 
+    // Get employee name for confirmation message
+    const getSelectedEmployeeName = () => {
+        if (!selectedEmployeeID) return '';
+        const employee = employees.find(emp => emp.EmployeeID === selectedEmployeeID);
+        return employee ? `${employee.FirstName} ${employee.LastName}` : `Employee #${selectedEmployeeID}`;
+    };
+
+    // Format date for confirmation message
+    const getFormattedDate = () => {
+        if (!selectedScheduleDate) return '';
+        return new Date(selectedScheduleDate).toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
+
     return (
         <div className="bg-gray-800/50 rounded-xl p-6 relative">
+            {/* Confirmation Dialog */}
+            {showConfirmation && (
+                <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/70">
+                    <div className="bg-gradient-to-b from-gray-900 to-black border border-red-500 rounded-xl p-6 max-w-md mx-auto shadow-lg shadow-red-500/30">
+                        <h3 className="text-xl font-bold text-red-400 mb-3">Confirm Deletion</h3>
+                        <p className="mb-6">Are you sure you want to delete the schedule for {getSelectedEmployeeName()} on {getFormattedDate()}? This action cannot be undone.</p>
+                        <div className="flex space-x-4">
+                            <button 
+                                onClick={cancelDelete} 
+                                className="flex-1 px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 transition-colors text-white"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={handleSubmit} 
+                                className="flex-1 px-4 py-2 rounded bg-red-600 hover:bg-red-700 transition-colors text-white"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Success Popup */}
             {showSuccessPopup && (
                 <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/70">
@@ -161,7 +220,7 @@ export default function DeleteScheduleForm({ onScheduleDeleted }) {
             {/* Delete Button */}
             <button
                 disabled={!selectedEmployeeID || !selectedScheduleDate}
-                onClick={handleSubmit}
+                onClick={promptConfirmation}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded disabled:opacity-40"
             >
                 Delete Schedule
