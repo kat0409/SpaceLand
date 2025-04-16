@@ -7,7 +7,6 @@ export default function BestWorstSellerReport() {
     startDate: "",
     endDate: "",
     transactionType: "all",
-    groupBy: "month"
   });
 
   const [reportData, setReportData] = useState([]);
@@ -15,7 +14,7 @@ export default function BestWorstSellerReport() {
   const [error, setError] = useState("");
 
   const fetchReport = async () => {
-    const { startDate, endDate, transactionType, groupBy } = filters;
+    const { startDate, endDate, transactionType } = filters;
 
     if (!startDate || !endDate) {
       setError("Start and end dates are required.");
@@ -29,8 +28,7 @@ export default function BestWorstSellerReport() {
       const query = new URLSearchParams({
         startDate,
         endDate,
-        transactionType,
-        groupBy
+        transactionType
       }).toString();
 
       const res = await fetch(`${BACKEND_URL}/supervisor/merchandise/best-worst?${query}`);
@@ -83,17 +81,6 @@ export default function BestWorstSellerReport() {
             <option value="merch">Merchandise</option>
           </select>
         </div>
-        <div className="flex flex-col">
-          <label className="text-white">Group By</label>
-          <select
-            value={filters.groupBy}
-            onChange={(e) => setFilters({ ...filters, groupBy: e.target.value })}
-            className="p-2 rounded bg-black text-white"
-          >
-            <option value="week">Week</option>
-            <option value="month">Month</option>
-          </select>
-        </div>
         <div className="flex items-end">
           <button
             onClick={fetchReport}
@@ -122,7 +109,7 @@ export default function BestWorstSellerReport() {
             <tbody>
               {reportData.map((entry, idx) => (
                 <tr key={idx} className="text-center border-b border-gray-700">
-                  <td className="p-3 capitalize">{entry.type}</td>
+                  <td className="p-3 capitalize">{entry.transactionType}</td>
                   <td className="p-3">{entry.best}</td>
                   <td className="p-3">{entry.worst}</td>
                 </tr>
