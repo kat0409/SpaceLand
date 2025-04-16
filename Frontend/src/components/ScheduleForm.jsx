@@ -13,6 +13,8 @@ const ScheduleForm = ({ onScheduleAdded }) => {
     });
     const [employeeList, setEmployeeList] = useState([]);
     const [departmentList, setDepartmentList] = useState([]);
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
 
     useEffect(() => {
         fetch(`${BACKEND_URL}/supervisor/HR/all-employee-names`)
@@ -38,7 +40,26 @@ const ScheduleForm = ({ onScheduleAdded }) => {
         });
         const result = await response.json();
         if (response.ok) {
-            alert("Schedule added successfully!");
+            // Get employee name for the success message
+            const employee = employeeList.find(emp => emp.EmployeeID === form.EmployeeID);
+            const employeeName = employee ? `${employee.FirstName} ${employee.LastName}` : `Employee #${form.EmployeeID}`;
+            
+            // Format the date for a more readable success message
+            const shiftDate = new Date(form.scheduleDate).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            setSuccessMessage(`Shift scheduled for ${employeeName} on ${shiftDate} from ${form.shiftStart} to ${form.shiftEnd}`);
+            setShowSuccessPopup(true);
+            
+            // Auto-hide popup after 3 seconds
+            setTimeout(() => {
+                setShowSuccessPopup(false);
+            }, 3000);
+            
             setForm({ EmployeeID: "", Department: "", scheduleDate: "", shiftStart: "", shiftEnd: "", isRecurring: false });
             onScheduleAdded(); // Trigger refresh in parent
         } else {
@@ -47,7 +68,30 @@ const ScheduleForm = ({ onScheduleAdded }) => {
     };
 
     return (
-        <div className="bg-white/10 p-4 rounded-xl">
+        <div className="bg-white/10 p-4 rounded-xl relative">
+            {/* Success Popup */}
+            {showSuccessPopup && (
+                <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/70">
+                    <div className="bg-gradient-to-b from-gray-900 to-black border border-purple-500 rounded-xl p-8 max-w-md mx-auto shadow-lg shadow-purple-500/30 animate-fadeIn">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <h2 className="text-2xl font-bold text-purple-300 mb-2">Shift Added!</h2>
+                            <p className="text-gray-300 mb-6">{successMessage}</p>
+                            <button 
+                                onClick={() => setShowSuccessPopup(false)}
+                                className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition duration-200"
+                            >
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <h2 className="text-lg font-semibold mb-2">Create Employee Shift</h2>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Employee Dropdown */}
