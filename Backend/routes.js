@@ -352,6 +352,10 @@ function routes(req, res) {
         return actions.resolveWeatherAlert(req, res);
     } 
 
+    if (url.startsWith("/add-weather-alert") && method === "POST") {
+        return actions.addWeatherAlert(req, res);
+    }
+
     if (url.startsWith("/payment-info") && method === "POST") {
         return actions.addPaymentInfo(req, res);
     } 
