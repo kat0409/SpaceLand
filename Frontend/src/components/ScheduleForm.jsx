@@ -51,6 +51,8 @@ const ScheduleForm = ({ onScheduleAdded }) => {
             <h2 className="text-lg font-semibold mb-2">Create Employee Shift</h2>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Employee Dropdown */}
+                <div className="flex flex-col">
+                    <label className="text-sm text-gray-300 mb-1">Select Employee</label>
                     <select
                     name="EmployeeID"
                     value={form.EmployeeID}
@@ -82,18 +84,37 @@ const ScheduleForm = ({ onScheduleAdded }) => {
                         </option>
                     ))}
                 </select>
-                {/* Department Display (auto-filled) */}
-                <input
-                    type="text"
-                    name="Department"
-                    value={form.Department}
-                    readOnly
-                    className="p-2 rounded bg-black/30 text-white border border-gray-700"
-                />
+                </div>
 
-                <input type="date" name="scheduleDate" value={form.scheduleDate} onChange={handleChange} required className="p-2 rounded bg-black/50 text-white border border-gray-700" />
-                <input type="time" name="shiftStart" value={form.shiftStart} onChange={handleChange} required className="p-2 rounded bg-black/50 text-white border border-gray-700" />
-                <input type="time" name="shiftEnd" value={form.shiftEnd} onChange={handleChange} required className="p-2 rounded bg-black/50 text-white border border-gray-700" />
+                {/* Department Display (auto-filled) */}
+                <div className="flex flex-col">
+                    <label className="text-sm text-gray-300 mb-1">Department</label>
+                    <input
+                        type="text"
+                        name="Department"
+                        value={form.Department}
+                        readOnly
+                        className="p-2 rounded bg-black/30 text-white border border-gray-700"
+                    />
+                </div>
+
+                {/* Date field */}
+                <div className="flex flex-col">
+                    <label className="text-sm text-gray-300 mb-1">Shift Date</label>
+                    <input type="date" name="scheduleDate" value={form.scheduleDate} onChange={handleChange} required className="p-2 rounded bg-black/50 text-white border border-gray-700" />
+                </div>
+
+                {/* Start Time field */}
+                <div className="flex flex-col">
+                    <label className="text-sm text-gray-300 mb-1">Start Time</label>
+                    <input type="time" name="shiftStart" value={form.shiftStart} onChange={handleChange} required className="p-2 rounded bg-black/50 text-white border border-gray-700" />
+                </div>
+
+                {/* End Time field */}
+                <div className="flex flex-col">
+                    <label className="text-sm text-gray-300 mb-1">End Time</label>
+                    <input type="time" name="shiftEnd" value={form.shiftEnd} onChange={handleChange} required className="p-2 rounded bg-black/50 text-white border border-gray-700" />
+                </div>
 
                 <label className="flex items-center text-white space-x-2">
                     <input type="checkbox" name="isRecurring" checked={form.isRecurring} onChange={handleChange} />
