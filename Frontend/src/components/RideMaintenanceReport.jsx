@@ -18,6 +18,22 @@ export default function RideMaintenanceReport() {
             .catch(console.error);
     }, []);
 
+    // Helper function to format dates correctly
+    const formatDate = (dateString) => {
+        if (!dateString) return 'Unknown';
+        
+        // Create a date object and adjust for timezone
+        const date = new Date(dateString);
+        
+        // Format the date as MM/DD/YYYY
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            timeZone: 'UTC' // Use UTC to avoid timezone issues
+        });
+    };
+
     const fetchReport = () => {
         setLoading(true);
         setError(null); // reset error on each fetch
@@ -63,6 +79,19 @@ export default function RideMaintenanceReport() {
         fetchReport();
     }, []);
 
+    // Function to get status color class
+    const getStatusColor = (status) => {
+        status = (status || '').toLowerCase();
+        switch (status) {
+            case 'completed':
+                return 'bg-green-500/20 text-green-300';
+            case 'pending':
+                return 'bg-yellow-500/20 text-yellow-300';
+            default:
+                return 'bg-gray-500/20 text-gray-300';
+        }
+    };
+
     return (
         <div className="bg-gray-800/50 rounded-lg p-6">
             <h2 className="text-2xl font-bold mb-4">Ride Maintenance Report</h2>
@@ -96,33 +125,46 @@ export default function RideMaintenanceReport() {
                     Apply Filters
                 </button>
             </div>
-            {loading && <p>Loading...</p>}
-            {error && <p className="text-red-400">Error: {error}</p>}
-            {!loading && !error && report.length === 0 && <p>No maintenance records found.</p>}
+            {loading && (
+                <div className="text-center py-8">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500 mb-2"></div>
+                    <p>Loading maintenance report...</p>
+                </div>
+            )}
+            {error && <p className="text-red-400 bg-red-900/20 p-4 rounded-lg">Error: {error}</p>}
+            {!loading && !error && report.length === 0 && (
+                <div className="bg-gray-900/30 rounded-lg p-8 text-center">
+                    <p className="text-gray-400">No maintenance records found for the selected criteria.</p>
+                </div>
+            )}
             {report.length > 0 && (
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                        <thead className="text-purple-300">
+                        <thead className="text-purple-300 border-b border-white/10">
                             <tr>
-                                <th>Ride</th>
-                                <th>Assigned Employee</th>
-                                <th>Status</th>
-                                <th>Reason</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Days Taken</th>
+                                <th className="p-2 text-left">Ride</th>
+                                <th className="p-2 text-left">Assigned Employee</th>
+                                <th className="p-2 text-left">Status</th>
+                                <th className="p-2 text-left">Reason</th>
+                                <th className="p-2 text-left">Start Date</th>
+                                <th className="p-2 text-left">End Date</th>
+                                <th className="p-2 text-left">Days Taken</th>
                             </tr>
                         </thead>
                         <tbody>
                             {report.map((item, idx) => (
-                                <tr key={idx} className="border-t border-white/10">
-                                    <td>{item.RideName}</td>
-                                    <td>{item.AssignedEmployee}</td>
-                                    <td>{item.status}</td>
-                                    <td>{item.reason}</td>
-                                    <td>{item.StartDate}</td>
-                                    <td>{item.EndDate}</td>
-                                    <td>{item.DaysTaken}</td>
+                                <tr key={idx} className="border-b border-white/10 hover:bg-gray-700/30">
+                                    <td className="p-2">{item.RideName}</td>
+                                    <td className="p-2">{item.AssignedEmployee || 'Unassigned'}</td>
+                                    <td className="p-2">
+                                        <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(item.status)}`}>
+                                            {item.status || 'Unknown'}
+                                        </span>
+                                    </td>
+                                    <td className="p-2">{item.reason}</td>
+                                    <td className="p-2">{formatDate(item.StartDate)}</td>
+                                    <td className="p-2">{formatDate(item.EndDate)}</td>
+                                    <td className="p-2">{item.DaysTaken}</td>
                                 </tr>
                             ))}
                         </tbody>
