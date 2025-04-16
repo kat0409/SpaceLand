@@ -7,24 +7,59 @@ import MaintenanceRequestForm from "./MaintenanceRequestForm";
 import MarkMaintenanceCompletionForm from "./MarkMaintenanceCompletionForm";
 import RideMaintenanceReport from "../components/RideMaintenanceReport";
 import MaintenanceEmployeePerformanceReport from "../components/MaintenanceEmployeePerformanceReport";
+import WeatherAlertManager from "../components/WeatherAlertManager";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
 
 export default function MaintenanceSupervisorPortal() {
   const { auth, logout } = useContext(AuthContext);
   const [maintenanceRequests, setMaintenanceRequests] = useState([]);
+  const [filteredRequests, setFilteredRequests] = useState([]);
   const [rides, setRides] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showRequestDetails, setShowRequestDetails] = useState(false);
-  const [activeTab, setActiveTab] = useState('Dashboard');
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [requestFilter, setRequestFilter] = useState({
+    status: 'all',
+    sortBy: 'newest'
+  });
 
   useEffect(() => {
     if (auth.isAuthenticated && auth.role === 'supervisor' && localStorage.getItem('department') === 'maintenance') {
       fetchMaintenanceData();
     }
   }, [auth]);
+
+  useEffect(() => {
+    // Apply filters to maintenance requests
+    let result = [...maintenanceRequests];
+    
+    // Filter by status
+    if (requestFilter.status !== 'all') {
+      result = result.filter(request => 
+        (request.status || '').toLowerCase() === requestFilter.status.toLowerCase()
+      );
+    }
+    
+    // Sort requests
+    if (requestFilter.sortBy === 'newest') {
+      result.sort((a, b) => {
+        const dateA = new Date(a.MaintenanceStartDate || '');
+        const dateB = new Date(b.MaintenanceStartDate || '');
+        return dateB - dateA; // Newest first
+      });
+    } else if (requestFilter.sortBy === 'oldest') {
+      result.sort((a, b) => {
+        const dateA = new Date(a.MaintenanceStartDate || '');
+        const dateB = new Date(b.MaintenanceStartDate || '');
+        return dateA - dateB; // Oldest first
+      });
+    }
+    
+    setFilteredRequests(result);
+  }, [maintenanceRequests, requestFilter]);
 
   const fetchMaintenanceData = async () => {
     try {
@@ -73,6 +108,40 @@ export default function MaintenanceSupervisorPortal() {
     }
   };
 
+  // Helper function to format dates correctly
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Unknown';
+    
+    // Create a date object and adjust for timezone
+    const date = new Date(dateString);
+    
+    // Format the date as MM/DD/YYYY
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: 'UTC' // Use UTC to avoid timezone issues
+    });
+  };
+
+  // Helper function to format date and time
+  const formatDateTime = (dateString) => {
+    if (!dateString) return 'Unknown';
+    
+    // Create a date object and adjust for timezone
+    const date = new Date(dateString);
+    
+    // Format the date and time
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'UTC' // Use UTC to avoid timezone issues
+    });
+  };
+
   const handleCompleteMaintenance = async (requestId) => {
     try {
       const response = await fetch(`${BACKEND_URL}/supervisor/maintenance/complete-request`, {
@@ -99,9 +168,33 @@ export default function MaintenanceSupervisorPortal() {
     setShowRequestDetails(true);
   };
 
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setRequestFilter(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleLogout = () => {
     logout();
     window.location.href = "/auth";
+  };
+
+  // Function to get status color class
+  const getStatusColor = (status) => {
+    status = (status || '').toLowerCase();
+    switch (status) {
+      case 'completed':
+        return 'bg-green-500/20 text-green-300';
+      case 'pending':
+        return 'bg-yellow-500/20 text-yellow-300';
+      default:
+        return 'bg-gray-500/20 text-gray-300';
+    }
+  };
+
+  // Function to get ride name from ride ID
+  const getRideName = (rideId) => {
+    const ride = rides.find(r => r.RideID === rideId || r.rideID === rideId);
+    return ride ? (ride.RideName || ride.name) : `Ride #${rideId}`;
   };
 
   if (!auth.isAuthenticated || auth.role !== 'supervisor' || localStorage.getItem('department') !== 'maintenance') {
@@ -118,6 +211,18 @@ export default function MaintenanceSupervisorPortal() {
       </div>
     );
   }
+
+  // Get counts of maintenance requests by status
+  const pendingCount = maintenanceRequests.filter(r => 
+    (r.status || '').toLowerCase() === 'pending'
+  ).length;
+  
+  const completedCount = maintenanceRequests.filter(r => 
+    (r.status || '').toLowerCase() === 'completed'
+  ).length;
+
+  // Get total count
+  const totalCount = maintenanceRequests.length;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
@@ -146,6 +251,7 @@ export default function MaintenanceSupervisorPortal() {
             { key: 'dashboard', label: 'Dashboard' },
             { key: 'report', label: 'Ride Maintenance Report' },
             { key: 'performance', label: 'Employee Performance' },
+            { key: 'weather', label: 'Weather Alerts' },
           ].map(tab => (
             <button
               key={tab.key}
@@ -178,50 +284,142 @@ export default function MaintenanceSupervisorPortal() {
               <MarkMaintenanceCompletionForm />
             </div>
             {/* Dashboard grid view */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 gap-8">
               {/* Maintenance Request Status Section */}
               <motion.div 
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="bg-gray-800/50 rounded-lg p-6"
+                className="bg-gray-800/50 rounded-xl p-6"
               >
-                <h2 className="text-2xl font-bold mb-4">Maintenance Request Status</h2>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-bold">Maintenance Request Status</h2>
+                  <button
+                    onClick={fetchMaintenanceData}
+                    className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded transition text-sm"
+                  >
+                    Refresh Data
+                  </button>
+                </div>
+                
+                {/* Status Summary Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-yellow-800/30 border border-yellow-600/30 rounded-lg p-3 text-center">
+                    <h3 className="text-yellow-300 text-lg font-semibold">Pending</h3>
+                    <p className="text-2xl font-bold">{pendingCount}</p>
+                  </div>
+                  <div className="bg-green-800/30 border border-green-600/30 rounded-lg p-3 text-center">
+                    <h3 className="text-green-300 text-lg font-semibold">Completed</h3>
+                    <p className="text-2xl font-bold">{completedCount}</p>
+                  </div>
+                  <div className="bg-purple-800/30 border border-purple-600/30 rounded-lg p-3 text-center">
+                    <h3 className="text-purple-300 text-lg font-semibold">Total</h3>
+                    <p className="text-2xl font-bold">{totalCount}</p>
+                  </div>
+                </div>
+                
+                {/* Filter Controls */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="block text-sm mb-1 text-gray-400">Filter by Status</label>
+                    <select
+                      name="status"
+                      value={requestFilter.status}
+                      onChange={handleFilterChange}
+                      className="w-full p-2 bg-gray-900/50 border border-gray-700 rounded text-white"
+                    >
+                      <option value="all">All Statuses</option>
+                      <option value="pending">Pending</option>
+                      <option value="completed">Completed</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1 text-gray-400">Sort By</label>
+                    <select
+                      name="sortBy"
+                      value={requestFilter.sortBy}
+                      onChange={handleFilterChange}
+                      className="w-full p-2 bg-gray-900/50 border border-gray-700 rounded text-white"
+                    >
+                      <option value="newest">Date (Newest First)</option>
+                      <option value="oldest">Date (Oldest First)</option>
+                    </select>
+                  </div>
+                </div>
+                
                 {loading ? (
-                  <p>Loading maintenance requests...</p>
+                  <div className="text-center py-8">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500 mb-2"></div>
+                    <p>Loading maintenance requests...</p>
+                  </div>
                 ) : (
-                  <div className="space-y-4">
-                    {maintenanceRequests.length > 0 ? (
-                      maintenanceRequests.map((request, index) => (
-                        <div 
-                          key={request.RequestID || request.requestID || index}
-                          className="bg-gray-700/50 rounded-lg p-4 hover:bg-gray-700/70 transition cursor-pointer"
-                          onClick={() => handleViewRequestDetails(request)}
-                        >
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <h3 className="font-semibold">{request.RideName || request.rideName}</h3>
-                              <p className="text-sm text-gray-400">
-                                Status: {request.Status || request.status}
-                              </p>
-                            </div>
-                            <span className={`px-2 py-1 rounded text-sm ${
-                              (request.Priority || request.priority) === 'High' ? 'bg-red-500/20 text-red-300' :
-                              (request.Priority || request.priority) === 'Medium' ? 'bg-yellow-500/20 text-yellow-300' :
-                              'bg-green-500/20 text-green-300'
-                            }`}>
-                              {request.Priority || request.priority || 'Normal'}
-                            </span>
-                          </div>
-                        </div>
-                      ))
+                  <div className="overflow-x-auto">
+                    {filteredRequests.length > 0 ? (
+                      <table className="w-full text-sm">
+                        <thead className="text-left text-purple-300 border-b border-white/10">
+                          <tr>
+                            <th className="p-2">Ride</th>
+                            <th className="p-2">Issue</th>
+                            <th className="p-2">Status</th>
+                            <th className="p-2">Date</th>
+                            <th className="p-2">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredRequests.map((request, index) => (
+                            <tr 
+                              key={request.maintenanceID || index}
+                              className="border-b border-white/10 hover:bg-gray-700/30"
+                            >
+                              <td className="p-2 font-semibold">
+                                {getRideName(request.rideID)}
+                              </td>
+                              <td className="p-2">
+                                {request.reason || 'No reason provided'}
+                              </td>
+                              <td className="p-2">
+                                <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(request.status)}`}>
+                                  {request.status || 'Unknown'}
+                                </span>
+                              </td>
+                              <td className="p-2">
+                                {formatDate(request.MaintenanceStartDate)}
+                              </td>
+                              <td className="p-2">
+                                <button
+                                  onClick={() => handleViewRequestDetails(request)}
+                                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition text-xs mr-2"
+                                >
+                                  Details
+                                </button>
+                                {(request.status === 'pending') && (
+                                  <button
+                                    onClick={() => handleCompleteMaintenance(request.maintenanceID)}
+                                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded transition text-xs"
+                                  >
+                                    Complete
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     ) : (
-                      <p>No maintenance requests found</p>
+                      <div className="bg-gray-900/30 rounded-lg p-8 text-center">
+                        <p className="text-gray-400">No maintenance requests found matching your filters.</p>
+                        {requestFilter.status !== 'all' ? (
+                          <button
+                            onClick={() => setRequestFilter({ status: 'all', sortBy: 'newest' })}
+                            className="mt-2 text-purple-400 hover:text-purple-300 underline"
+                          >
+                            Clear filters
+                          </button>
+                        ) : null}
+                      </div>
                     )}
                   </div>
                 )}
               </motion.div>
-
-              {/* Add a second panel here if needed (like ride status or performance preview) */}
             </div>
           </>
         )}
@@ -239,54 +437,15 @@ export default function MaintenanceSupervisorPortal() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Ride Status Overview */}
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-gray-800/50 rounded-lg p-6"
-          >
-            <h2 className="text-2xl font-bold mb-4">Ride Status Overview</h2>
-            {loading ? (
-              <p>Loading ride status...</p>
-            ) : (
-              <div className="space-y-4">
-                {rides.length > 0 ? (
-                  rides.map((ride, index) => (
-                    <div 
-                      key={ride.RideID || ride.rideID || index}
-                      className="bg-gray-700/50 rounded-lg p-4"
-                    >
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="font-semibold">{ride.RideName || ride.rideName || ride.Name || ride.name}</h3>
-                          <p className="text-sm text-gray-400">
-                            {ride.LastMaintenanceDate ? 
-                              `Last Maintenance: ${new Date(ride.LastMaintenanceDate).toLocaleDateString()}` : 
-                              'No maintenance record'}
-                          </p>
-                        </div>
-                        <span className={`px-2 py-1 rounded text-sm ${
-                          (ride.Status || ride.status) === 'Operational' ? 'bg-green-500/20 text-green-300' :
-                          (ride.Status || ride.status) === 'Maintenance' ? 'bg-yellow-500/20 text-yellow-300' :
-                          'bg-red-500/20 text-red-300'
-                        }`}>
-                          {ride.Status || ride.status || 'Unknown'}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p>No rides found</p>
-                )}
-              </div>
-            )}
-          </motion.div>
-        </div>
+        {activeTab === 'weather' && (
+          <div className="bg-gray-800/50 rounded-lg p-6">
+            <WeatherAlertManager />
+          </div>
+        )}
 
         {/* Maintenance Request Details Modal */}
         {showRequestDetails && selectedRequest && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -296,22 +455,31 @@ export default function MaintenanceSupervisorPortal() {
               <div className="space-y-4">
                 <div>
                   <h3 className="font-semibold">Ride Information</h3>
-                  <p>Name: {selectedRequest.RideName}</p>
-                  <p>Type: {selectedRequest.RideType}</p>
+                  <p>Name: {getRideName(selectedRequest.rideID)}</p>
+                  <p>Ride ID: {selectedRequest.rideID || 'Not specified'}</p>
                 </div>
                 <div>
                   <h3 className="font-semibold">Request Details</h3>
-                  <p>Priority: {selectedRequest.Priority}</p>
-                  <p>Status: {selectedRequest.Status}</p>
-                  <p>Description: {selectedRequest.Description}</p>
+                  <p>Status: 
+                    <span className={`ml-2 px-2 py-1 rounded-full text-xs ${getStatusColor(selectedRequest.status)}`}>
+                      {selectedRequest.status || 'Unknown'}
+                    </span>
+                  </p>
+                  <p>Issue: {selectedRequest.reason || 'No description provided'}</p>
                 </div>
                 <div>
                   <h3 className="font-semibold">Timeline</h3>
-                  <p>Requested: {new Date(selectedRequest.RequestDate).toLocaleString()}</p>
-                  {selectedRequest.CompletionDate && (
-                    <p>Completed: {new Date(selectedRequest.CompletionDate).toLocaleString()}</p>
+                  <p>Requested: {formatDateTime(selectedRequest.MaintenanceStartDate)}</p>
+                  {selectedRequest.MaintenanceEndDate && (
+                    <p>Completed: {formatDateTime(selectedRequest.MaintenanceEndDate)}</p>
                   )}
                 </div>
+                {selectedRequest.MaintenanceEmployeeID && (
+                  <div>
+                    <h3 className="font-semibold">Assignment</h3>
+                    <p>Assigned to Employee ID: {selectedRequest.MaintenanceEmployeeID}</p>
+                  </div>
+                )}
               </div>
               <div className="mt-6 flex justify-end space-x-4">
                 <button
@@ -320,10 +488,10 @@ export default function MaintenanceSupervisorPortal() {
                 >
                   Close
                 </button>
-                {selectedRequest.Status === 'Pending' && (
+                {selectedRequest.status === 'pending' && (
                   <button
                     onClick={() => {
-                      handleCompleteMaintenance(selectedRequest.RequestID);
+                      handleCompleteMaintenance(selectedRequest.maintenanceID);
                       setShowRequestDetails(false);
                     }}
                     className="px-4 py-2 bg-green-600 rounded-lg hover:bg-green-700 transition"

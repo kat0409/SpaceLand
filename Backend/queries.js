@@ -746,7 +746,12 @@ const displayAlert = `
 `;
 
 const resolveWeatherAlert = `
-    UPDATE alerts SET isResolved = 1 WHERE alertID = ?
+    UPDATE weatheralerts SET isResolved = 1 WHERE alertID = ?
+`;
+
+const addWeatherAlert = `
+    INSERT INTO weatheralerts (alertMessage, timestamp, isResolved)
+    VALUES (?, NOW(), FALSE)
 `;
 
 const addPaymentInfo = `
@@ -852,6 +857,7 @@ module.exports = {
     getMerchandiseItems,
     displayAlert,
     resolveWeatherAlert,
+    addWeatherAlert,
     addPaymentInfo
 };
 

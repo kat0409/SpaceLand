@@ -91,6 +91,7 @@ const routeMap = {
         '/supervisor/HR/schedule',
         '/supervisor/HR/fire-employee',
         "/resolve-weather-alert",
+        "/add-weather-alert",
         "/payment-info"
     ],
     'PUT': [
