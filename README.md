@@ -172,27 +172,6 @@ The application is hosted at the following URLs:
 - **Frontend**: https://spaceland.vercel.app
 - **Backend**: https://spacelandmark.onrender.com
 
-### Login Credentials
-
-#### Visitor Access:
-- Username: katty123
-- Password: pass000
-
-#### Employee Access:
-- Username: katrod
-- Password: pass456
-
-#### Supervisor Access (HR):
-- Username: charlieb
-- Password: pass789
-
-#### Supervisor Access (Maintenance):
-- Username: edwardm
-- Password: pass654
-
-#### Supervisor Access (Merchandise):
-- Username: kat119
-- Password: password1
 
 ## 🛠️ Technologies Used
 
