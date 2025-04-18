@@ -126,7 +126,10 @@ export default function Auth() {
                 <input name="phone" placeholder="Phone" value={signupData.phone} onChange={handleSignupChange} className="input" />
                 <input name="email" type="email" placeholder="Email" value={signupData.email} onChange={handleSignupChange} className="input" required />
                 <input name="address" placeholder="Address" value={signupData.address} onChange={handleSignupChange} className="input" />
-                <input name="dateOfBirth" type="date" value={signupData.dateOfBirth} onChange={handleSignupChange} className="input" required />
+                <div>
+                  <label className="block text-sm text-purple-300 mb-1">Date of Birth</label>
+                  <input name="dateOfBirth" type="date" value={signupData.dateOfBirth} onChange={handleSignupChange} className="input w-full" required />
+                </div>
                 <input name="height" type="number" placeholder="Height (cm)" value={signupData.height} onChange={handleSignupChange} className="input" />
                 <input name="age" type="number" placeholder="Age" value={signupData.age} onChange={handleSignupChange} className="input" />
                 <select name="gender" value={signupData.gender} onChange={handleSignupChange} className="input">
