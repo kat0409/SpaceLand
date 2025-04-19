@@ -2643,48 +2643,46 @@ const getTransactionSummaryReport = (req, res) => {
   };  
 /////////////
 const getMerchBreakdownByDate = (req, res) => {
-    const { date } = url.parse(req.url, true).query;
-    
+    parsedUrl = url.parse(req.url, true);
+    const { date } = parsedUrl.query;
+  
     if (!date) {
-        return res.status(400).json({ error: "Missing date parameter" });
+      res.writeHead(400, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ error: "Missing date" }));
     }
-
-    let queryDate;
+  
+    // Convert date to MySQL format
+    let mysqlDate;
     try {
-        queryDate = new Date(date);
-        if (isNaN(queryDate.getTime())) {
-            throw new Error("Invalid date");
-        }
+      mysqlDate = new Date(date).toISOString().split('T')[0];
     } catch (e) {
-        return res.status(400).json({ error: "Invalid date format. Use YYYY-MM-DD" });
+      res.writeHead(400, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ error: "Invalid date format" }));
     }
-
-    const formattedDate = queryDate.toISOString().split('T')[0];
-    
+  
     const query = `
-        SELECT 
-            m.merchandiseID,
-            m.itemName, 
-            m.price,
-            COALESCE(SUM(mt.quantity), 0) AS totalSold,
-            m.quantity AS currentStock
-        FROM merchandise m
-        LEFT JOIN merchandisetransactions mt 
-            ON m.merchandiseID = mt.merchandiseID
-            AND DATE(mt.transactionDate) = ?
-        GROUP BY m.merchandiseID
-        ORDER BY totalSold DESC
+      SELECT m.itemName, SUM(mt.quantity) AS totalSold
+      FROM merchandisetransactions mt
+      JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+      WHERE DATE(mt.transactionDate) = ?
+      GROUP BY m.itemName
+      ORDER BY totalSold DESC
     `;
-
-    pool.query(query, [formattedDate], (err, results) => {
-        if (err) {
-            console.error("Database error:", err);
-            return res.status(500).json({ error: "Database query failed" });
-        }
-
-        res.status(200).json(results);
+  
+    pool.query(query, [mysqlDate], (err, results) => {
+      if (err) {
+        console.error("Merch breakdown error:", err);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ 
+          error: "Internal server error",
+          details: err.message 
+        }));
+      }
+  
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(results));
     });
-}; 
+};
 ///////////////////////////  
 
   const getBestWorstSellersReport = (req, res) => {
