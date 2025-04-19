@@ -2583,7 +2583,35 @@ const getTransactionSummaryReport = (req, res) => {
     });
   };    
 /////////////
-
+const getMerchBreakdownByDate = (req, res) => {
+    const { date } = url.parse(req.url, true).query;
+  
+    if (!date) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ error: "Missing date" }));
+    }
+  
+    const query = `
+      SELECT m.itemName, SUM(mt.quantity) AS totalSold
+      FROM merchandisetransactions mt
+      JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+      WHERE DATE(mt.transactionDate) = ?
+      GROUP BY m.itemName
+      ORDER BY totalSold DESC
+    `;
+  
+    pool.query(query, [date], (err, results) => {
+      if (err) {
+        console.error("Merch breakdown error:", err);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ error: "Internal server error" }));
+      }
+  
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(results));
+    });
+  };
+//////////////////////  
   const getBestWorstSellersReport = (req, res) => {
     const { startDate, endDate, transactionType = 'all' } = url.parse(req.url, true).query;
   
@@ -3159,5 +3187,6 @@ module.exports = {
     addPaymentInfo,
     resolveWeatherAlert,
     displayAlert,
-    addWeatherAlert
+    addWeatherAlert,
+    getMerchBreakdownByDate
 };  
