@@ -2651,6 +2651,15 @@ const getMerchBreakdownByDate = (req, res) => {
       return res.end(JSON.stringify({ error: "Missing date" }));
     }
   
+    // Convert date to MySQL format
+    let mysqlDate;
+    try {
+      mysqlDate = new Date(date).toISOString().split('T')[0];
+    } catch (e) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ error: "Invalid date format" }));
+    }
+  
     const query = `
       SELECT m.itemName, SUM(mt.quantity) AS totalSold
       FROM merchandisetransactions mt
@@ -2660,17 +2669,20 @@ const getMerchBreakdownByDate = (req, res) => {
       ORDER BY totalSold DESC
     `;
   
-    pool.query(query, [date], (err, results) => {
+    pool.query(query, [mysqlDate], (err, results) => {
       if (err) {
         console.error("Merch breakdown error:", err);
         res.writeHead(500, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify({ error: "Internal server error" }));
+        return res.end(JSON.stringify({ 
+          error: "Internal server error",
+          details: err.message 
+        }));
       }
   
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(results));
     });
-};  
+}; 
 ///////////////////////////  
 
   const getBestWorstSellersReport = (req, res) => {
