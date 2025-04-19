@@ -171,6 +171,32 @@ export default function TransactionSummaryReport() {
           </tbody>
         </table>
       )}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-white text-black rounded-xl p-6 w-[90%] max-w-lg">
+            <h3 className="text-xl font-bold mb-4">
+              Merchandise Breakdown for {selectedDate}
+            </h3>
+            {modalData.length > 0 ? (
+              <ul className="space-y-2">
+                {modalData.map((item, idx) => (
+                  <li key={idx}>
+                    {item.itemName}: {item.totalSold}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No merchandise sales found for this date.</p>
+            )}
+            <button
+              onClick={() => setShowModal(false)}
+              className="mt-6 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
