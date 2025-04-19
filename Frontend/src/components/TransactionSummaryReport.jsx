@@ -63,6 +63,18 @@ export default function TransactionSummaryReport() {
     setLoading(false);
   };
 
+  const handleMerchBreakdown = async (date) => {
+    setSelectedDate(date);
+    try {
+      const res = await fetch(`${BACKEND_URL}/supervisor/merchandise/merch-breakdown?date=${date}`);
+      const data = await res.json();
+      setModalData(data);
+      setShowModal(true);
+    } catch (err) {
+      console.error("Error fetching merch breakdown:", err);
+    }
+  };  
+
   return (
     <div className="bg-white/10 p-6 rounded-xl space-y-6">
       <h2 className="text-2xl font-semibold text-white">Transaction Summary Report</h2>
@@ -122,7 +134,9 @@ export default function TransactionSummaryReport() {
             <tr>
               <th className="p-2">Date</th>
               <th className="p-2">Transaction Type</th>
+              <th className="p-2">Quantity</th>
               <th className="p-2">Total Revenue</th>
+              <th className="p-2">Quantity Breakdown</th>
             </tr>
           </thead>
           <tbody>
@@ -131,12 +145,25 @@ export default function TransactionSummaryReport() {
                 <tr key={idx} className="border-t border-white/10 hover:bg-white/5">
                   <td className="p-2">{row.transactionDate}</td>
                   <td className="p-2 capitalize">{row.transactionType}</td>
+                  <td className="p-2">{row.totalQty}</td>
                   <td className="p-2">${parseFloat(row.totalRevenue).toFixed(2)}</td>
+                  <td className="p-2">
+                    {row.transactionType === 'merch' ? (
+                      <button
+                        className="text-blue-400 hover:underline"
+                        onClick={() => handleMerchBreakdown(row.transactionDate)}
+                      >
+                        See Details
+                      </button>
+                    ) : (
+                      row.breakdown
+                    )}
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="3" className="text-center p-4 text-gray-400">
+                <td colSpan="5" className="text-center p-4 text-gray-400">
                   No transactions found for selected filters.
                 </td>
               </tr>
