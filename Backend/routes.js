@@ -360,6 +360,10 @@ function routes(req, res) {
         return actions.addPaymentInfo(req, res);
     } 
 
+    if (url.startsWith('/supervisor/merchandise/merch-breakdown') && method === 'GET') {
+        return actions.getMerchBreakdownByDate(req, res);
+    }
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Route not handled by router' }));
 }
