@@ -73,7 +73,7 @@ export default function TransactionSummaryReport() {
     } catch (err) {
       console.error("Error fetching merch breakdown:", err);
     }
-  };  
+  };
 
   return (
     <div className="bg-white/10 p-6 rounded-xl space-y-6">
@@ -145,7 +145,7 @@ export default function TransactionSummaryReport() {
                 <tr key={idx} className="border-t border-white/10 hover:bg-white/5">
                   <td className="p-2">{row.transactionDate}</td>
                   <td className="p-2 capitalize">{row.transactionType}</td>
-                  <td className="p-2">{row.totalQty}</td>
+                  <td className="p-2">{row.totalQty ?? '-'}</td>
                   <td className="p-2">${parseFloat(row.totalRevenue).toFixed(2)}</td>
                   <td className="p-2">
                     {row.transactionType === 'merch' ? (
@@ -156,7 +156,7 @@ export default function TransactionSummaryReport() {
                         See Details
                       </button>
                     ) : (
-                      row.breakdown
+                      row.breakdown || '-'
                     )}
                   </td>
                 </tr>
@@ -171,6 +171,8 @@ export default function TransactionSummaryReport() {
           </tbody>
         </table>
       )}
+
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-white text-black rounded-xl p-6 w-[90%] max-w-lg">
