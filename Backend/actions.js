@@ -2643,44 +2643,46 @@ const getTransactionSummaryReport = (req, res) => {
   };  
 /////////////
 const getMerchBreakdownByDate = (req, res) => {
-    parsedUrl = url.parse(req.url, true);
-    const { date } = parsedUrl.query;
-  
+    const { date } = url.parse(req.url, true).query;
+    
     if (!date) {
-      res.writeHead(400, { "Content-Type": "application/json" });
-      return res.end(JSON.stringify({ error: "Missing date" }));
+        return res.status(400).json({ error: "Missing date parameter" });
     }
-  
-    // Convert date to MySQL format
-    let mysqlDate;
+
+    let queryDate;
     try {
-      mysqlDate = new Date(date).toISOString().split('T')[0];
+        queryDate = new Date(date);
+        if (isNaN(queryDate.getTime())) {
+            throw new Error("Invalid date");
+        }
     } catch (e) {
-      res.writeHead(400, { "Content-Type": "application/json" });
-      return res.end(JSON.stringify({ error: "Invalid date format" }));
+        return res.status(400).json({ error: "Invalid date format. Use YYYY-MM-DD" });
     }
-  
+
+    const formattedDate = queryDate.toISOString().split('T')[0];
+    
     const query = `
-      SELECT m.itemName, SUM(mt.quantity) AS totalSold
-      FROM merchandisetransactions mt
-      JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
-      WHERE DATE(mt.transactionDate) = ?
-      GROUP BY m.itemName
-      ORDER BY totalSold DESC
+        SELECT 
+            m.merchandiseID,
+            m.itemName, 
+            m.price,
+            COALESCE(SUM(mt.quantity), 0) AS totalSold,
+            m.quantity AS currentStock
+        FROM merchandise m
+        LEFT JOIN merchandisetransactions mt 
+            ON m.merchandiseID = mt.merchandiseID
+            AND DATE(mt.transactionDate) = ?
+        GROUP BY m.merchandiseID
+        ORDER BY totalSold DESC
     `;
-  
-    pool.query(query, [mysqlDate], (err, results) => {
-      if (err) {
-        console.error("Merch breakdown error:", err);
-        res.writeHead(500, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify({ 
-          error: "Internal server error",
-          details: err.message 
-        }));
-      }
-  
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(results));
+
+    pool.query(query, [formattedDate], (err, results) => {
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).json({ error: "Database query failed" });
+        }
+
+        res.status(200).json(results);
     });
 }; 
 ///////////////////////////  
