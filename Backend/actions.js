@@ -2571,72 +2571,60 @@ const getTransactionSummaryReport = (req, res) => {
       // All transactions (simplified summary)
       sql = `
         SELECT 
-          DATE(t.transactionDate) AS transactionDate,
-          'ticket' AS transactionType,
-          COUNT(*) AS totalQty,
-          SUM(tix.price) AS totalRevenue,
-          ANY_VALUE(bd.breakdown) AS breakdown
+        DATE(t.transactionDate) AS transactionDate,
+        'ticket' AS transactionType,
+        COUNT(*) AS totalQty,
+        SUM(tix.price) AS totalRevenue,
+        ANY_VALUE(bd.breakdown) AS breakdown
         FROM tickettransactions t
         JOIN tickets tix ON t.transactionID = tix.transactionID
         LEFT JOIN (
-          SELECT 
-            DATE(t2.transactionDate) AS date,
-            GROUP_CONCAT(CONCAT(t2.ticketType, ': ', ct) SEPARATOR ', ') AS breakdown
-          FROM (
-            SELECT 
-              DATE(transactionDate) AS transactionDate,
-              ticketType,
-              COUNT(*) AS ct
-            FROM tickettransactions
-            GROUP BY DATE(transactionDate), ticketType
-          ) t2
-          GROUP BY t2.transactionDate
-        ) bd ON DATE(t.transactionDate) = bd.date
+        SELECT 
+            DATE(transactionDate) AS transactionDate,
+            GROUP_CONCAT(CONCAT(ticketType, ': ', COUNT(*))) AS breakdown
+        FROM tickettransactions
+        GROUP BY DATE(transactionDate), ticketType
+        ) bd ON DATE(t.transactionDate) = bd.transactionDate
         WHERE DATE(t.transactionDate) BETWEEN ? AND ?
         GROUP BY DATE(t.transactionDate)
-  
+
         UNION ALL
-  
+
+        -- MEAL PLANS
         SELECT 
-          DATE(m.transactionDate) AS transactionDate,
-          'mealplan' AS transactionType,
-          COUNT(*) AS totalQty,
-          SUM(mp.price) AS totalRevenue,
-          ANY_VALUE(bd.breakdown) AS breakdown
+        DATE(m.transactionDate) AS transactionDate,
+        'mealplan' AS transactionType,
+        COUNT(*) AS totalQty,
+        SUM(mp.price) AS totalRevenue,
+        ANY_VALUE(bd.breakdown) AS breakdown
         FROM mealplantransactions m
         JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
         LEFT JOIN (
-          SELECT 
-            DATE(m2.transactionDate) AS date,
-            GROUP_CONCAT(CONCAT(m2.mealPlanName, ': ', ct) SEPARATOR ', ') AS breakdown
-          FROM (
-            SELECT 
-              DATE(mt.transactionDate) AS transactionDate,
-              mp.mealPlanName,
-              COUNT(*) AS ct
-            FROM mealplantransactions mt
-            JOIN mealplans mp ON mt.mealPlanID = mp.mealPlanID
-            GROUP BY DATE(mt.transactionDate), mp.mealPlanName
-          ) m2
-          GROUP BY m2.transactionDate
-        ) bd ON DATE(m.transactionDate) = bd.date
+        SELECT 
+            DATE(mt.transactionDate) AS transactionDate,
+            GROUP_CONCAT(CONCAT(mp.mealPlanName, ': ', COUNT(*))) AS breakdown
+        FROM mealplantransactions mt
+        JOIN mealplans mp ON mt.mealPlanID = mp.mealPlanID
+        GROUP BY DATE(mt.transactionDate), mp.mealPlanName
+        ) bd ON DATE(m.transactionDate) = bd.transactionDate
         WHERE DATE(m.transactionDate) BETWEEN ? AND ?
         GROUP BY DATE(m.transactionDate)
-  
+
         UNION ALL
-  
+
         SELECT 
-          DATE(transactionDate) AS transactionDate,
-          'merch' AS transactionType,
-          SUM(quantity) AS totalQty,
-          SUM(totalAmount) AS totalRevenue,
-          'see details' AS breakdown
-        FROM merchandisetransactions
-        WHERE DATE(transactionDate) BETWEEN ? AND ?
-        GROUP BY DATE(transactionDate)
-  
+        DATE(mt.transactionDate) AS transactionDate,
+        'merch' AS transactionType,
+        SUM(mt.quantity) AS totalQty,
+        SUM(mt.totalAmount) AS totalRevenue,
+        GROUP_CONCAT(CONCAT(m.itemName, ': ', SUM(mt.quantity))) AS breakdown
+        FROM merchandisetransactions mt
+        JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+        WHERE DATE(mt.transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(mt.transactionDate)
+
         ORDER BY transactionDate
-      `;
+      `
       params = [startDate, endDate, startDate, endDate, startDate, endDate];
     }
   
@@ -2651,48 +2639,6 @@ const getTransactionSummaryReport = (req, res) => {
       res.end(JSON.stringify(results));
     });
   };  
-/////////////
-const getMerchBreakdownByDate = (req, res) => {
-    parsedUrl = url.parse(req.url, true);
-    const { date } = parsedUrl.query;
-  
-    if (!date) {
-      res.writeHead(400, { "Content-Type": "application/json" });
-      return res.end(JSON.stringify({ error: "Missing date" }));
-    }
-  
-    // Convert date to MySQL format
-    let mysqlDate;
-    try {
-      mysqlDate = new Date(date).toISOString().split('T')[0];
-    } catch (e) {
-      res.writeHead(400, { "Content-Type": "application/json" });
-      return res.end(JSON.stringify({ error: "Invalid date format" }));
-    }
-  
-    const query = `
-      SELECT m.itemName, SUM(mt.quantity) AS totalSold
-      FROM merchandisetransactions mt
-      JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
-      WHERE DATE(mt.transactionDate) = ?
-      GROUP BY m.itemName
-      ORDER BY totalSold DESC
-    `;
-  
-    pool.query(query, [mysqlDate], (err, results) => {
-      if (err) {
-        console.error("Merch breakdown error:", err);
-        res.writeHead(500, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify({ 
-          error: "Internal server error",
-          details: err.message 
-        }));
-      }
-  
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(results));
-    });
-};
 ///////////////////////////  
 
   const getBestWorstSellersReport = (req, res) => {
@@ -3271,5 +3217,4 @@ module.exports = {
     resolveWeatherAlert,
     displayAlert,
     addWeatherAlert,
-    getMerchBreakdownByDate
 };  

@@ -54,7 +54,7 @@ export default function TransactionSummaryReport() {
           ...row,
           totalQty: row.totalQty !== null ? parseInt(row.totalQty, 10) : 0,
           totalRevenue: parseFloat(row.totalRevenue || 0),
-          breakdown: row.breakdown || '-'
+          breakdown: row.breakdown !== undefined && row.breakdown !== null ? String(row.breakdown) : '-'
         }));
 
         setReportData(processedData);
