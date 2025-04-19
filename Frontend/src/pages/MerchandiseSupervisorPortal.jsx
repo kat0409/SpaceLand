@@ -25,7 +25,7 @@ export default function SupervisorPortal() {
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
-    const {logout} = useContext(AuthContext);
+    const {logout, auth} = useContext(AuthContext);
     /*const [filters, setFilters] = useState({
         startDate: '',
         endDate: '',
@@ -153,72 +153,44 @@ export default function SupervisorPortal() {
     };
 
     useEffect(() => {
+        // Ensure auth is initialized before making requests
+        if (!auth) return;
+        
         // Fetch low stock items
         fetch(`${BACKEND_URL}/supervisor/merchandise/low-stock`)
             .then(res => res.json())
             .then(data => setLowStock(data))
             .catch(err => console.error('Low Stock Error:', err));
-        
-        // Fetch ticket sales
+
+        // Fetch ticket sales report
         fetch(`${BACKEND_URL}/supervisor/merchandise/ticket-sales`)
             .then(res => res.json())
             .then(data => setTicketSales(data))
-            .catch(err => console.error('Ticket Sales Error:', err));
-        
+            .catch(err => console.error('Ticket Sales Report Error:', err));
+
         // Fetch visitor purchases report
         fetch(`${BACKEND_URL}/supervisor/merchandise/visitor-purchases`)
             .then(res => res.json())
             .then(data => setVisitorPurchasesReport(data))
             .catch(err => console.error('Visitor Purchases Report Error:', err));
         
-        // Fetch low stock notifications
-        fetch(`${BACKEND_URL}/supervisor/merchandise/notifications?SupervisorID=12`)
-            .then(res => res.json())
-            .then(data => setLowStockItems(data))
+        // Fetch low stock notifications - fixed to use auth.userID instead of hardcoded value
+        console.log(`Fetching notifications with SupervisorID: ${auth.userID}`);
+        fetch(`${BACKEND_URL}/supervisor/merchandise/notifications?SupervisorID=${auth.userID}`)
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! Status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                console.log('Low stock notifications received:', data);
+                setLowStockItems(data);
+            })
             .catch(err => console.error('Error fetching low stock notifications:', err));
         
-        // Fetch merchandise data
-        fetch(`${BACKEND_URL}/supervisor/merchandise/merch`)
-            .then((res) => res.json())
-            .then((data) => {
-                if (Array.isArray(data)) {
-                    setMerchandise(data);
-                } else {
-                    console.error("Unexpected merchandise data:", data);
-                }
-            })
-            .catch((err) => {
-                console.error("Error fetching merchandise:", err);
-            });
-        
-        // Fetch merchandise orders
-        fetch(`${BACKEND_URL}/supervisor/merchandise/orders`)
-            .then((res) => res.json())
-            .then((data) => {
-                if (Array.isArray(data)) {
-                    setMerchReorders(data);
-                } else {
-                    console.error("Unexpected order data:", data);
-                }
-            })
-            .catch((err) => {
-                console.error("Error fetching merchandise orders:", err);
-            });
-        
-        // Fetch merchandise sales data for charts
-        /*fetch(`${BACKEND_URL}/supervisor/merchandise/sales-data`)
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data)) {
-                    setSalesData(data);
-                } else {
-                    console.error("Unexpected sales data:", data);
-                }
-            })
-            .catch(err => console.error("Error fetching sales data:", err));*/
-            
         fetchFilteredReport();
-    }, []);
+    }, [auth]); // Changed dependency to auth object itself
 
     useEffect(() => {
         fetchFilteredReport();

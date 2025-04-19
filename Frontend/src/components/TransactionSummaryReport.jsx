@@ -2,6 +2,16 @@ import React, { useState, useEffect } from 'react';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
+// Add CSS styles for the modal
+const styles = {
+  modalOverlay: `fixed inset-0 bg-black/60 flex items-center justify-center z-50`,
+  modalContent: `bg-white text-black rounded-xl p-6 w-[90%] max-w-lg`,
+  merchTable: `w-full border-collapse mt-4`,
+  tableHeader: `border-b-2 border-gray-200 text-left py-2`,
+  tableCell: `border-b border-gray-200 py-2`,
+  closeButton: `mt-6 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700`
+};
+
 export default function TransactionSummaryReport() {
   const [filters, setFilters] = useState({
     startDate: '',
@@ -83,11 +93,32 @@ export default function TransactionSummaryReport() {
     setSelectedDate(date);
     try {
       const res = await fetch(`${BACKEND_URL}/supervisor/merchandise/merch-breakdown?date=${date}`);
+      
+      if (!res.ok) {
+        throw new Error(`Failed to fetch merchandise breakdown: ${res.status}`);
+      }
+      
       const data = await res.json();
-      setModalData(data);
+      console.log('Raw merchandise breakdown data:', data);
+      
+      // Process the data to ensure totalSold is a number
+      const processedData = data.map(item => {
+        console.log('Processing item:', item);
+        return {
+          ...item,
+          itemName: item.itemName || 'Unknown Item',
+          totalSold: item.totalSold !== null && item.totalSold !== undefined 
+            ? parseInt(item.totalSold, 10) 
+            : 0
+        };
+      });
+      
+      console.log('Processed merchandise breakdown data:', processedData);
+      setModalData(processedData);
       setShowModal(true);
     } catch (err) {
       console.error("Error fetching merch breakdown:", err);
+      alert(`Failed to load merchandise breakdown: ${err.message}`);
     }
   };
 
@@ -197,28 +228,32 @@ export default function TransactionSummaryReport() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-white text-black rounded-xl p-6 w-[90%] max-w-lg">
-            <h3 className="text-xl font-bold mb-4">
-              Merchandise Breakdown for {selectedDate}
-            </h3>
-            {modalData.length > 0 ? (
-              <ul className="space-y-2">
-                {modalData.map((item, idx) => (
-                  <li key={idx}>
-                    {item.itemName}: {item.totalSold}
-                  </li>
-                ))}
-              </ul>
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h2 className="text-xl font-bold mb-4">Merchandise Breakdown for {selectedDate}</h2>
+            {modalData.length === 0 ? (
+              <p>No merchandise data available for this date.</p>
             ) : (
-              <p>No merchandise sales found for this date.</p>
+              <table className={styles.merchTable}>
+                <thead>
+                  <tr>
+                    <th className={styles.tableHeader}>Item</th>
+                    <th className={`${styles.tableHeader} text-right`}>Quantity Sold</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {modalData.map((item, index) => (
+                    <tr key={index}>
+                      <td className={styles.tableCell}>{item.itemName || 'Unknown Item'}</td>
+                      <td className={`${styles.tableCell} text-right`}>
+                        {Number(item.totalSold) > 0 ? formatNumber(Number(item.totalSold)) : 0}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
-            <button
-              onClick={() => setShowModal(false)}
-              className="mt-6 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
-            >
-              Close
-            </button>
+            <button onClick={() => setShowModal(false)} className={styles.closeButton}>Close</button>
           </div>
         </div>
       )}
