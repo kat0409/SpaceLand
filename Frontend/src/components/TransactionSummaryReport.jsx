@@ -231,7 +231,7 @@ export default function TransactionSummaryReport() {
       {showModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
-            <h2 className="text-xl font-bold mb-4">Merchandise Inventory as of {selectedDate}</h2>
+            <h2 className="text-xl font-bold mb-4">Merchandise Breakdown for {selectedDate}</h2>
             {modalData.length === 0 ? (
               <p>No merchandise data available for this date.</p>
             ) : (
@@ -239,7 +239,7 @@ export default function TransactionSummaryReport() {
                 <thead>
                   <tr>
                     <th className={styles.tableHeader}>Item</th>
-                    <th className={`${styles.tableHeader} text-right`}>Quantity in Stock</th>
+                    <th className={`${styles.tableHeader} text-right`}>Quantity Sold</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -247,7 +247,7 @@ export default function TransactionSummaryReport() {
                     <tr key={index}>
                       <td className={styles.tableCell}>{item.itemName || 'Unknown Item'}</td>
                       <td className={`${styles.tableCell} text-right`}>
-                        {Number(item.quantity) > 0 ? formatNumber(Number(item.quantity)) : 0}
+                        {Number(item.totalSold) > 0 ? formatNumber(Number(item.totalSold)) : 0}
                       </td>
                     </tr>
                   ))}
