@@ -10,7 +10,7 @@ export default function MaintenanceRequestForm(){
     const [reason, setReason] = useState('');
     const [message, setMessage] = useState('');
 
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
     useEffect(() => {
         fetch(`${BACKEND_URL}/supervisor/maintenance/rides`)

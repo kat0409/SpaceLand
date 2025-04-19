@@ -7,7 +7,7 @@ const DirectImageUploadModal = ({ isOpen, onClose, item, onUploadSuccess }) => {
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
   
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];

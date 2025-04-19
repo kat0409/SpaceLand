@@ -11,7 +11,7 @@ import { AuthContext } from '../components/AuthProvider';
 import TransactionSummaryReport from '../components/TransactionSummaryReport';
 import BestWorstSellerReport from "../components/BestWorstSellerReport";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
 export default function SupervisorPortal() {
     const [lowStock, setLowStock] = useState([]);
@@ -71,7 +71,7 @@ export default function SupervisorPortal() {
             if (filters.transactionType) params.append("transactionType", filters.transactionType);
             if (filters.bestOnly) params.append("bestOnly", filters.bestOnly);
         
-            const response = await fetch(`https://spacelandmark.onrender.com/supervisor/merchandise/sales-report?${params.toString()}`);
+            const response = await fetch(`https://spaceland.onrender.com/supervisor/merchandise/sales-report?${params.toString()}`);
             const data = await response.json();
         
         if (!Array.isArray(data)) {

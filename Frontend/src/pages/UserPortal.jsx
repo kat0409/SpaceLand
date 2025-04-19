@@ -13,7 +13,7 @@ export default function UserPortal() {
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const BACKEND_URL = 'https://spacelandmark.onrender.com';
+  const BACKEND_URL = 'https://spaceland.onrender.com';
   const visitorID = localStorage.getItem('VisitorID');
 
   useEffect(() => {

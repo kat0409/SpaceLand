@@ -9,7 +9,7 @@ import RideMaintenanceReport from "../components/RideMaintenanceReport";
 import MaintenanceEmployeePerformanceReport from "../components/MaintenanceEmployeePerformanceReport";
 import WeatherAlertManager from "../components/WeatherAlertManager";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
 export default function MaintenanceSupervisorPortal() {
   const { auth, logout } = useContext(AuthContext);

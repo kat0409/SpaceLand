@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://spacelandmark.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://spaceland.onrender.com";
 
 export default function BestWorstSellerReport() {
   const [filters, setFilters] = useState({
