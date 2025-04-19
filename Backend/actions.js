@@ -2571,60 +2571,72 @@ const getTransactionSummaryReport = (req, res) => {
       // All transactions (simplified summary)
       sql = `
         SELECT 
-        DATE(t.transactionDate) AS transactionDate,
-        'ticket' AS transactionType,
-        COUNT(*) AS totalQty,
-        SUM(tix.price) AS totalRevenue,
-        ANY_VALUE(bd.breakdown) AS breakdown
+          DATE(t.transactionDate) AS transactionDate,
+          'ticket' AS transactionType,
+          COUNT(*) AS totalQty,
+          SUM(tix.price) AS totalRevenue,
+          ANY_VALUE(bd.breakdown) AS breakdown
         FROM tickettransactions t
         JOIN tickets tix ON t.transactionID = tix.transactionID
         LEFT JOIN (
-        SELECT 
-            DATE(transactionDate) AS transactionDate,
-            GROUP_CONCAT(CONCAT(ticketType, ': ', COUNT(*))) AS breakdown
-        FROM tickettransactions
-        GROUP BY DATE(transactionDate), ticketType
-        ) bd ON DATE(t.transactionDate) = bd.transactionDate
+          SELECT 
+            DATE(t2.transactionDate) AS date,
+            GROUP_CONCAT(CONCAT(t2.ticketType, ': ', ct) SEPARATOR ', ') AS breakdown
+          FROM (
+            SELECT 
+              DATE(transactionDate) AS transactionDate,
+              ticketType,
+              COUNT(*) AS ct
+            FROM tickettransactions
+            GROUP BY DATE(transactionDate), ticketType
+          ) t2
+          GROUP BY t2.transactionDate
+        ) bd ON DATE(t.transactionDate) = bd.date
         WHERE DATE(t.transactionDate) BETWEEN ? AND ?
         GROUP BY DATE(t.transactionDate)
-
+  
         UNION ALL
-
-        -- MEAL PLANS
+  
         SELECT 
-        DATE(m.transactionDate) AS transactionDate,
-        'mealplan' AS transactionType,
-        COUNT(*) AS totalQty,
-        SUM(mp.price) AS totalRevenue,
-        ANY_VALUE(bd.breakdown) AS breakdown
+          DATE(m.transactionDate) AS transactionDate,
+          'mealplan' AS transactionType,
+          COUNT(*) AS totalQty,
+          SUM(mp.price) AS totalRevenue,
+          ANY_VALUE(bd.breakdown) AS breakdown
         FROM mealplantransactions m
         JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
         LEFT JOIN (
-        SELECT 
-            DATE(mt.transactionDate) AS transactionDate,
-            GROUP_CONCAT(CONCAT(mp.mealPlanName, ': ', COUNT(*))) AS breakdown
-        FROM mealplantransactions mt
-        JOIN mealplans mp ON mt.mealPlanID = mp.mealPlanID
-        GROUP BY DATE(mt.transactionDate), mp.mealPlanName
-        ) bd ON DATE(m.transactionDate) = bd.transactionDate
+          SELECT 
+            DATE(m2.transactionDate) AS date,
+            GROUP_CONCAT(CONCAT(m2.mealPlanName, ': ', ct) SEPARATOR ', ') AS breakdown
+          FROM (
+            SELECT 
+              DATE(mt.transactionDate) AS transactionDate,
+              mp.mealPlanName,
+              COUNT(*) AS ct
+            FROM mealplantransactions mt
+            JOIN mealplans mp ON mt.mealPlanID = mp.mealPlanID
+            GROUP BY DATE(mt.transactionDate), mp.mealPlanName
+          ) m2
+          GROUP BY m2.transactionDate
+        ) bd ON DATE(m.transactionDate) = bd.date
         WHERE DATE(m.transactionDate) BETWEEN ? AND ?
         GROUP BY DATE(m.transactionDate)
-
+  
         UNION ALL
-
+  
         SELECT 
-        DATE(mt.transactionDate) AS transactionDate,
-        'merch' AS transactionType,
-        SUM(mt.quantity) AS totalQty,
-        SUM(mt.totalAmount) AS totalRevenue,
-        GROUP_CONCAT(CONCAT(m.itemName, ': ', SUM(mt.quantity))) AS breakdown
-        FROM merchandisetransactions mt
-        JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
-        WHERE DATE(mt.transactionDate) BETWEEN ? AND ?
-        GROUP BY DATE(mt.transactionDate)
-
+          DATE(transactionDate) AS transactionDate,
+          'merch' AS transactionType,
+          SUM(quantity) AS totalQty,
+          SUM(totalAmount) AS totalRevenue,
+          'see details' AS breakdown
+        FROM merchandisetransactions
+        WHERE DATE(transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(transactionDate)
+  
         ORDER BY transactionDate
-      `
+      `;
       params = [startDate, endDate, startDate, endDate, startDate, endDate];
     }
   
