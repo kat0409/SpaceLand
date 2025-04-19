@@ -2477,7 +2477,7 @@ const getFilteredSalesReport = (req, res) => {
         res.end(JSON.stringify(results));
     });
 };
-
+/////////////
 const getTransactionSummaryReport = (req, res) => {
     const { startDate, endDate, transactionType } = url.parse(req.url, true).query;
   
@@ -2491,22 +2491,46 @@ const getTransactionSummaryReport = (req, res) => {
   
     if (transactionType === 'ticket') {
       sql = `
-        SELECT DATE(transactionDate) AS transactionDate, 'ticket' AS transactionType, SUM(tix.price) AS totalRevenue
+        SELECT 
+        summary.transactionDate,
+        'ticket' AS transactionType,
+        SUM(summary.qty) AS totalQty,
+        SUM(summary.revenue) AS totalRevenue,
+        GROUP_CONCAT(CONCAT(summary.ticketType, ': ', summary.qty) SEPARATOR ', ') AS breakdown
+        FROM (
+        SELECT 
+            DATE(t.transactionDate) AS transactionDate,
+            t.ticketType,
+            COUNT(*) AS qty,
+            SUM(tix.price) AS revenue
         FROM tickettransactions t
         JOIN tickets tix ON t.transactionID = tix.transactionID
-        WHERE DATE(transactionDate) BETWEEN ? AND ?
-        GROUP BY DATE(transactionDate)
-        ORDER BY transactionDate;
+        WHERE DATE(t.transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(t.transactionDate), t.ticketType
+        ) summary
+        GROUP BY summary.transactionDate
       `;
       params = [startDate, endDate];
     } else if (transactionType === 'mealplan') {
       sql = `
-        SELECT DATE(transactionDate) AS transactionDate, 'mealplan' AS transactionType, SUM(mp.price) AS totalRevenue
+        SELECT 
+        summary.transactionDate,
+        'mealplan' AS transactionType,
+        SUM(summary.qty),
+        SUM(summary.revenue),
+        GROUP_CONCAT(CONCAT(summary.mealPlanName, ': ', summary.qty) SEPARATOR ', ')
+        FROM (
+        SELECT 
+            DATE(m.transactionDate) AS transactionDate,
+            mp.mealPlanName,
+            COUNT(*) AS qty,
+            SUM(mp.price) AS revenue
         FROM mealplantransactions m
         JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
-        WHERE DATE(transactionDate) BETWEEN ? AND ?
-        GROUP BY DATE(transactionDate)
-        ORDER BY transactionDate;
+        WHERE DATE(m.transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(m.transactionDate), mp.mealPlanName
+        ) summary
+        GROUP BY summary.transactionDate
       `;
       params = [startDate, endDate];
     } else if (transactionType === 'merch') {
@@ -2558,6 +2582,7 @@ const getTransactionSummaryReport = (req, res) => {
       res.end(JSON.stringify(results));
     });
   };    
+/////////////
 
   const getBestWorstSellersReport = (req, res) => {
     const { startDate, endDate, transactionType = 'all' } = url.parse(req.url, true).query;
