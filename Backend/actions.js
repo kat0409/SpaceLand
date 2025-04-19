@@ -2546,17 +2546,27 @@ const getTransactionSummaryReport = (req, res) => {
         GROUP BY DATE(m.transactionDate)
       `;
     } else if (transactionType === 'merch') {
-      sql = `
-        SELECT 
-          DATE(transactionDate) AS transactionDate,
-          'merch' AS transactionType,
-          SUM(quantity) AS totalQty,
-          SUM(totalAmount) AS totalRevenue,
-          'see details' AS breakdown
-        FROM merchandisetransactions
-        WHERE DATE(transactionDate) BETWEEN ? AND ?
-        GROUP BY DATE(transactionDate)
-      `;
+        sql = `
+          SELECT 
+            summary.transactionDate,
+            'merch' AS transactionType,
+            SUM(summary.qty) AS totalQty,
+            SUM(summary.revenue) AS totalRevenue,
+            GROUP_CONCAT(CONCAT(summary.itemName, ': ', summary.qty) SEPARATOR ', ') AS breakdown
+          FROM (
+            SELECT 
+              DATE(mt.transactionDate) AS transactionDate,
+              m.itemName,
+              SUM(mt.quantity) AS qty,
+              SUM(mt.totalAmount) AS revenue
+            FROM merchandisetransactions mt
+            JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+            WHERE DATE(mt.transactionDate) BETWEEN ? AND ?
+            GROUP BY DATE(mt.transactionDate), m.itemName
+          ) summary
+          GROUP BY summary.transactionDate
+        `;
+        params = [startDate, endDate];    
     } else {
       // All transactions (simplified summary)
       sql = `

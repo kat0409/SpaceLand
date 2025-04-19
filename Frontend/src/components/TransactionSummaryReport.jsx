@@ -2,16 +2,6 @@ import React, { useState, useEffect } from 'react';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
-// Add CSS styles for the modal
-const styles = {
-  modalOverlay: `fixed inset-0 bg-black/60 flex items-center justify-center z-50`,
-  modalContent: `bg-white text-black rounded-xl p-6 w-[90%] max-w-lg`,
-  merchTable: `w-full border-collapse mt-4`,
-  tableHeader: `border-b-2 border-gray-200 text-left py-2`,
-  tableCell: `border-b border-gray-200 py-2`,
-  closeButton: `mt-6 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700`
-};
-
 export default function TransactionSummaryReport() {
   const [filters, setFilters] = useState({
     startDate: '',
@@ -22,9 +12,6 @@ export default function TransactionSummaryReport() {
   const [reportData, setReportData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [modalData, setModalData] = useState([]);
-  const [selectedDate, setSelectedDate] = useState('');
 
   useEffect(() => {
     const today = new Date();
@@ -39,8 +26,7 @@ export default function TransactionSummaryReport() {
       endDate: formattedToday,
       transactionType: 'all'
     });
-    
-    // Fetch report data when component mounts
+
     fetchReport(formattedWeekAgo, formattedToday, 'all');
   }, []);
 
@@ -64,15 +50,13 @@ export default function TransactionSummaryReport() {
       const data = await res.json();
 
       if (res.ok) {
-        console.log('Transaction data:', data);
-        
-        // Process the data to ensure numeric values are properly formatted
         const processedData = data.map(row => ({
           ...row,
           totalQty: row.totalQty !== null ? parseInt(row.totalQty, 10) : 0,
-          totalRevenue: parseFloat(row.totalRevenue || 0)
+          totalRevenue: parseFloat(row.totalRevenue || 0),
+          breakdown: row.breakdown || '-'
         }));
-        
+
         setReportData(processedData);
       } else {
         setError(data.error || 'Failed to load report.');
@@ -89,41 +73,6 @@ export default function TransactionSummaryReport() {
     fetchReport(filters.startDate, filters.endDate, filters.transactionType);
   };
 
-  const handleMerchBreakdown = async (date) => {
-    setSelectedDate(date);
-    try {
-      const res = await fetch(`${BACKEND_URL}/supervisor/merchandise/merch-breakdown?date=${date}`);
-      
-      if (!res.ok) {
-        throw new Error(`Failed to fetch merchandise breakdown: ${res.status}`);
-      }
-      
-      const data = await res.json();
-      console.log('Raw merchandise breakdown data:', data);
-      
-      // Process the data to handle different property names that might come from the backend
-      const processedData = data.map(item => {
-        console.log('Processing item:', item);
-        return {
-          ...item,
-          itemName: item.itemName || 'Unknown Item',
-          // Check multiple possible property names that might contain the quantity sold
-          totalSold: item.quantity !== undefined ? parseInt(item.quantity, 10) : 
-                    item.totalSold !== undefined ? parseInt(item.totalSold, 10) : 
-                    0
-        };
-      });
-      
-      console.log('Processed merchandise breakdown data:', processedData);
-      setModalData(processedData);
-      setShowModal(true);
-    } catch (err) {
-      console.error("Error fetching merch breakdown:", err);
-      alert(`Failed to load merchandise breakdown: ${err.message}`);
-    }
-  };
-
-  // Format numbers with commas for readability
   const formatNumber = (num) => {
     if (num === null || num === undefined) return '-';
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -133,7 +82,6 @@ export default function TransactionSummaryReport() {
     <div className="bg-white/10 p-6 rounded-xl space-y-6">
       <h2 className="text-2xl font-semibold text-white">Transaction Summary Report</h2>
 
-      {/* Filter Bar */}
       <div className="flex flex-wrap gap-4 items-end">
         <div className="flex flex-col">
           <label className="text-white text-sm">Start Date</label>
@@ -177,7 +125,6 @@ export default function TransactionSummaryReport() {
         </button>
       </div>
 
-      {/* Report Output */}
       {error && <div className="text-red-400">{error}</div>}
 
       {loading ? (
@@ -201,18 +148,7 @@ export default function TransactionSummaryReport() {
                   <td className="p-2 capitalize">{row.transactionType}</td>
                   <td className="p-2">{formatNumber(row.totalQty)}</td>
                   <td className="p-2">${parseFloat(row.totalRevenue).toFixed(2)}</td>
-                  <td className="p-2">
-                    {row.transactionType === 'merch' ? (
-                      <button
-                        className="text-blue-400 hover:underline"
-                        onClick={() => handleMerchBreakdown(row.transactionDate)}
-                      >
-                        See Details
-                      </button>
-                    ) : (
-                      row.breakdown || '-'
-                    )}
-                  </td>
+                  <td className="p-2">{row.breakdown}</td>
                 </tr>
               ))
             ) : (
@@ -225,38 +161,6 @@ export default function TransactionSummaryReport() {
             )}
           </tbody>
         </table>
-      )}
-
-      {/* Modal */}
-      {showModal && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
-            <h2 className="text-xl font-bold mb-4">Merchandise Breakdown for {selectedDate}</h2>
-            {modalData.length === 0 ? (
-              <p>No merchandise data available for this date.</p>
-            ) : (
-              <table className={styles.merchTable}>
-                <thead>
-                  <tr>
-                    <th className={styles.tableHeader}>Item</th>
-                    <th className={`${styles.tableHeader} text-right`}>Quantity Sold</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {modalData.map((item, index) => (
-                    <tr key={index}>
-                      <td className={styles.tableCell}>{item.itemName || 'Unknown Item'}</td>
-                      <td className={`${styles.tableCell} text-right`}>
-                        {Number(item.totalSold) > 0 ? formatNumber(Number(item.totalSold)) : 0}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-            <button onClick={() => setShowModal(false)} className={styles.closeButton}>Close</button>
-          </div>
-        </div>
       )}
     </div>
   );
