@@ -2626,14 +2626,23 @@ const getTransactionSummaryReport = (req, res) => {
         UNION ALL
   
         SELECT 
-          DATE(transactionDate) AS transactionDate,
-          'merch' AS transactionType,
-          SUM(quantity) AS totalQty,
-          SUM(totalAmount) AS totalRevenue,
-          'see details' AS breakdown
-        FROM merchandisetransactions
-        WHERE DATE(transactionDate) BETWEEN ? AND ?
-        GROUP BY DATE(transactionDate)
+            summary.transactionDate,
+            'merch' AS transactionType,
+            SUM(summary.qty) AS totalQty,
+            SUM(summary.totalAmount) AS totalRevenue,
+            GROUP_CONCAT(CONCAT(summary.itemName, ': ', summary.qty)) AS breakdown
+        FROM (
+            SELECT 
+                DATE(mt.transactionDate) AS transactionDate,
+                m.itemName,
+                SUM(mt.quantity) AS qty,
+                SUM(mt.totalAmount) AS totalAmount
+            FROM merchandisetransactions mt
+            JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+            WHERE DATE(mt.transactionDate) BETWEEN ? AND ?
+            GROUP BY DATE(mt.transactionDate), m.itemName
+        ) summary
+        GROUP BY summary.transactionDate
   
         ORDER BY transactionDate
       `;
