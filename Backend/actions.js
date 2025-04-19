@@ -3247,5 +3247,6 @@ module.exports = {
     addPaymentInfo,
     resolveWeatherAlert,
     displayAlert,
-    addWeatherAlert
+    addWeatherAlert,
+    getMerchBreakdownByDate
 };  
