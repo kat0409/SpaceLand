@@ -101,15 +101,16 @@ export default function TransactionSummaryReport() {
       const data = await res.json();
       console.log('Raw merchandise breakdown data:', data);
       
-      // Process the data to ensure totalSold is a number
+      // Process the data to handle different property names that might come from the backend
       const processedData = data.map(item => {
         console.log('Processing item:', item);
         return {
           ...item,
           itemName: item.itemName || 'Unknown Item',
-          totalSold: item.totalSold !== null && item.totalSold !== undefined 
-            ? parseInt(item.totalSold, 10) 
-            : 0
+          // Check multiple possible property names that might contain the quantity sold
+          totalSold: item.quantity !== undefined ? parseInt(item.quantity, 10) : 
+                    item.totalSold !== undefined ? parseInt(item.totalSold, 10) : 
+                    0
         };
       });
       
