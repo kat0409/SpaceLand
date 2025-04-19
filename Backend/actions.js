@@ -2643,7 +2643,8 @@ const getTransactionSummaryReport = (req, res) => {
   };  
 /////////////
 const getMerchBreakdownByDate = (req, res) => {
-    const { date } = url.parse(req.url, true).query;
+    parsedUrl = url.parse(req.url, true);
+    const { date } = parsedUrl.query;
   
     if (!date) {
       res.writeHead(400, { "Content-Type": "application/json" });
