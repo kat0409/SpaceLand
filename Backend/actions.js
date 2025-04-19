@@ -2641,7 +2641,6 @@ const getTransactionSummaryReport = (req, res) => {
     });
   };  
 /////////////
-
 const getMerchBreakdownByDate = (req, res) => {
     const { date } = url.parse(req.url, true).query;
   
@@ -2669,7 +2668,7 @@ const getMerchBreakdownByDate = (req, res) => {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(results));
     });
-  };
+};  
 //////////////////////  
   const getBestWorstSellersReport = (req, res) => {
     const { startDate, endDate, transactionType = 'all' } = url.parse(req.url, true).query;
