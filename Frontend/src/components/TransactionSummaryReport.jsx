@@ -29,10 +29,13 @@ export default function TransactionSummaryReport() {
       endDate: formattedToday,
       transactionType: 'all'
     });
+    
+    // Fetch report data when component mounts
+    fetchReport(formattedWeekAgo, formattedToday, 'all');
   }, []);
 
-  const fetchReport = async () => {
-    if (!filters.startDate || !filters.endDate) {
+  const fetchReport = async (startDate, endDate, transactionType) => {
+    if (!startDate || !endDate) {
       setError('Please select a valid date range.');
       return;
     }
@@ -41,9 +44,9 @@ export default function TransactionSummaryReport() {
     setError('');
 
     const params = new URLSearchParams({
-      startDate: filters.startDate,
-      endDate: filters.endDate,
-      transactionType: filters.transactionType
+      startDate: startDate || filters.startDate,
+      endDate: endDate || filters.endDate,
+      transactionType: transactionType || filters.transactionType
     });
 
     try {
@@ -51,16 +54,29 @@ export default function TransactionSummaryReport() {
       const data = await res.json();
 
       if (res.ok) {
-        setReportData(data);
+        console.log('Transaction data:', data);
+        
+        // Process the data to ensure numeric values are properly formatted
+        const processedData = data.map(row => ({
+          ...row,
+          totalQty: row.totalQty !== null ? parseInt(row.totalQty, 10) : 0,
+          totalRevenue: parseFloat(row.totalRevenue || 0)
+        }));
+        
+        setReportData(processedData);
       } else {
         setError(data.error || 'Failed to load report.');
       }
     } catch (err) {
-      console.error(err);
+      console.error('Error fetching transaction data:', err);
       setError('Something went wrong.');
     }
 
     setLoading(false);
+  };
+
+  const handleFilterApply = () => {
+    fetchReport(filters.startDate, filters.endDate, filters.transactionType);
   };
 
   const handleMerchBreakdown = async (date) => {
@@ -73,6 +89,12 @@ export default function TransactionSummaryReport() {
     } catch (err) {
       console.error("Error fetching merch breakdown:", err);
     }
+  };
+
+  // Format numbers with commas for readability
+  const formatNumber = (num) => {
+    if (num === null || num === undefined) return '-';
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   return (
@@ -116,7 +138,7 @@ export default function TransactionSummaryReport() {
         </div>
 
         <button
-          onClick={fetchReport}
+          onClick={handleFilterApply}
           className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
         >
           Apply Filters
@@ -145,7 +167,7 @@ export default function TransactionSummaryReport() {
                 <tr key={idx} className="border-t border-white/10 hover:bg-white/5">
                   <td className="p-2">{row.transactionDate}</td>
                   <td className="p-2 capitalize">{row.transactionType}</td>
-                  <td className="p-2">{row.totalQty ?? '-'}</td>
+                  <td className="p-2">{formatNumber(row.totalQty)}</td>
                   <td className="p-2">${parseFloat(row.totalRevenue).toFixed(2)}</td>
                   <td className="p-2">
                     {row.transactionType === 'merch' ? (
@@ -165,6 +187,7 @@ export default function TransactionSummaryReport() {
               <tr>
                 <td colSpan="5" className="text-center p-4 text-gray-400">
                   No transactions found for selected filters.
+                  {filters.startDate && filters.endDate ? '' : ' Please select a date range.'}
                 </td>
               </tr>
             )}
