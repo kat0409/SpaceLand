@@ -1,6 +1,6 @@
 // src/pages/Purchase.jsx
 import { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { motion } from 'framer-motion';
@@ -346,6 +346,21 @@ export default function Purchase() {
               </button>
             </motion.div>
           )}
+
+          {/* New merchandise shopping section */}
+          <div className="bg-purple-900/30 border border-purple-500/30 rounded-xl p-6 mt-12">
+            <h3 className="text-xl font-semibold mb-2">🛍️ Looking for SpaceLand Merchandise?</h3>
+            <p className="mb-4">
+              Check out our space-themed merchandise collection at the Andromeda Galaxy Gift Shop! 
+              From t-shirts to collectibles, we have everything you need to remember your cosmic adventure.
+            </p>
+            <Link 
+              to="/shopping" 
+              className="inline-block px-6 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 rounded-lg font-bold text-white transition-all"
+            >
+              Visit Gift Shop
+            </Link>
+          </div>
         </div>
       </section>
       <Footer />
