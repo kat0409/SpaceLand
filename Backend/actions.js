@@ -2640,6 +2640,140 @@ const getTransactionSummaryReport = (req, res) => {
              )) AS worstAvgValue
         `);
       }
+      if (transactionType === 'all' || transactionType === 'merch') {
+        queries.push(`
+          SELECT 'merch' AS transactionType,
+            (SELECT m.itemName
+             FROM merchandisetransactions mt
+             JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+             WHERE DATE(mt.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             GROUP BY m.itemName
+             ORDER BY COUNT(*) DESC
+             LIMIT 1) AS best,
+            (SELECT COUNT(*)
+             FROM merchandisetransactions mt
+             JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+             WHERE DATE(mt.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             AND m.itemName = (
+               SELECT m2.itemName
+               FROM merchandisetransactions mt2
+               JOIN merchandise m2 ON mt2.merchandiseID = m2.merchandiseID
+               WHERE DATE(mt2.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+               GROUP BY m2.itemName
+               ORDER BY COUNT(*) DESC
+               LIMIT 1
+             )) AS bestCount,
+            (SELECT ROUND(AVG(mt.totalAmount/mt.quantity), 2)
+             FROM merchandisetransactions mt
+             JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+             WHERE DATE(mt.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             AND m.itemName = (
+               SELECT m2.itemName
+               FROM merchandisetransactions mt2
+               JOIN merchandise m2 ON mt2.merchandiseID = m2.merchandiseID
+               WHERE DATE(mt2.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+               GROUP BY m2.itemName
+               ORDER BY COUNT(*) DESC
+               LIMIT 1
+             )) AS bestAvgValue,
+            (SELECT m.itemName
+             FROM merchandisetransactions mt
+             JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+             WHERE DATE(mt.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             GROUP BY m.itemName
+             ORDER BY COUNT(*) ASC
+             LIMIT 1) AS worst,
+            (SELECT COUNT(*)
+             FROM merchandisetransactions mt
+             JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+             WHERE DATE(mt.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             AND m.itemName = (
+               SELECT m2.itemName
+               FROM merchandisetransactions mt2
+               JOIN merchandise m2 ON mt2.merchandiseID = m2.merchandiseID
+               WHERE DATE(mt2.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+               GROUP BY m2.itemName
+               ORDER BY COUNT(*) ASC
+               LIMIT 1
+             )) AS worstCount,
+            (SELECT ROUND(AVG(mt.totalAmount/mt.quantity), 2)
+             FROM merchandisetransactions mt
+             JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+             WHERE DATE(mt.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             AND m.itemName = (
+               SELECT m2.itemName
+               FROM merchandisetransactions mt2
+               JOIN merchandise m2 ON mt2.merchandiseID = m2.merchandiseID
+               WHERE DATE(mt2.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+               GROUP BY m2.itemName
+               ORDER BY COUNT(*) ASC
+               LIMIT 1
+             )) AS worstAvgValue
+        `);
+      }
+      if (transactionType === 'all' || transactionType === 'ticket') {
+        queries.push(`
+          SELECT 'ticket' AS transactionType,
+            (SELECT ticketType
+             FROM tickettransactions
+             WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             GROUP BY ticketType
+             ORDER BY COUNT(*) DESC
+             LIMIT 1) AS best,
+            (SELECT COUNT(*)
+             FROM tickettransactions
+             WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             AND ticketType = (
+               SELECT ticketType
+               FROM tickettransactions
+               WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+               GROUP BY ticketType
+               ORDER BY COUNT(*) DESC
+               LIMIT 1
+             )) AS bestCount,
+            (SELECT ROUND(AVG(tix.price), 2)
+             FROM tickettransactions t
+             JOIN tickets tix ON t.transactionID = tix.transactionID
+             WHERE DATE(t.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             AND t.ticketType = (
+               SELECT ticketType
+               FROM tickettransactions
+               WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+               GROUP BY ticketType
+               ORDER BY COUNT(*) DESC
+               LIMIT 1
+             )) AS bestAvgValue,
+            (SELECT ticketType
+             FROM tickettransactions
+             WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             GROUP BY ticketType
+             ORDER BY COUNT(*) ASC
+             LIMIT 1) AS worst,
+            (SELECT COUNT(*)
+             FROM tickettransactions
+             WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             AND ticketType = (
+               SELECT ticketType
+               FROM tickettransactions
+               WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+               GROUP BY ticketType
+               ORDER BY COUNT(*) ASC
+               LIMIT 1
+             )) AS worstCount,
+            (SELECT ROUND(AVG(tix.price), 2)
+             FROM tickettransactions t
+             JOIN tickets tix ON t.transactionID = tix.transactionID
+             WHERE DATE(t.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             AND t.ticketType = (
+               SELECT ticketType
+               FROM tickettransactions
+               WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+               GROUP BY ticketType
+               ORDER BY COUNT(*) ASC
+               LIMIT 1
+             )) AS worstAvgValue
+        `);
+      }
   
     const sql = queries.join('\nUNION ALL\n');
   
