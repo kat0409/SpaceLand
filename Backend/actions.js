@@ -2569,113 +2569,77 @@ const getTransactionSummaryReport = (req, res) => {
   
     const queries = [];
   
-    if (transactionType === 'all' || transactionType === 'ticket') {
-      queries.push(`
-        SELECT 'ticket' AS transactionType,
-          (SELECT ticketType
-           FROM tickettransactions
-           WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
-           GROUP BY ticketType
-           ORDER BY COUNT(*) DESC
-           LIMIT 1) AS best,
-          (SELECT COUNT(*)
-           FROM tickettransactions
-           WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
-           AND ticketType = (
-             SELECT ticketType
-             FROM tickettransactions
-             WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
-             GROUP BY ticketType
-             ORDER BY COUNT(*) DESC
-             LIMIT 1
-           )) AS bestCount,
-          (SELECT ROUND(AVG(tix.price), 2)
-           FROM tickettransactions t
-           JOIN tickets tix ON t.transactionID = tix.transactionID
-           WHERE DATE(t.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
-           AND t.ticketType = (
-             SELECT ticketType
-             FROM tickettransactions
-             WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
-             GROUP BY ticketType
-             ORDER BY COUNT(*) DESC
-             LIMIT 1
-           )) AS bestAvgValue,
-          (SELECT ticketType
-           FROM tickettransactions
-           WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
-           GROUP BY ticketType
-           ORDER BY COUNT(*) ASC
-           LIMIT 1) AS worst,
-          (SELECT COUNT(*)
-           FROM tickettransactions
-           WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
-           AND ticketType = (
-             SELECT ticketType
-             FROM tickettransactions
-             WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
-             GROUP BY ticketType
-             ORDER BY COUNT(*) ASC
-             LIMIT 1
-           )) AS worstCount,
-          (SELECT ROUND(AVG(tix.price), 2)
-           FROM tickettransactions t
-           JOIN tickets tix ON t.transactionID = tix.transactionID
-           WHERE DATE(t.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
-           AND t.ticketType = (
-             SELECT ticketType
-             FROM tickettransactions
-             WHERE DATE(transactionDate) BETWEEN '${startDate}' AND '${endDate}'
-             GROUP BY ticketType
-             ORDER BY COUNT(*) ASC
-             LIMIT 1
-           )) AS worstAvgValue
-      `);
-    }
-  
     if (transactionType === 'all' || transactionType === 'mealplan') {
-      queries.push(`
-        SELECT 'mealplan' AS transactionType,
-          (SELECT mp.mealPlanName
-           FROM mealplantransactions m
-           JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
-           WHERE DATE(m.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
-           GROUP BY mp.mealPlanName
-           ORDER BY COUNT(*) DESC
-           LIMIT 1) AS best,
-          (SELECT COUNT(*)
-           FROM mealplantransactions m
-           JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
-           WHERE DATE(m.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
-           AND mp.mealPlanName = (
-             SELECT mp2.mealPlanName
-             FROM mealplantransactions m2
-             JOIN mealplans mp2 ON m2.mealPlanID = mp2.mealPlanID
-           GROUP BY mp.mealPlanName
-           ORDER BY COUNT(*) ASC
-           LIMIT 1) AS worst
-      `);
-    }
-  
-    if (transactionType === 'all' || transactionType === 'merch') {
-      queries.push(`
-        SELECT 'merch' AS transactionType,
-          (SELECT m.itemName
-           FROM merchandisetransactions mt
-           JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
-           WHERE DATE(mt.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
-           GROUP BY m.itemName
-           ORDER BY COUNT(*) DESC
-           LIMIT 1) AS best,
-          (SELECT m.itemName
-           FROM merchandisetransactions mt
-           JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
-           WHERE DATE(mt.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
-           GROUP BY m.itemName
-           ORDER BY COUNT(*) ASC
-           LIMIT 1) AS worst
-      `);
-    }
+        queries.push(`
+          SELECT 'mealplan' AS transactionType,
+            (SELECT mp.mealPlanName
+             FROM mealplantransactions m
+             JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
+             WHERE DATE(m.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             GROUP BY mp.mealPlanName
+             ORDER BY COUNT(*) DESC
+             LIMIT 1) AS best,
+            (SELECT COUNT(*)
+             FROM mealplantransactions m
+             JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
+             WHERE DATE(m.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             AND mp.mealPlanName = (
+               SELECT mp2.mealPlanName
+               FROM mealplantransactions m2
+               JOIN mealplans mp2 ON m2.mealPlanID = mp2.mealPlanID
+               WHERE DATE(m2.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+               GROUP BY mp2.mealPlanName
+               ORDER BY COUNT(*) DESC
+               LIMIT 1
+             )) AS bestCount,
+            (SELECT ROUND(AVG(mp.price), 2)
+             FROM mealplantransactions m
+             JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
+             WHERE DATE(m.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             AND mp.mealPlanName = (
+               SELECT mp2.mealPlanName
+               FROM mealplantransactions m2
+               JOIN mealplans mp2 ON m2.mealPlanID = mp2.mealPlanID
+               WHERE DATE(m2.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+               GROUP BY mp2.mealPlanName
+               ORDER BY COUNT(*) DESC
+               LIMIT 1
+             )) AS bestAvgValue,
+            (SELECT mp.mealPlanName
+             FROM mealplantransactions m
+             JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
+             WHERE DATE(m.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             GROUP BY mp.mealPlanName
+             ORDER BY COUNT(*) ASC
+             LIMIT 1) AS worst,
+            (SELECT COUNT(*)
+             FROM mealplantransactions m
+             JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
+             WHERE DATE(m.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             AND mp.mealPlanName = (
+               SELECT mp2.mealPlanName
+               FROM mealplantransactions m2
+               JOIN mealplans mp2 ON m2.mealPlanID = mp2.mealPlanID
+               WHERE DATE(m2.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+               GROUP BY mp2.mealPlanName
+               ORDER BY COUNT(*) ASC
+               LIMIT 1
+             )) AS worstCount,
+            (SELECT ROUND(AVG(mp.price), 2)
+             FROM mealplantransactions m
+             JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
+             WHERE DATE(m.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+             AND mp.mealPlanName = (
+               SELECT mp2.mealPlanName
+               FROM mealplantransactions m2
+               JOIN mealplans mp2 ON m2.mealPlanID = mp2.mealPlanID
+               WHERE DATE(m2.transactionDate) BETWEEN '${startDate}' AND '${endDate}'
+               GROUP BY mp2.mealPlanName
+               ORDER BY COUNT(*) ASC
+               LIMIT 1
+             )) AS worstAvgValue
+        `);
+      }
   
     const sql = queries.join('\nUNION ALL\n');
   
