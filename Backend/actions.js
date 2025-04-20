@@ -3047,6 +3047,131 @@ const addWeatherAlert = (req, res) => {
     });
 };
 
+//Add to your actions.js file
+const addOnlineMerchandiseTransaction = (req, res) => {
+    let body = "";
+    req.on("data", chunk => { body += chunk.toString(); });
+    
+    req.on("end", () => {
+        const { visitorID, items } = JSON.parse(body);
+        
+        if (!visitorID || !items || !Array.isArray(items) || items.length === 0) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "Invalid request data" }));
+        }
+        
+        // Begin transaction
+        pool.getConnection((err, connection) => {
+            if (err) {
+                console.error("Database connection error:", err);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Database connection error" }));
+            }
+            
+            connection.beginTransaction(err => {
+                if (err) {
+                    connection.release();
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    return res.end(JSON.stringify({ error: "Transaction error" }));
+                }
+                
+                const transactionResults = [];
+                let processedItems = 0;
+                
+                // Process each item in the cart
+                items.forEach(item => {
+                    const { merchandiseID, quantity } = item;
+                    
+                    // Check inventory
+                    connection.query('SELECT price, quantity FROM merchandise WHERE merchandiseID = ?', 
+                    [merchandiseID], 
+                    (err, results) => {
+                        if (err || results.length === 0) {
+                            return connection.rollback(() => {
+                                connection.release();
+                                res.writeHead(400, { "Content-Type": "application/json" });
+                                res.end(JSON.stringify({ error: "Invalid merchandise item" }));
+                            });
+                        }
+                        
+                        const { price, quantity: availableQuantity } = results[0];
+                        
+                        if (availableQuantity < quantity) {
+                            return connection.rollback(() => {
+                                connection.release();
+                                res.writeHead(400, { "Content-Type": "application/json" });
+                                res.end(JSON.stringify({ error: `Not enough stock for item ${merchandiseID}` }));
+                            });
+                        }
+                        
+                        const totalAmount = price * quantity;
+                        
+                        // Create transaction record
+                        connection.query(
+                            'INSERT INTO merchandisetransactions (merchandiseID, VisitorID, transactionDate, quantity, totalAmount) VALUES (?, ?, NOW(), ?, ?)',
+                            [merchandiseID, visitorID, quantity, totalAmount],
+                            (err, result) => {
+                                if (err) {
+                                    return connection.rollback(() => {
+                                        connection.release();
+                                        res.writeHead(500, { "Content-Type": "application/json" });
+                                        res.end(JSON.stringify({ error: "Failed to create transaction" }));
+                                    });
+                                }
+                                
+                                // Update inventory
+                                connection.query(
+                                    'UPDATE merchandise SET quantity = quantity - ? WHERE merchandiseID = ?',
+                                    [quantity, merchandiseID],
+                                    (err) => {
+                                        if (err) {
+                                            return connection.rollback(() => {
+                                                connection.release();
+                                                res.writeHead(500, { "Content-Type": "application/json" });
+                                                res.end(JSON.stringify({ error: "Failed to update inventory" }));
+                                            });
+                                        }
+                                        
+                                        transactionResults.push({
+                                            merchandiseID,
+                                            transactionID: result.insertId,
+                                            quantity,
+                                            totalAmount
+                                        });
+                                        
+                                        processedItems++;
+                                        
+                                        // If all items processed, commit transaction
+                                        if (processedItems === items.length) {
+                                            connection.commit(err => {
+                                                if (err) {
+                                                    return connection.rollback(() => {
+                                                        connection.release();
+                                                        res.writeHead(500, { "Content-Type": "application/json" });
+                                                        res.end(JSON.stringify({ error: "Failed to commit transaction" }));
+                                                    });
+                                                }
+                                                
+                                                connection.release();
+                                                res.writeHead(200, { "Content-Type": "application/json" });
+                                                res.end(JSON.stringify({ 
+                                                    success: true,
+                                                    message: "Purchase successful",
+                                                    transactions: transactionResults
+                                                }));
+                                            });
+                                        }
+                                    }
+                                );
+                            }
+                        );
+                    });
+                });
+            });
+        });
+    });
+};
+
 //Check to see if you need to make a module.exports function here as well
 module.exports = {
     getRides,
@@ -3134,5 +3259,6 @@ module.exports = {
     addPaymentInfo,
     resolveWeatherAlert,
     displayAlert,
-    addWeatherAlert
+    addWeatherAlert,
+    addOnlineMerchandiseTransaction
 };  
