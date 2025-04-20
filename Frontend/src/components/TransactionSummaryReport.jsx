@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
+
+
+
 const formatDate = (dateString) => {
   if (!dateString) return '';
   
@@ -42,6 +45,7 @@ const formatDate = (dateString) => {
 
 export default function TransactionSummaryReport() {
   const [filters, setFilters] = useState({
+    
     startDate: '',
     endDate: '',
     transactionType: 'all'
@@ -50,6 +54,16 @@ export default function TransactionSummaryReport() {
   const [reportData, setReportData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [totalRevenue, setTotalRevenue] = useState(0);
+
+  useEffect(() => {
+    if (reportData.length > 0) {
+      const sum = reportData.reduce((total, row) => total + parseFloat(row.totalRevenue || 0), 0);
+      setTotalRevenue(sum);
+    } else {
+      setTotalRevenue(0);
+    }
+  }, [reportData]);
 
   useEffect(() => {
     const today = new Date();
@@ -198,6 +212,19 @@ export default function TransactionSummaryReport() {
               </tr>
             )}
           </tbody>
+          {reportData.length > 0 && (
+  <tfoot>
+    <tr className="border-t-2 border-purple-500 bg-white/10 font-bold">
+      <td className="p-3" colSpan="3" style={{ textAlign: 'right' }}>
+        TOTAL REVENUE
+      </td>
+      <td className="p-3 text-white">
+        ${totalRevenue.toFixed(2)}
+      </td>
+      <td></td>
+    </tr>
+  </tfoot>
+)}
         </table>
       )}
     </div>
