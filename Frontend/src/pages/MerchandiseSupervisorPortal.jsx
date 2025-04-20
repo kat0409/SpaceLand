@@ -184,7 +184,7 @@ export default function SupervisorPortal() {
             .then(notificationData => {
                 if (Array.isArray(notificationData) && notificationData.length > 0) {
                     // Filter notifications to only include items that are still actually low in stock
-                    const validAlerts = notificationData.filter(alert => {
+                    let validAlerts = notificationData.filter(alert => {
                         // Find the corresponding item in current inventory
                         const inventoryItem = currentInventory.find(item => 
                             item.itemName === alert.itemName || 
@@ -195,8 +195,33 @@ export default function SupervisorPortal() {
                         return inventoryItem && inventoryItem.quantity < 10;
                     });
                     
+                    // Remove duplicates by keeping only the latest notification for each merchandise item
+                    const uniqueItems = new Map();
+                    
+                    // Sort by message time (if available) to get the most recent first
+                    if (validAlerts[0]?.messsageTime) {
+                        validAlerts.sort((a, b) => {
+                            if (a.messsageTime && b.messsageTime) {
+                                return new Date(b.messsageTime) - new Date(a.messsageTime);
+                            }
+                            return 0;
+                        });
+                    }
+                    
+                    // Keep only one notification per item
+                    validAlerts.forEach(alert => {
+                        // Use merchandiseID as the key if available, otherwise use itemName
+                        const key = alert.merchandiseID || alert.itemName;
+                        if (!uniqueItems.has(key)) {
+                            uniqueItems.set(key, alert);
+                        }
+                    });
+                    
+                    // Convert the Map back to an array
+                    validAlerts = Array.from(uniqueItems.values());
+                    
                     setLowStockItems(validAlerts);
-                    console.log("Filtered low stock notifications:", validAlerts.length);
+                    console.log("Filtered and deduplicated low stock notifications:", validAlerts.length);
                 } else {
                     // If no valid notifications, use low stock items from inventory
                     const criticalStock = currentInventory.filter(item => item.quantity < 10);
@@ -284,7 +309,16 @@ export default function SupervisorPortal() {
                                         </svg>
                                     </span>
                                     <strong className="font-bold text-red-200">Low Stock Alert!</strong>
-                                    <span className="text-red-300 text-sm ml-2">({lowStockItems.length} items)</span>
+                                    <span className="text-red-300 text-sm ml-2">
+                                        {(() => {
+                                            // Count unique items by merchandiseID or itemName
+                                            const uniqueItemIds = new Set();
+                                            lowStockItems.forEach(item => {
+                                                uniqueItemIds.add(item.merchandiseID || item.itemName);
+                                            });
+                                            return `(${uniqueItemIds.size} items)`;
+                                        })()}
+                                    </span>
                                 </div>
                                 
                                 <div className="flex items-center">
@@ -307,12 +341,29 @@ export default function SupervisorPortal() {
                                 }}
                             >
                                 <ul className="space-y-2 text-red-200">
-                                    {lowStockItems.map((item) => (
-                                        <li key={item.notificationID || item.merchandiseID} className="flex items-center">
-                                            <span className="inline-block w-2 h-2 rounded-full bg-red-400 mr-2"></span>
-                                            <span>{item.itemName}: Only {item.stockLevel || item.quantity} left {item.message ? `— ${item.message}` : ''}</span>
-                                        </li>
-                                    ))}
+                                    {(() => {
+                                        // Create a map to store unique item entries by their merchandiseID or itemName
+                                        const uniqueItems = new Map();
+                                        
+                                        // Process each alert and only keep one per unique item
+                                        lowStockItems.forEach(item => {
+                                            const key = item.merchandiseID || item.itemName;
+                                            if (!uniqueItems.has(key)) {
+                                                uniqueItems.set(key, item);
+                                            }
+                                        });
+                                        
+                                        // Convert the unique alerts map back to an array
+                                        const uniqueAlerts = Array.from(uniqueItems.values());
+                                        
+                                        // Render the unique alerts
+                                        return uniqueAlerts.map((item) => (
+                                            <li key={item.notificationID || item.merchandiseID} className="flex items-center">
+                                                <span className="inline-block w-2 h-2 rounded-full bg-red-400 mr-2"></span>
+                                                <span>{item.itemName}: Only {item.stockLevel || item.quantity} left {item.message ? `— ${item.message}` : ''}</span>
+                                            </li>
+                                        ));
+                                    })()}
                                 </ul>
                                 <div className="mt-3 pt-3 border-t border-red-500/30">
                                     <span className="text-xs text-red-300/70">Items below critical threshold require immediate attention</span>

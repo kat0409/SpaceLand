@@ -103,7 +103,11 @@ export default function BestWorstSellerReport() {
               <tr>
                 <th className="p-3">Transaction Type</th>
                 <th className="p-3">Best Seller</th>
+                <th className="p-3">Transaction Count</th>
+                <th className="p-3">Avg. Value</th>
                 <th className="p-3">Worst Seller</th>
+                <th className="p-3">Transaction Count</th>
+                <th className="p-3">Avg. Value</th>
               </tr>
             </thead>
             <tbody>
@@ -111,7 +115,11 @@ export default function BestWorstSellerReport() {
                 <tr key={idx} className="text-center border-b border-gray-700">
                   <td className="p-3 capitalize">{entry.transactionType}</td>
                   <td className="p-3">{entry.best}</td>
+                  <td className="p-3">{entry.bestCount || 0}</td>
+                  <td className="p-3">${entry.bestAvgValue ? parseFloat(entry.bestAvgValue).toFixed(2) : '0.00'}</td>
                   <td className="p-3">{entry.worst}</td>
+                  <td className="p-3">{entry.worstCount || 0}</td>
+                  <td className="p-3">${entry.worstAvgValue ? parseFloat(entry.worstAvgValue).toFixed(2) : '0.00'}</td>
                 </tr>
               ))}
             </tbody>
