@@ -104,10 +104,10 @@ export default function BestWorstSellerReport() {
                 <th className="p-3">Transaction Type</th>
                 <th className="p-3">Best Seller</th>
                 <th className="p-3">Transaction Count</th>
-                <th className="p-3">Avg. Value</th>
+                <th className="p-3">Value</th>
                 <th className="p-3">Worst Seller</th>
                 <th className="p-3">Transaction Count</th>
-                <th className="p-3">Avg. Value</th>
+                <th className="p-3">Value</th>
               </tr>
             </thead>
             <tbody>
