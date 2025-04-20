@@ -1,7 +1,7 @@
 // src/components/Header.jsx
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { User } from "lucide-react";
+import { User, ShoppingCart } from "lucide-react";
 import { AuthContext } from '../components/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,6 +9,37 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const { auth, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [cartItemCount, setCartItemCount] = useState(0);
+
+  // Effect to check cart contents when component mounts or when storage changes
+  useEffect(() => {
+    const updateCartCount = () => {
+      const merchandiseCart = localStorage.getItem('merchandiseCart');
+      if (merchandiseCart) {
+        try {
+          const cart = JSON.parse(merchandiseCart);
+          const count = cart.reduce((total, item) => total + item.quantity, 0);
+          setCartItemCount(count);
+        } catch (err) {
+          console.error("Error parsing cart data:", err);
+          setCartItemCount(0);
+        }
+      } else {
+        setCartItemCount(0);
+      }
+    };
+
+    // Initialize cart count
+    updateCartCount();
+
+    // Listen for storage changes (if cart is updated in another tab)
+    window.addEventListener('storage', updateCartCount);
+
+    // Clean up
+    return () => {
+      window.removeEventListener('storage', updateCartCount);
+    };
+  }, []);
 
   const navLinks = [
     { name: 'Home', href: '/' },
@@ -74,13 +105,16 @@ export default function Header() {
 
           {/* 🛒 Cart Button */}
           <Link
-  to="/purchase"
-  className="p-2 rounded-full bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 transition-all duration-300 shadow-md hover:scale-105"
->
-  <svg className="w-5 h-5" viewBox="0 0 576 512" fill="white" xmlns="http://www.w3.org/2000/svg">
-    <path d="M0 24C0 10.7 10.7 0 24 0H69.5c22 0 41.5 12.8 50.6 32h411c26.3 0 45.5 25 38.6 50.4l-41 152.3c-8.5 31.4-37 53.3-69.5 53.3H170.7l5.4 28.5c2.2 11.3 12.1 19.5 23.6 19.5H488c13.3 0 24 10.7 24 24s-10.7 24-24 24H199.7c-34.6 0-64.3-24.6-70.7-58.5L77.4 54.5c-.7-3.8-4-6.5-7.9-6.5H24C10.7 48 0 37.3 0 24zM128 464a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm336-48a48 48 0 1 1 0 96 48 48 0 1 1 0-96z" />
-  </svg>
-</Link>
+            to="/shopping"
+            className="relative p-2 rounded-full bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 transition-all duration-300 shadow-md hover:scale-105"
+          >
+            <ShoppingCart className="w-5 h-5" />
+            {cartItemCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                {cartItemCount}
+              </span>
+            )}
+          </Link>
 
           {/* 👤 User Icon Button */}
           {auth.isAuthenticated ? (
