@@ -32,20 +32,10 @@ The database uses MySQL and includes the following key entities:
    ```
    npm install
    ```
-
-3. Create a `.env` file with the following database configuration:
-   ```
-   DB_HOST=space-land.mysql.database.azure.com
-   DB_USER=space_land2025
-   DB_PASSWORD=$paceland25
-   DB_NAME=spacelanddb25
-   DB_PORT=3306
-   ```
-
-4. Import the database schema and initial data:
+3. Import the database schema and initial data:
    - Use the provided SQL dump file to create and populate your database
 
-5. Start the backend server:
+4. Start the backend server:
    ```
    npm start
    ```
