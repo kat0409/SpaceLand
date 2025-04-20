@@ -2478,6 +2478,8 @@ const getFilteredSalesReport = (req, res) => {
     });
 };
 
+
+
 const getTransactionSummaryReport = (req, res) => {
     const { startDate, endDate, transactionType } = url.parse(req.url, true).query;
   
@@ -2487,62 +2489,163 @@ const getTransactionSummaryReport = (req, res) => {
     }
   
     let sql = '';
-    let params = [];
+    let params = [startDate, endDate];
   
     if (transactionType === 'ticket') {
       sql = `
-        SELECT DATE(transactionDate) AS transactionDate, 'ticket' AS transactionType, SUM(tix.price) AS totalRevenue
+        SELECT 
+          DATE(t.transactionDate) AS transactionDate,
+          'ticket' AS transactionType,
+          COUNT(*) AS totalQty,
+          SUM(tix.price) AS totalRevenue,
+          ANY_VALUE(bd.breakdown) AS breakdown
         FROM tickettransactions t
         JOIN tickets tix ON t.transactionID = tix.transactionID
-        WHERE DATE(transactionDate) BETWEEN ? AND ?
-        GROUP BY DATE(transactionDate)
-        ORDER BY transactionDate;
+        LEFT JOIN (
+          SELECT 
+            DATE(t2.transactionDate) AS date,
+            GROUP_CONCAT(CONCAT(t2.ticketType, ': ', ct) SEPARATOR ', ') AS breakdown
+          FROM (
+            SELECT 
+              DATE(transactionDate) AS transactionDate,
+              ticketType,
+              COUNT(*) AS ct
+            FROM tickettransactions
+            GROUP BY DATE(transactionDate), ticketType
+          ) t2
+          GROUP BY t2.transactionDate
+        ) bd ON DATE(t.transactionDate) = bd.date
+        WHERE DATE(t.transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(t.transactionDate)
       `;
-      params = [startDate, endDate];
     } else if (transactionType === 'mealplan') {
       sql = `
-        SELECT DATE(transactionDate) AS transactionDate, 'mealplan' AS transactionType, SUM(mp.price) AS totalRevenue
+        SELECT 
+          DATE(m.transactionDate) AS transactionDate,
+          'mealplan' AS transactionType,
+          COUNT(*) AS totalQty,
+          SUM(mp.price) AS totalRevenue,
+          ANY_VALUE(bd.breakdown) AS breakdown
         FROM mealplantransactions m
         JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
-        WHERE DATE(transactionDate) BETWEEN ? AND ?
-        GROUP BY DATE(transactionDate)
-        ORDER BY transactionDate;
+        LEFT JOIN (
+          SELECT 
+            DATE(m2.transactionDate) AS date,
+            GROUP_CONCAT(CONCAT(m2.mealPlanName, ': ', ct) SEPARATOR ', ') AS breakdown
+          FROM (
+            SELECT 
+              DATE(mt.transactionDate) AS transactionDate,
+              mp.mealPlanName,
+              COUNT(*) AS ct
+            FROM mealplantransactions mt
+            JOIN mealplans mp ON mt.mealPlanID = mp.mealPlanID
+            GROUP BY DATE(mt.transactionDate), mp.mealPlanName
+          ) m2
+          GROUP BY m2.transactionDate
+        ) bd ON DATE(m.transactionDate) = bd.date
+        WHERE DATE(m.transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(m.transactionDate)
       `;
-      params = [startDate, endDate];
     } else if (transactionType === 'merch') {
-      sql = `
-        SELECT DATE(transactionDate) AS transactionDate, 'merch' AS transactionType, SUM(totalAmount) AS totalRevenue
-        FROM merchandisetransactions
-        WHERE DATE(transactionDate) BETWEEN ? AND ?
-        GROUP BY DATE(transactionDate)
-        ORDER BY transactionDate;
-      `;
-      params = [startDate, endDate];
+        sql = `
+          SELECT 
+            summary.transactionDate,
+            'merch' AS transactionType,
+            SUM(summary.qty) AS totalQty,
+            SUM(summary.revenue) AS totalRevenue,
+            GROUP_CONCAT(CONCAT(summary.itemName, ': ', summary.qty) SEPARATOR ', ') AS breakdown
+          FROM (
+            SELECT 
+              DATE(mt.transactionDate) AS transactionDate,
+              m.itemName,
+              SUM(mt.quantity) AS qty,
+              SUM(mt.totalAmount) AS revenue
+            FROM merchandisetransactions mt
+            JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+            WHERE DATE(mt.transactionDate) BETWEEN ? AND ?
+            GROUP BY DATE(mt.transactionDate), m.itemName
+          ) summary
+          GROUP BY summary.transactionDate
+        `;
+        params = [startDate, endDate];    
     } else {
-      // default to all transaction types
+      // All transactions (simplified summary)
       sql = `
-        SELECT DATE(transactionDate) AS transactionDate, 'ticket' AS transactionType, SUM(tix.price) AS totalRevenue
+        SELECT 
+          DATE(t.transactionDate) AS transactionDate,
+          'ticket' AS transactionType,
+          COUNT(*) AS totalQty,
+          SUM(tix.price) AS totalRevenue,
+          ANY_VALUE(bd.breakdown) AS breakdown
         FROM tickettransactions t
         JOIN tickets tix ON t.transactionID = tix.transactionID
-        WHERE DATE(transactionDate) BETWEEN ? AND ?
-        GROUP BY DATE(transactionDate)
+        LEFT JOIN (
+          SELECT 
+            DATE(t2.transactionDate) AS date,
+            GROUP_CONCAT(CONCAT(t2.ticketType, ': ', ct) SEPARATOR ', ') AS breakdown
+          FROM (
+            SELECT 
+              DATE(transactionDate) AS transactionDate,
+              ticketType,
+              COUNT(*) AS ct
+            FROM tickettransactions
+            GROUP BY DATE(transactionDate), ticketType
+          ) t2
+          GROUP BY t2.transactionDate
+        ) bd ON DATE(t.transactionDate) = bd.date
+        WHERE DATE(t.transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(t.transactionDate)
   
         UNION ALL
   
-        SELECT DATE(transactionDate) AS transactionDate, 'mealplan' AS transactionType, SUM(mp.price) AS totalRevenue
+        SELECT 
+          DATE(m.transactionDate) AS transactionDate,
+          'mealplan' AS transactionType,
+          COUNT(*) AS totalQty,
+          SUM(mp.price) AS totalRevenue,
+          ANY_VALUE(bd.breakdown) AS breakdown
         FROM mealplantransactions m
         JOIN mealplans mp ON m.mealPlanID = mp.mealPlanID
-        WHERE DATE(transactionDate) BETWEEN ? AND ?
-        GROUP BY DATE(transactionDate)
+        LEFT JOIN (
+          SELECT 
+            DATE(m2.transactionDate) AS date,
+            GROUP_CONCAT(CONCAT(m2.mealPlanName, ': ', ct) SEPARATOR ', ') AS breakdown
+          FROM (
+            SELECT 
+              DATE(mt.transactionDate) AS transactionDate,
+              mp.mealPlanName,
+              COUNT(*) AS ct
+            FROM mealplantransactions mt
+            JOIN mealplans mp ON mt.mealPlanID = mp.mealPlanID
+            GROUP BY DATE(mt.transactionDate), mp.mealPlanName
+          ) m2
+          GROUP BY m2.transactionDate
+        ) bd ON DATE(m.transactionDate) = bd.date
+        WHERE DATE(m.transactionDate) BETWEEN ? AND ?
+        GROUP BY DATE(m.transactionDate)
   
         UNION ALL
   
-        SELECT DATE(transactionDate) AS transactionDate, 'merch' AS transactionType, SUM(totalAmount) AS totalRevenue
-        FROM merchandisetransactions
-        WHERE DATE(transactionDate) BETWEEN ? AND ?
-        GROUP BY DATE(transactionDate)
+        SELECT 
+            summary.transactionDate,
+            'merch' AS transactionType,
+            SUM(summary.qty) AS totalQty,
+            SUM(summary.totalAmount) AS totalRevenue,
+            GROUP_CONCAT(CONCAT(summary.itemName, ': ', summary.qty)) AS breakdown
+        FROM (
+            SELECT 
+                DATE(mt.transactionDate) AS transactionDate,
+                m.itemName,
+                SUM(mt.quantity) AS qty,
+                SUM(mt.totalAmount) AS totalAmount
+            FROM merchandisetransactions mt
+            JOIN merchandise m ON mt.merchandiseID = m.merchandiseID
+            WHERE DATE(mt.transactionDate) BETWEEN ? AND ?
+            GROUP BY DATE(mt.transactionDate), m.itemName
+        ) summary
+        GROUP BY summary.transactionDate
   
-        ORDER BY transactionDate;
+        ORDER BY transactionDate
       `;
       params = [startDate, endDate, startDate, endDate, startDate, endDate];
     }
@@ -2557,7 +2660,7 @@ const getTransactionSummaryReport = (req, res) => {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(results));
     });
-  };    
+  };      
 
   const getBestWorstSellersReport = (req, res) => {
     const { startDate, endDate, transactionType = 'all' } = url.parse(req.url, true).query;

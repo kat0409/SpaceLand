@@ -1,46 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spacelandmark.onrender.com';
-
-// Helper function to format dates
-const formatDate = (dateString) => {
-  if (!dateString) return '';
-  
-  try {
-    // Handle special database format
-    if (typeof dateString === 'string' && dateString.includes('-')) {
-      // Extract date parts from the string
-      const parts = dateString.split('T')[0].split('-');
-      if (parts.length === 3) {
-        // Create date using UTC to avoid timezone offset issues
-        const year = parseInt(parts[0]);
-        const month = parseInt(parts[1]) - 1; // JS months are 0-indexed
-        const day = parseInt(parts[2]);
-        
-        // Use the date parts to construct a date string that won't shift due to timezone
-        return `${month + 1}/${day}/${year}`;
-      }
-    }
-    
-    // For non-string or non-standard formats, use the date object
-    const date = new Date(dateString);
-    if (!isNaN(date.getTime())) {
-      // Use UTC methods to avoid timezone issues
-      const year = date.getUTCFullYear();
-      const month = date.getUTCMonth() + 1; // JS months are 0-indexed
-      const day = date.getUTCDate();
-      
-      // Format with leading zeros
-      return `${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}/${year}`;
-    }
-    
-    // Last fallback - just use the raw string
-    return dateString;
-  } catch (error) {
-    console.error("Date parsing error:", error);
-    return dateString;
-  }
-};
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://spaceland.onrender.com';
 
 export default function TransactionSummaryReport() {
   const [filters, setFilters] = useState({
@@ -52,7 +12,6 @@ export default function TransactionSummaryReport() {
   const [reportData, setReportData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [totalRevenue, setTotalRevenue] = useState(0);
 
   useEffect(() => {
     const today = new Date();
@@ -67,20 +26,12 @@ export default function TransactionSummaryReport() {
       endDate: formattedToday,
       transactionType: 'all'
     });
+
+    fetchReport(formattedWeekAgo, formattedToday, 'all');
   }, []);
 
-  // Calculate total revenue whenever report data changes
-  useEffect(() => {
-    if (reportData.length > 0) {
-      const sum = reportData.reduce((total, row) => total + parseFloat(row.totalRevenue), 0);
-      setTotalRevenue(sum);
-    } else {
-      setTotalRevenue(0);
-    }
-  }, [reportData]);
-
-  const fetchReport = async () => {
-    if (!filters.startDate || !filters.endDate) {
+  const fetchReport = async (startDate, endDate, transactionType) => {
+    if (!startDate || !endDate) {
       setError('Please select a valid date range.');
       return;
     }
@@ -89,9 +40,9 @@ export default function TransactionSummaryReport() {
     setError('');
 
     const params = new URLSearchParams({
-      startDate: filters.startDate,
-      endDate: filters.endDate,
-      transactionType: filters.transactionType
+      startDate: startDate || filters.startDate,
+      endDate: endDate || filters.endDate,
+      transactionType: transactionType || filters.transactionType
     });
 
     try {
@@ -99,23 +50,38 @@ export default function TransactionSummaryReport() {
       const data = await res.json();
 
       if (res.ok) {
-        setReportData(data);
+        const processedData = data.map(row => ({
+          ...row,
+          totalQty: row.totalQty !== null ? parseInt(row.totalQty, 10) : 0,
+          totalRevenue: parseFloat(row.totalRevenue || 0),
+          breakdown: row.breakdown !== undefined && row.breakdown !== null ? String(row.breakdown) : '-'
+        }));
+
+        setReportData(processedData);
       } else {
         setError(data.error || 'Failed to load report.');
       }
     } catch (err) {
-      console.error(err);
+      console.error('Error fetching transaction data:', err);
       setError('Something went wrong.');
     }
 
     setLoading(false);
   };
 
+  const handleFilterApply = () => {
+    fetchReport(filters.startDate, filters.endDate, filters.transactionType);
+  };
+
+  const formatNumber = (num) => {
+    if (num === null || num === undefined) return '-';
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
   return (
     <div className="bg-white/10 p-6 rounded-xl space-y-6">
       <h2 className="text-2xl font-semibold text-white">Transaction Summary Report</h2>
 
-      {/* Filter Bar */}
       <div className="flex flex-wrap gap-4 items-end">
         <div className="flex flex-col">
           <label className="text-white text-sm">Start Date</label>
@@ -152,14 +118,13 @@ export default function TransactionSummaryReport() {
         </div>
 
         <button
-          onClick={fetchReport}
+          onClick={handleFilterApply}
           className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
         >
           Apply Filters
         </button>
       </div>
 
-      {/* Report Output */}
       {error && <div className="text-red-400">{error}</div>}
 
       {loading ? (
@@ -170,34 +135,27 @@ export default function TransactionSummaryReport() {
             <tr>
               <th className="p-2">Date</th>
               <th className="p-2">Transaction Type</th>
+              <th className="p-2">Quantity</th>
               <th className="p-2">Total Revenue</th>
+              <th className="p-2">Quantity Breakdown</th>
             </tr>
           </thead>
           <tbody>
             {reportData.length > 0 ? (
               reportData.map((row, idx) => (
                 <tr key={idx} className="border-t border-white/10 hover:bg-white/5">
-                  <td className="p-2">{formatDate(row.transactionDate)}</td>
+                  <td className="p-2">{row.transactionDate}</td>
                   <td className="p-2 capitalize">{row.transactionType}</td>
+                  <td className="p-2">{formatNumber(row.totalQty)}</td>
                   <td className="p-2">${parseFloat(row.totalRevenue).toFixed(2)}</td>
+                  <td className="p-2">{row.breakdown}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="3" className="text-center p-4 text-gray-400">
+                <td colSpan="5" className="text-center p-4 text-gray-400">
                   No transactions found for selected filters.
-                </td>
-              </tr>
-            )}
-            
-            {/* Total Revenue Summary Row */}
-            {reportData.length > 0 && (
-              <tr className="border-t-2 border-purple-500 bg-white/10 font-bold">
-                <td colSpan="2" className="p-3 text-right text-purple-300">
-                  TOTAL REVENUE
-                </td>
-                <td className="p-3 text-white">
-                  ${totalRevenue.toFixed(2)}
+                  {filters.startDate && filters.endDate ? '' : ' Please select a date range.'}
                 </td>
               </tr>
             )}
